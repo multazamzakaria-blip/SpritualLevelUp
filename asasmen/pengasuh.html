@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Asasmen Pengasuh Naik Level</title>
+  <link rel="stylesheet" href="../assets/style.css">
+</head>
+
+<body>
+  <header>
+    <img src="../assets/logoslu.png" class="logo">
+    <h2>👳‍♂️ Asasmen Pengasuh Naik Level</h2>
+    <p>Refleksi bimbingan dan pertumbuhan spiritual selama 3 bulan terakhir</p>
+  </header>
+
+  <main class="card fade-in">
+    <form id="asasmenPengasuhForm">
+      <label>1. Dalam 3 bulan ini, saya membimbing santri dengan hati dan keteladanan.</label>
+      <select required>
+        <option value="">Pilih...</option>
+        <option>Tidak Pernah</option>
+        <option>Kadang</option>
+        <option>Sering</option>
+        <option>Selalu</option>
+      </select>
+
+      <label>2. Dalam 3 bulan ini, saya menjaga keseimbangan antara tugas dan ibadah.</label>
+      <select required>
+        <option value="">Pilih...</option>
+        <option>Tidak Pernah</option>
+        <option>Kadang</option>
+        <option>Sering</option>
+        <option>Selalu</option>
+      </select>
+
+      <label>3. Dalam 3 bulan ini, saya lebih sabar dan lembut dalam menghadapi santri.</label>
+      <select required>
+        <option value="">Pilih...</option>
+        <option>Tidak Pernah</option>
+        <option>Kadang</option>
+        <option>Sering</option>
+        <option>Selalu</option>
+      </select>
+
+      <label>Catatan atau refleksi tambahan (opsional):</label>
+      <textarea placeholder="Tulis refleksimu di sini..."></textarea>
+
+      <button type="submit" class="btn" style="width:100%;">Kirim Asasmen</button>
+    </form>
+  </main>
+
+  <footer>© 2025 Naik Level • Pesantren Fajrul Islam</footer>
+
+  <script type="module">
+    import { app } from "../assets/firebase-config.js";
+    import { getFirestore, addDoc, collection, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
+    import { checkUser } from "../assets/script.js";
+
+    const db = getFirestore(app);
+    const user = checkUser();
+
+    document.getElementById("asasmenPengasuhForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const selects = Array.from(document.querySelectorAll("select")).map(s => s.value);
+      const notes = document.querySelector("textarea").value;
+
+      if (selects.includes("")) {
+        alert("Lengkapi semua jawaban dulu ya 🌿");
+        return;
+      }
+
+      await addDoc(collection(db, "asasmen_pengasuh"), {
+        user: user.username,
+        answers: selects,
+        notes,
+        createdAt: serverTimestamp()
+      });
+
+      alert("Terima kasih, data berhasil dikirim.");
+      e.target.reset();
+    });
+  </script>
+</body>
+</html>
