@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Dashboard Supervisor - Naik Level</title>
+  <title>Halaman Utama - Naik Level</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 
@@ -11,9 +11,9 @@
 
   <!-- Header -->
   <header class="text-center mb-8">
-    <img src="../assets/logoslu.png" alt="Logo Pesantren" class="w-16 h-16 mx-auto mb-3">
-    <h1 class="text-3xl font-bold text-teal-700">🌿 Dashboard Supervisor</h1>
-    <p class="text-gray-600">Pemantauan Asasmen, Laporan, dan Irsyad</p>
+    <img src="assets/logoslu.png" alt="Logo Pesantren" class="w-16 h-16 mx-auto mb-3">
+    <h1 class="text-3xl font-bold text-teal-700">🌿 Naik Level</h1>
+    <p class="text-gray-600">Panduan Perjalanan Spiritual & Refleksi Batin</p>
   </header>
 
   <!-- User Info -->
@@ -26,17 +26,16 @@
   <!-- Menu Grid -->
   <section class="grid grid-cols-2 gap-4 w-80 text-center">
     <!-- Asasmen -->
-    <a href="../asasmen/pengasuh.html" class="menu-card">Asasmen Pengasuh</a>
-    <a href="../asasmen/santri.html" class="menu-card">Asasmen Santri</a>
-    <a href="../asasmen/hamba.html" class="menu-card">Asasmen Hamba</a>
+    <a href="asasmen/pengasuh.html" class="menu-card">Asasmen Pengasuh</a>
+    <a href="asasmen/santri.html" class="menu-card">Asasmen Santri</a>
+    <a href="asasmen/hamba.html" class="menu-card">Asasmen Hamba</a>
 
     <!-- Laporan -->
-    <a href="../laporan/harian.html" class="menu-card">Laporan Harian</a>
-    <a href="../laporan/pekanan.html" class="menu-card">Laporan Pekanan</a>
+    <a href="laporan/harian.html" class="menu-card">Laporan Harian</a>
+    <a href="laporan/pekanan.html" class="menu-card">Laporan Pekanan</a>
 
     <!-- Irsyad -->
-    <a href="../irsyad/supervisor.html" class="menu-card">Tulis Irsyad</a>
-    <a href="../irsyad/index.html" class="menu-card">Lihat Irsyad</a>
+    <a href="irsyad/index.html" class="menu-card">Irsyad</a>
   </section>
 
   <!-- Logout Button -->
@@ -53,26 +52,35 @@
   <!-- Script -->
   <script type="module">
     // ==============================
-    // 🔒 Proteksi Login Supervisor
+    // 🔒 Proteksi Login Salik / Supervisor
     // ==============================
-    const supervisor = JSON.parse(localStorage.getItem("naikLevelSupervisor"));
+    const userData = localStorage.getItem("naikLevelUser");
+    let user = null;
+
+    try {
+      user = JSON.parse(userData);
+    } catch (err) {
+      console.error("Data user tidak valid:", err);
+    }
+
     const usernameDisplay = document.getElementById("usernameDisplay");
     const roleDisplay = document.getElementById("roleDisplay");
 
-    if (!supervisor) {
-      // belum login, arahkan ke login supervisor
-      window.location.href = "./login.html";
+    if (!user || !user.username || !user.role) {
+      // belum login, arahkan ke login
+      window.location.href = "login.html";
     } else {
-      usernameDisplay.textContent = supervisor.username;
-      roleDisplay.textContent = "Supervisor / Mursyid";
+      usernameDisplay.textContent = user.username;
+      roleDisplay.textContent =
+        user.role === "supervisor" ? "Supervisor / Mursyid" : "Salik";
     }
 
     // ==============================
     // 🚪 Tombol Logout
     // ==============================
     document.getElementById("logoutBtn").addEventListener("click", () => {
-      localStorage.removeItem("naikLevelSupervisor");
-      window.location.href = "./login.html";
+      localStorage.removeItem("naikLevelUser");
+      window.location.href = "login.html";
     });
   </script>
 
