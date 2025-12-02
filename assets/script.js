@@ -25,7 +25,33 @@ export function checkUser() {
   }
   return JSON.parse(data);
 }
+// ========================================
+// 🔑 Supervisor Login & Proteksi
+// ========================================
+export function checkSupervisor(username, password) {
+  // Data login supervisor — bisa ditambah jika ada banyak supervisor
+  const validSupervisors = [
+    { username: "mursyid", password: "naiklevel123" },
+    { username: "pengasuh", password: "cahaya2025" },
+  ];
 
+  return validSupervisors.some(
+    s => s.username === username && s.password === password
+  );
+}
+
+export function protectSupervisorPage() {
+  const data = localStorage.getItem("naikLevelSupervisor");
+  if (!data) {
+    window.location.href = "./login.html";
+  }
+  return JSON.parse(data);
+}
+
+export function logoutSupervisor() {
+  localStorage.removeItem("naikLevelSupervisor");
+  window.location.href = "./login.html";
+}
 // Ambil nama pengguna
 export function getUserName() {
   const data = localStorage.getItem("naikLevelUser");
