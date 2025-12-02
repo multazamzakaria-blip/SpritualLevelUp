@@ -6,6 +6,15 @@
   <title>Irsyad dari Supervisor - Naik Level</title>
   <link rel="stylesheet" href="../assets/style.css">
   <style>
+    body {
+      font-family: "Poppins", sans-serif;
+      background: linear-gradient(to bottom right, #d1fae5, #a7f3d0);
+      color: #064e3b;
+    }
+    header {
+      text-align: center;
+      padding: 1.5rem 1rem;
+    }
     .irsyad-box {
       background: #ecfdf5;
       border: 1px solid #a7f3d0;
@@ -17,6 +26,7 @@
     .irsyad-box h4 {
       margin: 0;
       color: #065f46;
+      font-size: 1rem;
     }
     .irsyad-box p {
       margin-top: 8px;
@@ -24,58 +34,98 @@
       line-height: 1.6;
       white-space: pre-line;
     }
+    small {
+      display: block;
+      margin-top: 6px;
+      color: #047857;
+      font-size: 0.75rem;
+    }
   </style>
 </head>
 
 <body>
   <header>
-    <img src="../assets/logoslu.png" class="logo">
+    <img src="../assets/logoslu.png" class="logo" style="width:70px;margin:auto;">
     <h2>🌸 Irsyad Supervisor</h2>
     <p>Pesan bimbingan dan nasehat dari Supervisor untukmu</p>
   </header>
 
-  <main class="card fade-in" id="irsyadContainer">
-    <p>Memuat pesan irsyad...</p>
+  <main class="card fade-in" id="irsyadContainer" style="max-width:600px;margin:auto;background:#fff;padding:1.5rem;border-radius:16px;">
+    <p>🔄 Memuat pesan irsyad...</p>
   </main>
 
-  <footer>© 2025 Naik Level • Pesantren Fajrul Islam</footer>
+  <footer style="text-align:center;padding:1rem;font-size:0.8rem;color:#065f46;">
+    © 2025 Naik Level • Pesantren Fajrul Islam
+  </footer>
 
   <script type="module">
     import { app } from "../assets/firebase-config.js";
-    import { getFirestore, collection, query, where, getDocs, orderBy } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
+    import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
     import { checkUser } from "../assets/script.js";
 
     const db = getFirestore(app);
-    const user = checkUser();
     const container = document.getElementById("irsyadContainer");
+    const user = checkUser();
 
     async function loadIrsyad() {
       container.innerHTML = "<p>🔄 Sedang memuat pesan irsyad...</p>";
 
-      const q = query(
-        collection(db, "irsyad"),
-        where("penerima", "==", user.username),
-        orderBy("createdAt", "desc")
-      );
+      try {
+        const globalSnap = await getDocs(collection(db, "irsyad_global"));
+        const personalSnap = await getDocs(collection(db, "irsyad_personal"));
 
-      const querySnapshot = await getDocs(q);
-      if (querySnapshot.empty) {
-        container.innerHTML = "<p>Belum ada pesan irsyad dari supervisor 🌿</p>";
-        return;
+        let semuaIrsyad = [];
+
+        // Ambil semua irsyad umum
+        globalSnap.forEach(doc => {
+          const d = doc.data();
+          semuaIrsyad.push({
+            judul: d.judul || "(Tanpa Judul)",
+            pesan: d.pesan,
+            tanggal: d.tanggal,
+            dari: d.dari,
+            untuk: "Semua Salik"
+          });
+        });
+
+        // Ambil hanya irsyad personal untuk user ini
+        personalSnap.forEach(doc => {
+          const d = doc.data();
+          if (d.userId === user.uid || d.nama === user.username) {
+            semuaIrsyad.push({
+              judul: d.judul || "(Tanpa Judul)",
+              pesan: d.pesan,
+              tanggal: d.tanggal,
+              dari: d.dari,
+              untuk: d.nama
+            });
+          }
+        });
+
+        // Urutkan berdasarkan tanggal (string → waktu terbaru di atas)
+        semuaIrsyad.sort((a, b) => new Date(b.tanggal) - new Date(a.tanggal));
+
+        if (semuaIrsyad.length === 0) {
+          container.innerHTML = "<p>Belum ada pesan irsyad dari supervisor 🌿</p>";
+          return;
+        }
+
+        // Tampilkan daftar irsyad
+        container.innerHTML = "";
+        semuaIrsyad.forEach(item => {
+          const box = document.createElement("div");
+          box.className = "irsyad-box";
+          box.innerHTML = `
+            <h4>${item.judul}</h4>
+            <p>${item.pesan}</p>
+            <small>🕊️ Dari: ${item.dari} • ${item.tanggal}</small>
+          `;
+          container.appendChild(box);
+        });
+      } catch (err) {
+        console.error(err);
+        container.innerHTML = "<p>❌ Terjadi kesalahan saat memuat pesan irsyad.</p>";
       }
-
-      container.innerHTML = "";
-      querySnapshot.forEach(doc => {
-        const data = doc.data();
-        const box = document.createElement("div");
-        box.className = "irsyad-box";
-        box.innerHTML = `
-          <h4>${data.judul || "Irsyad Tanpa Judul"}</h4>
-          <p>${data.pesan}</p>
-          <small>🕊️ Dari: ${data.dari} • ${new Date(data.createdAt?.toDate()).toLocaleString()}</small>
-        `;
-        container.appendChild(box);
-      });
     }
 
     loadIrsyad();
