@@ -121,7 +121,7 @@
       "from-emerald-700 to-emerald-900"
     ];
 
-    // 🧭 Pemetaan bilingual Indonesia → Inggris
+    // Pemetaan bilingual Indonesia → Inggris
     const levelMap = {
       "MALU": "shame",
       "RASA BERSALAH": "guilt",
@@ -160,14 +160,17 @@
         const res = await fetch("riyadhah-data.json");
         riyadhahData = await res.json();
 
+        // Ambil hanya dua level dominan
         const storedLevels = JSON.parse(localStorage.getItem("dominantLevels")) || [];
-        console.log("🎯 Level Dominan:", storedLevels);
+        const topTwoLevels = storedLevels.slice(0, 2);
 
-        let filtered = riyadhahData;
+        console.log("🎯 Dua Level Dominan:", topTwoLevels);
 
-        if (storedLevels.length > 0) {
+        let filtered = [];
+
+        if (topTwoLevels.length > 0) {
           filtered = riyadhahData.filter(item =>
-            storedLevels.some(lvl => {
+            topTwoLevels.some(lvl => {
               const engEquivalent = levelMap[lvl.toUpperCase()] || "";
               const label = item.levelLabel.toLowerCase();
               return (
@@ -178,8 +181,8 @@
           );
 
           levelInfo.innerHTML = `
-            Berdasarkan hasil asesmen spiritual Anda:
-            <span class="font-semibold text-emerald-600">${storedLevels.join(", ")}</span>.
+            Berdasarkan dua level spiritual tertinggi Anda:
+            <span class="font-semibold text-emerald-600">${topTwoLevels.join(", ")}</span>.
             Berikut Riyadhah yang relevan untuk dilakukan.
           `;
         } else {
