@@ -1,295 +1,460 @@
-<script type="module">
-  // ==========================
-  // INIT FIREBASE (langsung di sini)
-  // ==========================
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
-  import {
-    getFirestore,
-    collection,
-    addDoc,
-    serverTimestamp
-  } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Asasmen Pengasuh Naik Level</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+        sans-serif;
+    }
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyDuxvufRwadUsGh8-Kakl9KTG5ZGVcIoYQ",
-    authDomain: "naik-level-81580.firebaseapp.com",
-    projectId: "naik-level-81580",
-    storageBucket: "naik-level-81580.firebasestorage.app",
-    messagingSenderId: "319872430378",
-    appId: "1:319872430378:web:64db1b51b159d27d622e53",
-    measurementId: "G-RG7JS79MZ1"
-  };
+    /* Teks pernyataan lebih besar & tebal */
+    #questionText {
+      font-size: 1.1rem;
+      font-weight: 600;
+      line-height: 1.6;
+      color: #134e4a;
+    }
 
-  const app = initializeApp(firebaseConfig);
-  const db  = getFirestore(app);
+    #levelLabel {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #0f766e;
+      margin-bottom: 0.25rem;
+    }
 
-  // ==========================
-  // PROTEKSI LOGIN & USER INFO
-  // ==========================
-  const user = JSON.parse(localStorage.getItem("naikLevelUser") || "null");
-  if (!user) {
-    window.location.href = "../index.html";
-  }
-  document.getElementById("usernameDisplay").textContent = user.username;
+    .answer-btn {
+      width: 100%;
+      border-radius: 0.75rem;
+      padding: 0.85rem 1rem;
+      border: 2px solid #e5e7eb;
+      background-color: #f9fafb;
+      font-weight: 600;
+      font-size: 1rem;
+      transition: all 0.15s ease;
+    }
 
-  // ==========================
-  // DATA LEVEL
-  // ==========================
-  const levelMeta = [
-    { level: 1,  name: "Level 1 – Malu (Shame)" },
-    { level: 2,  name: "Level 2 – Rasa Bersalah (Guilt)" },
-    { level: 3,  name: "Level 3 – Apati (Apathy)" },
-    { level: 4,  name: "Level 4 – Berduka (Grief)" },
-    { level: 5,  name: "Level 5 – Takut (Fear)" },
-    { level: 6,  name: "Level 6 – Keinginan (Desire)" },
-    { level: 7,  name: "Level 7 – Marah (Anger)" },
-    { level: 8,  name: "Level 8 – Bangga (Pride)" },
-    { level: 9,  name: "Level 9 – Keberanian (Courage)" },
-    { level: 10, name: "Level 10 – Netralitas (Neutrality)" },
-    { level: 11, name: "Level 11 – Kemauan (Willingness)" },
-    { level: 12, name: "Level 12 – Penerimaan (Acceptance)" },
-    { level: 13, name: "Level 13 – Akal Budi (Reason)" },
-    { level: 14, name: "Level 14 – Cinta (Love)" },
-    { level: 15, name: "Level 15 – Sukacita (Joy)" },
-    { level: 16, name: "Level 16 – Damai (Peace)" },
-    { level: 17, name: "Level 17 – Pencerahan (Enlightenment)" }
-  ];
+    .answer-btn:hover {
+      border-color: #6ee7b7;
+      background-color: #ecfdf5;
+      transform: translateY(-1px);
+    }
 
-  // ==========================
-  // 68 PERNYATAAN LENGKAP
-  // ==========================
-  const questions = [
-    // LEVEL 1 – MALU
-    { id: 1,  level: 1, text: "Dalam 1 bulan ini, saya merasa tidak layak membimbing orang lain karena merasa diri saya penuh kekurangan." },
-    { id: 2,  level: 1, text: "Dalam 1 bulan ini, saya memilih menarik diri dari peran kepengasuhan karena takut dinilai atau disalahpahami." },
-    { id: 3,  level: 1, text: "Dalam 1 bulan ini, saya merasa Allah mungkin sudah tidak ridha atas pengabdian saya di pesantren." },
-    { id: 4,  level: 1, text: "Dalam 1 bulan ini, saya merasa kehadiran saya justru membebani orang lain, bukan membawa manfaat." },
+    .answer-btn.selected {
+      border-color: #10b981;
+      background-color: #d1fae5;
+      color: #065f46;
+      box-shadow: 0 0 0 1px rgba(16, 185, 129, 0.3);
+    }
 
-    // LEVEL 2 – RASA BERSALAH
-    { id: 5,  level: 2, text: "Dalam 1 bulan ini, saya sering teringat kesalahan masa lalu dan merasa belum pantas diampuni." },
-    { id: 6,  level: 2, text: "Dalam 1 bulan ini, saya menolak ketenangan batin karena merasa belum menebus dosa atau kelalaian saya sebagai pengasuh." },
-    { id: 7,  level: 2, text: "Dalam 1 bulan ini, saya berbuat baik dengan keras terhadap diri sendiri, bukan karena cinta, tapi karena ingin menebus kesalahan." },
-    { id: 8,  level: 2, text: "Dalam 1 bulan ini, saya sulit memaafkan diri sendiri meski saya yakin Allah Maha Pengampun." },
+    #finishBtn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+  </style>
+</head>
 
-    // LEVEL 3 – APATI
-    { id: 9,  level: 3, text: "Dalam 1 bulan ini, saya menjalankan peran pengasuhan secara mekanis, tanpa semangat dan tanpa makna." },
-    { id: 10, level: 3, text: "Dalam 1 bulan ini, saya merasa perubahan di pesantren percuma, seolah tidak ada yang bisa diperbaiki." },
-    { id: 11, level: 3, text: "Dalam 1 bulan ini, saya kehilangan arah dan makna dari pengabdian saya." },
-    { id: 12, level: 3, text: "Dalam 1 bulan ini, saya merasa mati rasa terhadap santri dan rekan kerja, seolah semua tidak lagi berarti." },
+<body class="min-h-screen bg-gradient-to-br from-emerald-100 to-teal-200 flex justify-center py-8 text-gray-700">
 
-    // LEVEL 4 – BERDUKA
-    { id: 13, level: 4, text: "Dalam 1 bulan ini, saya sering mengenang masa lalu saat suasana pesantren terasa lebih baik." },
-    { id: 14, level: 4, text: "Dalam 1 bulan ini, saya merasa kesedihan atas perubahan di pesantren sulit saya lepaskan." },
-    { id: 15, level: 4, text: "Dalam 1 bulan ini, saya merasa kehilangan semangat lama dan sulit menemukan kembali gairah membina santri." },
-    { id: 16, level: 4, text: "Dalam 1 bulan ini, saya sering menyesali keputusan atau sikap saya di masa lalu." },
+  <main class="w-full max-w-3xl bg-white/80 backdrop-blur-md shadow-xl rounded-3xl p-6 sm:p-8">
+    <!-- Header -->
+    <header class="flex items-center gap-4 mb-6">
+      <img src="../assets/logoslu.png" alt="Logo Pesantren" class="w-12 h-12 sm:w-14 sm:h-14 rounded-full shadow" />
+      <div class="flex-1">
+        <h1 class="text-2xl sm:text-3xl font-bold text-teal-700">
+          Asasmen Pengasuh Naik Level
+        </h1>
+        <p class="text-sm text-gray-600">
+          Refleksi <span class="font-semibold">1 bulan</span> terakhir perjalanan batinmu
+        </p>
+      </div>
+      <a href="../index.html" class="text-sm text-teal-700 hover:underline">
+        Kembali ke menu
+      </a>
+    </header>
 
-    // LEVEL 5 – TAKUT
-    { id: 17, level: 5, text: "Dalam 1 bulan ini, saya menjalankan peran dengan cemas — takut salah, takut dikritik, atau takut mengecewakan pimpinan." },
-    { id: 18, level: 5, text: "Dalam 1 bulan ini, saya menghindari menegur atau mengambil keputusan karena takut menimbulkan konflik." },
-    { id: 19, level: 5, text: "Dalam 1 bulan ini, saya banyak memikirkan hal-hal buruk yang mungkin terjadi pada diri atau pesantren." },
-    { id: 20, level: 5, text: "Dalam 1 bulan ini, saya menjaga jarak dengan santri atau guru karena takut terluka secara emosional." },
+    <!-- Info Pengasuh -->
+    <section class="mb-4">
+      <div class="bg-emerald-50 border border-emerald-100 rounded-2xl px-4 py-3 flex justify-between items-center">
+        <div>
+          <p class="text-xs text-gray-500">Pengasuh:</p>
+          <p id="usernameDisplay" class="text-base font-semibold text-emerald-800">-</p>
+        </div>
+        <p class="text-xs text-gray-400">
+          Jawab jujur untuk mengenali level batin dominanmu
+        </p>
+      </div>
+    </section>
 
-    // LEVEL 6 – KEINGINAN
-    { id: 21, level: 6, text: "Dalam 1 bulan ini, saya merasa gelisah bila program atau gagasan saya tidak dihargai." },
-    { id: 22, level: 6, text: "Dalam 1 bulan ini, saya membandingkan diri dengan pengasuh lain dan merasa iri dengan pencapaian mereka." },
-    { id: 23, level: 6, text: "Dalam 1 bulan ini, saya merasa terus mengejar sesuatu tapi tidak pernah benar-benar puas." },
-    { id: 24, level: 6, text: "Dalam 1 bulan ini, saya merasa semangat saya muncul hanya bila ada pujian, penghargaan, atau perhatian dari orang lain." },
+    <!-- Progres -->
+    <section class="mb-4">
+      <div class="flex justify-between text-xs text-gray-500 mb-1">
+        <span id="progressText">Pernyataan 1 dari 68</span>
+      </div>
+      <div class="w-full bg-emerald-100 h-2 rounded-full overflow-hidden">
+        <div id="progressBar" class="h-2 bg-emerald-500 rounded-full" style="width: 0%"></div>
+      </div>
+    </section>
 
-    // LEVEL 7 – MARAH
-    { id: 25, level: 7, text: "Dalam 1 bulan ini, saya mudah tersinggung terhadap ucapan, perilaku, atau keputusan orang lain di pesantren." },
-    { id: 26, level: 7, text: "Dalam 1 bulan ini, suasana di sekitar saya sering menjadi tegang karena sikap saya yang keras atau reaktif." },
-    { id: 27, level: 7, text: "Dalam 1 bulan ini, saya menyimpan kekecewaan pada orang yang tidak sejalan dengan saya." },
-    { id: 28, level: 7, text: "Dalam 1 bulan ini, saya sering menyalahkan keadaan atau orang lain atas hasil yang tidak sesuai harapan." },
+    <!-- Kartu Pertanyaan -->
+    <section
+      class="bg-white rounded-2xl shadow-md border border-emerald-50 px-4 sm:px-6 py-5 mb-4 min-h-[160px] flex flex-col justify-center">
+      <div id="levelLabel">Level ...</div>
+      <p id="questionText">
+        ...
+      </p>
+    </section>
 
-    // LEVEL 8 – BANGGA
-    { id: 29, level: 8, text: "Dalam 1 bulan ini, saya sulit menerima masukan dari pengurus atau rekan sejawat yang lebih muda." },
-    { id: 30, level: 8, text: "Dalam 1 bulan ini, saya berusaha terlihat kuat dan sempurna agar tidak kehilangan wibawa." },
-    { id: 31, level: 8, text: "Dalam 1 bulan ini, saya menilai orang lain dari penampilan dan hasil lahiriah lebih dari niat dan perjuangannya." },
-    { id: 32, level: 8, text: "Dalam 1 bulan ini, saya cenderung mencari pembenaran diri saat salah, agar tetap terlihat benar di hadapan orang lain." },
+    <!-- Jawaban -->
+    <section class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
+      <button class="answer-btn" data-value="10">Tidak Pernah</button>
+      <button class="answer-btn" data-value="20">Kadang</button>
+      <button class="answer-btn" data-value="40">Sering</button>
+      <button class="answer-btn" data-value="80">Selalu</button>
+    </section>
 
-    // LEVEL 9 – KEBERANIAN
-    { id: 33, level: 9, text: "Dalam 1 bulan ini, saya berani mengakui kesalahan di hadapan santri atau rekan kerja tanpa takut kehilangan wibawa." },
-    { id: 34, level: 9, text: "Dalam 1 bulan ini, saya memandang setiap masalah di pesantren sebagai tantangan yang bisa memperkuat tim." },
-    { id: 35, level: 9, text: "Dalam 1 bulan ini, saya mengambil langkah inisiatif untuk memperbaiki keadaan tanpa menunggu perintah." },
-    { id: 36, level: 9, text: "Dalam 1 bulan ini, saya merasa yakin bahwa Allah akan menolong selama saya jujur dan berusaha." },
+    <!-- Navigasi -->
+    <section class="flex items-center justify-between mb-4">
+      <button id="prevBtn"
+        class="flex items-center gap-1 text-sm px-3 py-2 rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed">
+        ⬅ Sebelumnya
+      </button>
+      <button id="nextBtn"
+        class="flex items-center gap-1 text-sm px-4 py-2 rounded-lg bg-emerald-500 text-white font-semibold hover:bg-emerald-600 disabled:opacity-40 disabled:cursor-not-allowed">
+        Berikutnya ➜
+      </button>
+    </section>
 
-    // LEVEL 10 – NETRALITAS
-    { id: 37, level: 10, text: "Dalam 1 bulan ini, saya mampu menerima perubahan kebijakan atau dinamika pesantren dengan tenang." },
-    { id: 38, level: 10, text: "Dalam 1 bulan ini, saya tidak terburu-buru menghakimi, tetapi berusaha memahami situasi dari berbagai sisi." },
-    { id: 39, level: 10, text: "Dalam 1 bulan ini, saya bisa menyeimbangkan antara keseriusan bekerja dan waktu untuk istirahat." },
-    { id: 40, level: 10, text: "Dalam 1 bulan ini, saya tidak berlebihan menyesali hasil yang kurang baik, karena percaya Allah menilai niat, bukan sekadar hasil." },
+    <!-- Tombol Selesai -->
+    <section class="text-center mb-4">
+      <button id="finishBtn"
+        class="inline-flex items-center justify-center px-6 sm:px-8 py-2.5 rounded-full bg-teal-600 text-white font-semibold text-sm sm:text-base shadow-md hover:bg-teal-700">
+        Selesai &amp; Lihat Hasil
+      </button>
+      <p class="text-[11px] text-gray-500 mt-1">
+        Tombol ini aktif setelah semua pernyataan terjawab.
+      </p>
+    </section>
 
-    // LEVEL 11 – KEMAUAN
-    { id: 41, level: 11, text: "Dalam 1 bulan ini, saya bekerja dengan antusias tanpa menunggu perintah, karena ingin memberi manfaat." },
-    { id: 42, level: 11, text: "Dalam 1 bulan ini, saya terus belajar hal-hal baru agar bisa menjadi pengasuh yang lebih bijak dan relevan." },
-    { id: 43, level: 11, text: "Dalam 1 bulan ini, saya menghadapi masalah pengasuhan dengan sikap belajar, bukan keluhan." },
-    { id: 44, level: 11, text: "Dalam 1 bulan ini, saya berusaha konsisten menjaga niat tulus dalam setiap pelayanan di pesantren." },
+    <!-- Hasil -->
+    <section id="resultBox" class="hidden mt-4 bg-emerald-50 border border-emerald-100 rounded-2xl p-4">
+      <h2 class="text-base sm:text-lg font-bold text-emerald-800 mb-2">
+        Tiga Level Batin Paling Dominan
+      </h2>
+      <ol id="topLevelsList" class="list-decimal list-inside space-y-1 text-sm text-gray-700"></ol>
+      <p id="saveStatus" class="mt-3 text-xs text-gray-500"></p>
+    </section>
 
-    // LEVEL 12 – PENERIMAAN
-    { id: 45, level: 12, text: "Dalam 1 bulan ini, saya mudah memaafkan guru, santri, atau staf yang berbuat salah." },
-    { id: 46, level: 12, text: "Dalam 1 bulan ini, saya menerima diri saya apa adanya — dengan kelebihan dan keterbatasan." },
-    { id: 47, level: 12, text: "Dalam 1 bulan ini, saya melihat hikmah dari setiap ujian, bahkan yang menyakitkan." },
-    { id: 48, level: 12, text: "Dalam 1 bulan ini, saya tetap tenang di tengah konflik atau perbedaan pandangan." },
+    <footer class="mt-6 text-center text-[11px] text-gray-400">
+      © 2025 Spritual Level Up · Pesantren Fajrul Islam
+    </footer>
+  </main>
+  <script type="module">
+    // ==========================
+    // INIT FIREBASE (langsung di sini)
+    // ==========================
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
+    import {
+      getFirestore,
+      collection,
+      addDoc,
+      serverTimestamp
+    } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
 
-    // LEVEL 13 – AKAL BUDI
-    { id: 49, level: 13, text: "Dalam 1 bulan ini, saya mengambil keputusan dengan berpikir jernih, berdasarkan data dan hikmah." },
-    { id: 50, level: 13, text: "Dalam 1 bulan ini, saya mencintai ilmu dan terus belajar dari berbagai sumber untuk memperluas wawasan pengasuhan." },
-    { id: 51, level: 13, text: "Dalam 1 bulan ini, saya sering menemukan tanda kebesaran Allah dalam sistem kehidupan pesantren yang tertata." },
-    { id: 52, level: 13, text: "Dalam 1 bulan ini, saya menyampaikan pendapat dengan tenang, rasional, dan menghormati perbedaan." },
+    const firebaseConfig = {
+      apiKey: "AIzaSyDuxvufRwadUsGh8-Kakl9KTG5ZGVcIoYQ",
+      authDomain: "naik-level-81580.firebaseapp.com",
+      projectId: "naik-level-81580",
+      storageBucket: "naik-level-81580.firebasestorage.app",
+      messagingSenderId: "319872430378",
+      appId: "1:319872430378:web:64db1b51b159d27d622e53",
+      measurementId: "G-RG7JS79MZ1"
+    };
 
-    // LEVEL 14 – CINTA
-    { id: 53, level: 14, text: "Dalam 1 bulan ini, saya memperlakukan santri dan guru dengan kasih dan kelembutan hati." },
-    { id: 54, level: 14, text: "Dalam 1 bulan ini, saya mudah memaafkan tanpa menuntut balasan atau permintaan maaf." },
-    { id: 55, level: 14, text: "Dalam 1 bulan ini, saya membantu dan melayani dengan niat tulus, bukan demi pujian." },
-    { id: 56, level: 14, text: "Dalam 1 bulan ini, saya melihat keindahan dan kebaikan Allah dalam setiap aspek kehidupan pesantren." },
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
 
-    // LEVEL 15 – SUKACITA
-    { id: 57, level: 15, text: "Dalam 1 bulan ini, saya merasa bahagia dan ringan dalam mengasuh, tanpa harus menunggu hasil besar." },
-    { id: 58, level: 15, text: "Dalam 1 bulan ini, saya menerima ujian dan kritik dengan rasa syukur karena itu bagian dari tarbiyah Allah." },
-    { id: 59, level: 15, text: "Dalam 1 bulan ini, saya membawa suasana cerah dan menenangkan bagi guru dan santri." },
-    { id: 60, level: 15, text: "Dalam 1 bulan ini, saya menikmati momen sederhana di pesantren — kebersamaan, adzan, dan tawa santri — dengan rasa syukur." },
+    // ==========================
+    // PROTEKSI LOGIN & USER INFO
+    // ==========================
+    const user = JSON.parse(localStorage.getItem("naikLevelUser") || "null");
+    if (!user) {
+      window.location.href = "../index.html";
+    }
+    document.getElementById("usernameDisplay").textContent = user.username;
 
-    // LEVEL 16 – DAMAI
-    { id: 61, level: 16, text: "Dalam 1 bulan ini, saya tetap tenang menghadapi berbagai persoalan pesantren." },
-    { id: 62, level: 16, text: "Dalam 1 bulan ini, saya berhenti mengeluh dan lebih banyak berserah diri kepada Allah." },
-    { id: 63, level: 16, text: "Dalam 1 bulan ini, kehadiran saya membuat orang lain merasa tenteram dan percaya diri." },
-    { id: 64, level: 16, text: "Dalam 1 bulan ini, saya merasakan ibadah bukan sekadar tugas, tapi perjumpaan yang saya rindukan." },
+    // ==========================
+    // DATA LEVEL (17 level)
+    // ==========================
+    const levelMeta = [
+      { level: 1, name: "Level 1 – Malu (Shame)" },
+      { level: 2, name: "Level 2 – Rasa Bersalah (Guilt)" },
+      { level: 3, name: "Level 3 – Apati (Apathy)" },
+      { level: 4, name: "Level 4 – Berduka (Grief)" },
+      { level: 5, name: "Level 5 – Takut (Fear)" },
+      { level: 6, name: "Level 6 – Keinginan (Desire)" },
+      { level: 7, name: "Level 7 – Marah (Anger)" },
+      { level: 8, name: "Level 8 – Bangga (Pride)" },
+      { level: 9, name: "Level 9 – Keberanian (Courage)" },
+      { level: 10, name: "Level 10 – Netralitas (Neutrality)" },
+      { level: 11, name: "Level 11 – Kemauan (Willingness)" },
+      { level: 12, name: "Level 12 – Penerimaan (Acceptance)" },
+      { level: 13, name: "Level 13 – Akal Budi (Reason)" },
+      { level: 14, name: "Level 14 – Cinta (Love)" },
+      { level: 15, name: "Level 15 – Sukacita (Joy)" },
+      { level: 16, name: "Level 16 – Damai (Peace)" },
+      { level: 17, name: "Level 17 – Pencerahan (Enlightenment)" }
+    ];
+    // ==========================
+    // 68 PERNYATAAN LENGKAP
+    // ==========================
+    const questions = [
+      // LEVEL 1 – MALU (Shame)
+      { id: 1, level: 1, text: "Dalam 1 bulan ini, saya merasa tidak layak membimbing orang lain karena merasa diri saya penuh kekurangan." },
+      { id: 2, level: 1, text: "Dalam 1 bulan ini, saya memilih menarik diri dari peran kepengasuhan karena takut dinilai atau disalahpahami." },
+      { id: 3, level: 1, text: "Dalam 1 bulan ini, saya merasa Allah mungkin sudah tidak ridha atas pengabdian saya di pesantren." },
+      { id: 4, level: 1, text: "Dalam 1 bulan ini, saya merasa kehadiran saya justru membebani orang lain, bukan membawa manfaat." },
 
-    // LEVEL 17 – PENCERAHAN
-    { id: 65, level: 17, text: "Dalam 1 bulan ini, saya merasa semua yang terjadi di pesantren adalah bagian dari kehendak Allah yang sempurna." },
-    { id: 66, level: 17, text: "Dalam 1 bulan ini, saya melihat kehadiran Allah dalam setiap jiwa yang saya temui." },
-    { id: 67, level: 17, text: "Dalam 1 bulan ini, saya hidup dengan tenang tanpa dorongan ego — cukup menjadi saluran kebaikan-Nya." },
-    { id: 68, level: 17, text: "Dalam 1 bulan ini, saya merasa kehadiran saya membawa kedamaian tanpa perlu banyak bicara." }
-  ];
+      // LEVEL 2 – RASA BERSALAH (Guilt)
+      { id: 5, level: 2, text: "Dalam 1 bulan ini, saya sering teringat kesalahan masa lalu dan merasa belum pantas diampuni." },
+      { id: 6, level: 2, text: "Dalam 1 bulan ini, saya menolak ketenangan batin karena merasa belum menebus dosa atau kelalaian saya sebagai pengasuh." },
+      { id: 7, level: 2, text: "Dalam 1 bulan ini, saya berbuat baik dengan keras terhadap diri sendiri, bukan karena cinta, tapi karena ingin menebus kesalahan." },
+      { id: 8, level: 2, text: "Dalam 1 bulan ini, saya sulit memaafkan diri sendiri meski saya yakin Allah Maha Pengampun." },
 
-  const totalQuestions = questions.length;
+      // LEVEL 3 – APATI (Apathy)
+      { id: 9, level: 3, text: "Dalam 1 bulan ini, saya menjalankan peran pengasuhan secara mekanis, tanpa semangat dan tanpa makna." },
+      { id: 10, level: 3, text: "Dalam 1 bulan ini, saya merasa perubahan di pesantren percuma, seolah tidak ada yang bisa diperbaiki." },
+      { id: 11, level: 3, text: "Dalam 1 bulan ini, saya kehilangan arah dan makna dari pengabdian saya." },
+      { id: 12, level: 3, text: "Dalam 1 bulan ini, saya merasa mati rasa terhadap santri dan rekan kerja, seolah semua tidak lagi berarti." },
 
-  // ==========================
-  // STATE & DOM
-  // ==========================
-  let currentIndex = 0;
-  const answers = {};
+      // LEVEL 4 – BERDUKA (Grief)
+      { id: 13, level: 4, text: "Dalam 1 bulan ini, saya sering mengenang masa lalu saat suasana pesantren terasa lebih baik." },
+      { id: 14, level: 4, text: "Dalam 1 bulan ini, saya merasa kesedihan atas perubahan di pesantren sulit saya lepaskan." },
+      { id: 15, level: 4, text: "Dalam 1 bulan ini, saya merasa kehilangan semangat lama dan sulit menemukan kembali gairah membina santri." },
+      { id: 16, level: 4, text: "Dalam 1 bulan ini, saya sering menyesali keputusan atau sikap saya di masa lalu." },
 
-  const questionText  = document.getElementById("questionText");
-  const progressText  = document.getElementById("progressText");
-  const levelLabel    = document.getElementById("levelLabel");
-  const progressBar   = document.getElementById("progressBar");
-  const prevBtn       = document.getElementById("prevBtn");
-  const nextBtn       = document.getElementById("nextBtn");
-  const finishBtn     = document.getElementById("finishBtn");
-  const resultBox     = document.getElementById("resultBox");
-  const topLevelsList = document.getElementById("topLevelsList");
-  const saveStatus    = document.getElementById("saveStatus");
-  const answerButtons = Array.from(document.querySelectorAll(".answer-btn"));
+      // LEVEL 5 – TAKUT (Fear)
+      { id: 17, level: 5, text: "Dalam 1 bulan ini, saya menjalankan peran dengan cemas — takut salah, takut dikritik, atau takut mengecewakan pimpinan." },
+      { id: 18, level: 5, text: "Dalam 1 bulan ini, saya menghindari menegur atau mengambil keputusan karena takut menimbulkan konflik." },
+      { id: 19, level: 5, text: "Dalam 1 bulan ini, saya banyak memikirkan hal-hal buruk yang mungkin terjadi pada diri atau pesantren." },
+      { id: 20, level: 5, text: "Dalam 1 bulan ini, saya menjaga jarak dengan santri atau guru karena takut terluka secara emosional." },
 
-  function updateFinishState() {
-    const totalAnswered = Object.keys(answers).length;
-    finishBtn.disabled = totalAnswered !== totalQuestions;
-  }
+      // LEVEL 6 – KEINGINAN (Desire)
+      { id: 21, level: 6, text: "Dalam 1 bulan ini, saya merasa gelisah bila program atau gagasan saya tidak dihargai." },
+      { id: 22, level: 6, text: "Dalam 1 bulan ini, saya membandingkan diri dengan pengasuh lain dan merasa iri dengan pencapaian mereka." },
+      { id: 23, level: 6, text: "Dalam 1 bulan ini, saya merasa terus mengejar sesuatu tapi tidak pernah benar-benar puas." },
+      { id: 24, level: 6, text: "Dalam 1 bulan ini, saya merasa semangat saya muncul hanya bila ada pujian, penghargaan, atau perhatian dari orang lain." },
 
-  function renderQuestion() {
-    const q = questions[currentIndex];
+      // LEVEL 7 – MARAH (Anger)
+      { id: 25, level: 7, text: "Dalam 1 bulan ini, saya mudah tersinggung terhadap ucapan, perilaku, atau keputusan orang lain di pesantren." },
+      { id: 26, level: 7, text: "Dalam 1 bulan ini, suasana di sekitar saya sering menjadi tegang karena sikap saya yang keras atau reaktif." },
+      { id: 27, level: 7, text: "Dalam 1 bulan ini, saya menyimpan kekecewaan pada orang yang tidak sejalan dengan saya." },
+      { id: 28, level: 7, text: "Dalam 1 bulan ini, saya sering menyalahkan keadaan atau orang lain atas hasil yang tidak sesuai harapan." },
 
-    questionText.textContent = q.text;
-    progressText.textContent = `Pernyataan ${q.id} dari ${totalQuestions}`;
-    const percent = (q.id / totalQuestions) * 100;
-    progressBar.style.width = `${percent}%`;
+      // LEVEL 8 – BANGGA (Pride)
+      { id: 29, level: 8, text: "Dalam 1 bulan ini, saya sulit menerima masukan dari pengurus atau rekan sejawat yang lebih muda." },
+      { id: 30, level: 8, text: "Dalam 1 bulan ini, saya berusaha terlihat kuat dan sempurna agar tidak kehilangan wibawa." },
+      { id: 31, level: 8, text: "Dalam 1 bulan ini, saya menilai orang lain dari penampilan dan hasil lahiriah lebih dari niat dan perjuangannya." },
+      { id: 32, level: 8, text: "Dalam 1 bulan ini, saya cenderung mencari pembenaran diri saat salah, agar tetap terlihat benar di hadapan orang lain." },
 
-    const meta = levelMeta.find(l => l.level === q.level);
-    levelLabel.textContent = meta ? meta.name : "";
+      // LEVEL 9 – KEBERANIAN (Courage)
+      { id: 33, level: 9, text: "Dalam 1 bulan ini, saya berani mengakui kesalahan di hadapan santri atau rekan kerja tanpa takut kehilangan wibawa." },
+      { id: 34, level: 9, text: "Dalam 1 bulan ini, saya memandang setiap masalah di pesantren sebagai tantangan yang bisa memperkuat tim." },
+      { id: 35, level: 9, text: "Dalam 1 bulan ini, saya mengambil langkah inisiatif untuk memperbaiki keadaan tanpa menunggu perintah." },
+      { id: 36, level: 9, text: "Dalam 1 bulan ini, saya merasa yakin bahwa Allah akan menolong selama saya jujur dan berusaha." },
 
-    answerButtons.forEach(btn => {
-      btn.classList.remove("selected");
-      const val = Number(btn.dataset.value);
-      if (answers[q.id] === val) btn.classList.add("selected");
-    });
+      // LEVEL 10 – NETRALITAS (Neutrality)
+      { id: 37, level: 10, text: "Dalam 1 bulan ini, saya mampu menerima perubahan kebijakan atau dinamika pesantren dengan tenang." },
+      { id: 38, level: 10, text: "Dalam 1 bulan ini, saya tidak terburu-buru menghakimi, tetapi berusaha memahami situasi dari berbagai sisi." },
+      { id: 39, level: 10, text: "Dalam 1 bulan ini, saya bisa menyeimbangkan antara keseriusan bekerja dan waktu untuk istirahat." },
+      { id: 40, level: 10, text: "Dalam 1 bulan ini, saya tidak berlebihan menyesali hasil yang kurang baik, karena percaya Allah menilai niat, bukan sekadar hasil." },
 
-    prevBtn.disabled = currentIndex === 0;
-    nextBtn.disabled = currentIndex === totalQuestions - 1;
-    updateFinishState();
-  }
+      // LEVEL 11 – KEMAUAN (Willingness)
+      { id: 41, level: 11, text: "Dalam 1 bulan ini, saya bekerja dengan antusias tanpa menunggu perintah, karena ingin memberi manfaat." },
+      { id: 42, level: 11, text: "Dalam 1 bulan ini, saya terus belajar hal-hal baru agar bisa menjadi pengasuh yang lebih bijak dan relevan." },
+      { id: 43, level: 11, text: "Dalam 1 bulan ini, saya menghadapi masalah pengasuhan dengan sikap belajar, bukan keluhan." },
+      { id: 44, level: 11, text: "Dalam 1 bulan ini, saya berusaha konsisten menjaga niat tulus dalam setiap pelayanan di pesantren." },
 
-  // pilih jawaban
-  answerButtons.forEach(btn => {
-    btn.addEventListener("click", () => {
-      const value = Number(btn.dataset.value);
+      // LEVEL 12 – PENERIMAAN (Acceptance)
+      { id: 45, level: 12, text: "Dalam 1 bulan ini, saya mudah memaafkan guru, santri, atau staf yang berbuat salah." },
+      { id: 46, level: 12, text: "Dalam 1 bulan ini, saya menerima diri saya apa adanya — dengan kelebihan dan keterbatasan." },
+      { id: 47, level: 12, text: "Dalam 1 bulan ini, saya melihat hikmah dari setiap ujian, bahkan yang menyakitkan." },
+      { id: 48, level: 12, text: "Dalam 1 bulan ini, saya tetap tenang di tengah konflik atau perbedaan pandangan." },
+
+      // LEVEL 13 – AKAL BUDI (Reason)
+      { id: 49, level: 13, text: "Dalam 1 bulan ini, saya mengambil keputusan dengan berpikir jernih, berdasarkan data dan hikmah." },
+      { id: 50, level: 13, text: "Dalam 1 bulan ini, saya mencintai ilmu dan terus belajar dari berbagai sumber untuk memperluas wawasan pengasuhan." },
+      { id: 51, level: 13, text: "Dalam 1 bulan ini, saya sering menemukan tanda kebesaran Allah dalam sistem kehidupan pesantren yang tertata." },
+      { id: 52, level: 13, text: "Dalam 1 bulan ini, saya menyampaikan pendapat dengan tenang, rasional, dan menghormati perbedaan." },
+
+      // LEVEL 14 – CINTA (Love)
+      { id: 53, level: 14, text: "Dalam 1 bulan ini, saya memperlakukan santri dan guru dengan kasih dan kelembutan hati." },
+      { id: 54, level: 14, text: "Dalam 1 bulan ini, saya mudah memaafkan tanpa menuntut balasan atau permintaan maaf." },
+      { id: 55, level: 14, text: "Dalam 1 bulan ini, saya membantu dan melayani dengan niat tulus, bukan demi pujian." },
+      { id: 56, level: 14, text: "Dalam 1 bulan ini, saya melihat keindahan dan kebaikan Allah dalam setiap aspek kehidupan pesantren." },
+
+      // LEVEL 15 – SUKACITA (Joy)
+      { id: 57, level: 15, text: "Dalam 1 bulan ini, saya merasa bahagia dan ringan dalam mengasuh, tanpa harus menunggu hasil besar." },
+      { id: 58, level: 15, text: "Dalam 1 bulan ini, saya menerima ujian dan kritik dengan rasa syukur karena itu bagian dari tarbiyah Allah." },
+      { id: 59, level: 15, text: "Dalam 1 bulan ini, saya membawa suasana cerah dan menenangkan bagi guru dan santri." },
+      { id: 60, level: 15, text: "Dalam 1 bulan ini, saya menikmati momen sederhana di pesantren — kebersamaan, adzan, dan tawa santri — dengan rasa syukur." },
+
+      // LEVEL 16 – DAMAI (Peace)
+      { id: 61, level: 16, text: "Dalam 1 bulan ini, saya tetap tenang menghadapi berbagai persoalan pesantren." },
+      { id: 62, level: 16, text: "Dalam 1 bulan ini, saya berhenti mengeluh dan lebih banyak berserah diri kepada Allah." },
+      { id: 63, level: 16, text: "Dalam 1 bulan ini, kehadiran saya membuat orang lain merasa tenteram dan percaya diri." },
+      { id: 64, level: 16, text: "Dalam 1 bulan ini, saya merasakan ibadah bukan sekadar tugas, tapi perjumpaan yang saya rindukan." },
+
+      // LEVEL 17 – PENCERAHAN (Enlightenment)
+      { id: 65, level: 17, text: "Dalam 1 bulan ini, saya merasa semua yang terjadi di pesantren adalah bagian dari kehendak Allah yang sempurna." },
+      { id: 66, level: 17, text: "Dalam 1 bulan ini, saya melihat kehadiran Allah dalam setiap jiwa yang saya temui." },
+      { id: 67, level: 17, text: "Dalam 1 bulan ini, saya hidup dengan tenang tanpa dorongan ego — cukup menjadi saluran kebaikan-Nya." },
+      { id: 68, level: 17, text: "Dalam 1 bulan ini, saya merasa kehadiran saya membawa kedamaian tanpa perlu banyak bicara." }
+    ];
+
+    const totalQuestions = questions.length;
+    // ==========================
+    // STATE & DOM
+    // ==========================
+    let currentIndex = 0;
+    const answers = {};
+
+    const questionText = document.getElementById("questionText");
+    const progressText = document.getElementById("progressText");
+    const levelLabel = document.getElementById("levelLabel");
+    const progressBar = document.getElementById("progressBar");
+    const prevBtn = document.getElementById("prevBtn");
+    const nextBtn = document.getElementById("nextBtn");
+    const finishBtn = document.getElementById("finishBtn");
+    const resultBox = document.getElementById("resultBox");
+    const topLevelsList = document.getElementById("topLevelsList");
+    const saveStatus = document.getElementById("saveStatus");
+    const answerButtons = Array.from(document.querySelectorAll(".answer-btn"));
+
+    function updateFinishState() {
+      const totalAnswered = Object.keys(answers).length;
+      finishBtn.disabled = totalAnswered !== totalQuestions;
+    }
+
+    function renderQuestion() {
       const q = questions[currentIndex];
-      answers[q.id] = value;
 
-      answerButtons.forEach(b => b.classList.remove("selected"));
-      btn.classList.add("selected");
-      updateFinishState();
-    });
-  });
+      questionText.textContent = q.text;
+      progressText.textContent = `Pernyataan ${q.id} dari ${totalQuestions}`;
+      const percent = (q.id / totalQuestions) * 100;
+      progressBar.style.width = `${percent}%`;
 
-  // navigasi
-  prevBtn.addEventListener("click", () => {
-    if (currentIndex > 0) {
-      currentIndex--;
-      renderQuestion();
-    }
-  });
+      const meta = levelMeta.find(l => l.level === q.level);
+      levelLabel.textContent = meta ? meta.name : "";
 
-  nextBtn.addEventListener("click", () => {
-    if (currentIndex < totalQuestions - 1) {
-      currentIndex++;
-      renderQuestion();
-    }
-  });
-
-  // selesai
-  async function finishAssessment() {
-    const totalAnswered = Object.keys(answers).length;
-    if (totalAnswered !== totalQuestions) {
-      alert("Mohon jawab semua pernyataan terlebih dahulu sebelum melihat hasil.");
-      return;
-    }
-
-    const levelScores = {};
-    levelMeta.forEach(l => levelScores[l.level] = 0);
-    questions.forEach(q => {
-      const v = answers[q.id] || 0;
-      levelScores[q.level] += v;
-    });
-
-    const ranked = levelMeta
-      .map(l => ({ level: l.level, name: l.name, score: levelScores[l.level] }))
-      .sort((a, b) => b.score - a.score);
-
-    const top3 = ranked.slice(0, 3);
-
-    topLevelsList.innerHTML = "";
-    top3.forEach((item, idx) => {
-      const li = document.createElement("li");
-      li.textContent = `${item.name} (Skor: ${item.score})`;
-      if (idx === 0) li.classList.add("font-semibold","text-emerald-700");
-      topLevelsList.appendChild(li);
-    });
-
-    resultBox.classList.remove("hidden");
-
-    try {
-      await addDoc(collection(db, "asasmen_pengasuh"), {
-        userId: user.username,
-        role: user.role || "pengasuh",
-        createdAt: serverTimestamp(),
-        answers,
-        levelScores,
-        top3Levels: top3.map(t => ({
-          level: t.level,
-          name: t.name,
-          score: t.score
-        }))
+      answerButtons.forEach(btn => {
+        btn.classList.remove("selected");
+        const val = Number(btn.dataset.value);
+        if (answers[q.id] === val) {
+          btn.classList.add("selected");
+        }
       });
-      saveStatus.textContent = "✅ Hasil asesmen berhasil disimpan. Mursyid dapat melihatnya di dashboard supervisor.";
-    } catch (err) {
-      console.error(err);
-      saveStatus.textContent = "⚠️ Hasil asesmen gagal disimpan ke server. Silakan cek koneksi internet dan coba lagi.";
+
+      prevBtn.disabled = currentIndex === 0;
+      nextBtn.disabled = currentIndex === totalQuestions - 1;
+      updateFinishState();
     }
-  }
 
-  finishBtn.addEventListener("click", finishAssessment);
+    // pilih jawaban
+    answerButtons.forEach(btn => {
+      btn.addEventListener("click", () => {
+        const value = Number(btn.dataset.value);
+        const q = questions[currentIndex];
+        answers[q.id] = value;
 
-  // mulai
-  renderQuestion();
-</script>
+        answerButtons.forEach(b => b.classList.remove("selected"));
+        btn.classList.add("selected");
+        updateFinishState();
+      });
+    });
+
+    // navigasi
+    prevBtn.addEventListener("click", () => {
+      if (currentIndex > 0) {
+        currentIndex--;
+        renderQuestion();
+      }
+    });
+
+    nextBtn.addEventListener("click", () => {
+      if (currentIndex < totalQuestions - 1) {
+        currentIndex++;
+        renderQuestion();
+      }
+    });
+
+    // selesai & simpan ke Firestore
+    async function finishAssessment() {
+      const totalAnswered = Object.keys(answers).length;
+      if (totalAnswered !== totalQuestions) {
+        alert("Mohon jawab semua pernyataan terlebih dahulu sebelum melihat hasil.");
+        return;
+      }
+
+      // hitung skor per level
+      const levelScores = {};
+      levelMeta.forEach(l => (levelScores[l.level] = 0));
+      questions.forEach(q => {
+        const v = answers[q.id] || 0;
+        levelScores[q.level] += v;
+      });
+
+      const ranked = levelMeta
+        .map(l => ({
+          level: l.level,
+          name: l.name,
+          score: levelScores[l.level]
+        }))
+        .sort((a, b) => b.score - a.score);
+
+      const top3 = ranked.slice(0, 3);
+
+      topLevelsList.innerHTML = "";
+      top3.forEach((item, idx) => {
+        const li = document.createElement("li");
+        li.textContent = `${item.name} (Skor: ${item.score})`;
+        if (idx === 0) {
+          li.classList.add("font-semibold", "text-emerald-700");
+        }
+        topLevelsList.appendChild(li);
+      });
+
+      resultBox.classList.remove("hidden");
+
+      try {
+        await addDoc(collection(db, "asasmen_pengasuh"), {
+          userId: user.username,
+          role: user.role || "pengasuh",
+          createdAt: serverTimestamp(),
+          answers,
+          levelScores,
+          top3Levels: top3.map(t => ({
+            level: t.level,
+            name: t.name,
+            score: t.score
+          }))
+        });
+        saveStatus.textContent =
+          "✅ Hasil asesmen berhasil disimpan. Mursyid dapat melihatnya di dashboard supervisor.";
+      } catch (err) {
+        console.error(err);
+        saveStatus.textContent =
+          "⚠️ Hasil asesmen gagal disimpan ke server. Silakan cek koneksi internet dan coba lagi.";
+      }
+    }
+
+    finishBtn.addEventListener("click", finishAssessment);
+
+    // mulai
+    renderQuestion();
+  </script>
+</body>
+</html>
