@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Irsyad dari Supervisor - Naik Level</title>
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    .irsyad-box {
+      background: #ecfdf5;
+      border: 1px solid #a7f3d0;
+      border-radius: 16px;
+      padding: 1rem 1.2rem;
+      margin-bottom: 1rem;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    }
+    .irsyad-box h4 {
+      margin: 0;
+      color: #065f46;
+    }
+    .irsyad-box p {
+      margin-top: 8px;
+      color: #064e3b;
+      line-height: 1.6;
+      white-space: pre-line;
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <img src="../assets/logoslu.png" class="logo">
+    <h2>🌸 Irsyad Supervisor</h2>
+    <p>Pesan bimbingan dan nasehat dari Supervisor untukmu</p>
+  </header>
+
+  <main class="card fade-in" id="irsyadContainer">
+    <p>Memuat pesan irsyad...</p>
+  </main>
+
+  <footer>© 2025 Naik Level • Pesantren Fajrul Islam</footer>
+
+  <script type="module">
+    import { app } from "../assets/firebase-config.js";
+    import { getFirestore, collection, query, where, getDocs, orderBy } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
+    import { checkUser } from "../assets/script.js";
+
+    const db = getFirestore(app);
+    const user = checkUser();
+    const container = document.getElementById("irsyadContainer");
+
+    async function loadIrsyad() {
+      container.innerHTML = "<p>🔄 Sedang memuat pesan irsyad...</p>";
+
+      const q = query(
+        collection(db, "irsyad"),
+        where("penerima", "==", user.username),
+        orderBy("createdAt", "desc")
+      );
+
+      const querySnapshot = await getDocs(q);
+      if (querySnapshot.empty) {
+        container.innerHTML = "<p>Belum ada pesan irsyad dari supervisor 🌿</p>";
+        return;
+      }
+
+      container.innerHTML = "";
+      querySnapshot.forEach(doc => {
+        const data = doc.data();
+        const box = document.createElement("div");
+        box.className = "irsyad-box";
+        box.innerHTML = `
+          <h4>${data.judul || "Irsyad Tanpa Judul"}</h4>
+          <p>${data.pesan}</p>
+          <small>🕊️ Dari: ${data.dari} • ${new Date(data.createdAt?.toDate()).toLocaleString()}</small>
+        `;
+        container.appendChild(box);
+      });
+    }
+
+    loadIrsyad();
+  </script>
+</body>
+</html>
