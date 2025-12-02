@@ -1,6 +1,9 @@
-// Firebase Configuration for Naik Level
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
-import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-analytics.js";
+// ================================
+// 🔥 FIREBASE KONFIGURASI NAIK LEVEL
+// ================================
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
+import { getFirestore } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDuxvufRwadUsGh8-Kakl9KTG5ZGVcIoYQ",
@@ -12,7 +15,6 @@ const firebaseConfig = {
   measurementId: "G-RG7JS79MZ1"
 };
 
-const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
-
-export { app };
+// 🔧 Inisialisasi Firebase App & Firestore
+export const app = initializeApp(firebaseConfig);
+export const db = getFirestore(app);
