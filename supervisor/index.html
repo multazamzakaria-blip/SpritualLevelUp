@@ -1,107 +1,174 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Halaman Utama - Naik Level</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-</head>
-
-<body class="min-h-screen bg-gradient-to-br from-emerald-100 to-teal-200 flex flex-col items-center justify-center font-sans text-gray-700">
-
-  <!-- Header -->
-  <header class="text-center mb-8">
-    <img src="../assets/logoslu.png" alt="Logo Pesantren" class="w-16 h-16 mx-auto mb-3">
-    <h1 class="text-3xl font-bold text-teal-700">Spiritual Level Up</h1>
-    <p class="text-gray-600">Panduan Perjalanan Spiritual & Refleksi Batin</p>
-  </header>
-
-  <!-- User Info -->
-  <div id="userInfo" class="text-center mb-6 bg-white/80 p-4 rounded-xl shadow-md w-80">
-    <p class="text-sm text-gray-600">Selamat datang,</p>
-    <h2 id="usernameDisplay" class="text-lg font-semibold text-teal-700"></h2>
-    <p id="roleDisplay" class="text-sm text-gray-500"></p>
-  </div>
-
-  <!-- Menu Grid -->
-  <section class="grid grid-cols-2 gap-4 w-80 text-center">
-    <!-- Asasmen -->
-    <a href="../asasmen/pengasuh.html" class="menu-card">Asasmen Pengasuh</a>
-    <a href="../asasmen/santri.html" class="menu-card">Asasmen Santri</a>
-    <a href="../asasmen/hamba.html" class="menu-card">Asasmen Hamba</a>
-
-    <!-- Laporan -->
-    <a href="../laporan/harian.html" class="menu-card">Laporan Harian</a>
-    <a href="../laporan/pekanan.html" class="menu-card">Laporan Pekanan</a>
-
-    <!-- Irsyad -->
-    <a href="../irsyad/index.html" class="menu-card">Irsyad</a>
-  </section>
-
-  <!-- Logout Button -->
-  <button id="logoutBtn"
-    class="mt-8 bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-lg shadow transition duration-200">
-    Keluar
-  </button>
-
-  <!-- Footer -->
-  <footer class="mt-8 text-xs text-gray-500">
-    © 2025 Naik Level · Pesantren Fajrul Islam
-  </footer>
-
-  <!-- Script -->
-  <script type="module">
-    // ==============================
-    // 🔒 Proteksi Login Salik / Supervisor
-    // ==============================
-    const userData = localStorage.getItem("naikLevelUser");
-    let user = null;
-
-    try {
-      user = JSON.parse(userData);
-    } catch (err) {
-      console.error("Data user tidak valid:", err);
-    }
-
-    const usernameDisplay = document.getElementById("usernameDisplay");
-    const roleDisplay = document.getElementById("roleDisplay");
-
-    if (!user || !user.username || !user.role) {
-      // belum login, arahkan ke login
-      window.location.href = "../login.html";
-    } else {
-      usernameDisplay.textContent = user.username;
-      roleDisplay.textContent =
-        user.role === "supervisor" ? "Supervisor / Mursyid" : "Salik";
-    }
-
-    // ==============================
-    // 🚪 Tombol Logout
-    // ==============================
-    document.getElementById("logoutBtn").addEventListener("click", () => {
-      localStorage.removeItem("naikLevelUser");
-      window.location.href = "../login.html";
-    });
-  </script>
-
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard Supervisor - Naik Level</title>
+  <link rel="stylesheet" href="../assets/style.css">
   <style>
-    .menu-card {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      height: 100px;
-      border-radius: 1rem;
-      background: white;
-      font-weight: 600;
-      color: #0f766e;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-      transition: transform 0.2s, background 0.2s;
+    body {
+      font-family: "Poppins", system-ui, sans-serif;
+      background: linear-gradient(to bottom right, #d1fae5, #a7f3d0);
+      min-height: 100vh;
+      color: #065f46;
     }
-    .menu-card:hover {
-      transform: translateY(-3px);
-      background: #ccfbf1;
+
+    header {
+      text-align: center;
+      padding: 1.5rem;
+    }
+
+    header img {
+      width: 80px;
+      margin: 0 auto 10px;
+    }
+
+    h2 {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: #064e3b;
+    }
+
+    p {
+      color: #065f46;
+    }
+
+    .menu-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5rem;
+      margin: 2rem;
+    }
+
+    .card-menu {
+      background: #ecfdf5;
+      border-radius: 16px;
+      padding: 1.5rem;
+      text-align: center;
+      border: 1px solid #a7f3d0;
+      transition: all 0.25s ease;
+      cursor: pointer;
+    }
+
+    .card-menu:hover {
+      background: #d1fae5;
+      transform: translateY(-4px);
+      box-shadow: 0 6px 10px rgba(0,0,0,0.05);
+    }
+
+    .card-menu h3 {
+      margin-top: 10px;
+      color: #065f46;
+      font-size: 1rem;
+    }
+
+    .card-menu p {
+      font-size: 0.8rem;
+      color: #6b7280;
+      margin-top: 4px;
+    }
+
+    .table-box {
+      margin: 2rem;
+      background: #ffffff;
+      border-radius: 14px;
+      padding: 1rem;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    th, td {
+      padding: 10px;
+      text-align: left;
+      border-bottom: 1px solid #e5e7eb;
+      vertical-align: top;
+    }
+
+    th {
+      background: #ecfdf5;
+      color: #065f46;
+      font-weight: 600;
+    }
+
+    tr:nth-child(even) {
+      background: #f9fafb;
+    }
+
+    button.refresh-btn {
+      margin-top: 1rem;
+      background: #059669;
+      color: white;
+      padding: 8px 14px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.85rem;
+    }
+
+    footer {
+      text-align: center;
+      padding: 1rem;
+      font-size: 0.75rem;
+      color: #065f46;
     }
   </style>
+</head>
 
+<body>
+  <header>
+    <img src="../assets/logoslu.png" alt="Logo Spiritual Level Up">
+    <h2>🌿 Dashboard Supervisor Naik Level</h2>
+    <p>Pusat pemantauan asesmen, laporan, dan irsyad santri</p>
+  </header>
+
+  <main>
+    <section class="menu-grid">
+      <div class="card-menu" onclick="window.location.href='./asesmen-pengasuh.html'">
+        <h3>🧕 Asasmen Pengasuh</h3>
+        <p>Lihat 3 level batin paling dominan dari setiap pengasuh</p>
+      </div>
+
+      <div class="card-menu" onclick="window.location.href='../irsyad/supervisor.html'">
+        <h3>🕊️ Tulis Irsyad</h3>
+        <p>Buat dan kirim bimbingan spiritual kepada Salik</p>
+      </div>
+
+      <div class="card-menu" onclick="window.location.href='./asesmen-santri.html'">
+        <h3>📘 Asasmen Santri</h3>
+        <p>Lihat hasil refleksi spiritual santri</p>
+      </div>
+
+      <div class="card-menu" onclick="window.location.href='./laporan-harian.html'">
+        <h3>📖 Laporan Harian</h3>
+        <p>Pantau rutinitas harian santri</p>
+      </div>
+
+      <div class="card-menu" onclick="window.location.href='./laporan-pekanan.html'">
+        <h3>📆 Laporan Pekanan</h3>
+        <p>Tinjau pertumbuhan mingguan santri</p>
+      </div>
+
+      <div class="card-menu" onclick="window.location.href='./data-irsyad.html'">
+        <h3>💬 Data Irsyad</h3>
+        <p>Lihat semua pesan bimbingan yang telah dikirim</p>
+      </div>
+    </section>
+
+    <section class="table-box">
+      <h3 id="tableTitle">📊 Data Asasmen / Laporan</h3>
+      <div id="dataContainer">
+        <p>Pilih salah satu menu di atas untuk melihat data.</p>
+      </div>
+      <button class="refresh-btn" id="refreshBtn" style="display:none;">🔄 Segarkan Data</button>
+    </section>
+  </main>
+
+  <footer>© 2025 Naik Level • Pesantren Fajrul Islam</footer>
 </body>
 </html>
