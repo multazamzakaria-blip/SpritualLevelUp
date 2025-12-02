@@ -24,21 +24,21 @@
   <header class="w-full px-4 pt-6 pb-4 sm:pt-8 sm:pb-6">
     <div class="max-w-5xl mx-auto flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
       <div>
-        <p class="text-xs uppercase tracking-[0.2em] text-emerald-100 mb-1">Naik Level Spiritual</p>
+        <p class="text-sm uppercase tracking-[0.15em] text-emerald-100 mb-1">Naik Level Spiritual</p>
         <h1 class="text-2xl sm:text-3xl font-bold text-white drop-shadow">
           🌱 Riyadhah Naik Level Pengasuh
         </h1>
-        <p class="text-emerald-100 text-xs sm:text-sm mt-1 max-w-xl">
-          Panduan latihan batin bertahap dari level Shame hingga Enlightenment, sebagai kelanjutan hasil asesmen spiritual.
+        <p class="text-emerald-100 text-sm mt-1 max-w-xl leading-relaxed">
+          Panduan latihan batin bertahap dari level Shame hingga Enlightenment.
         </p>
       </div>
       <div class="flex flex-wrap gap-2 justify-start sm:justify-end">
         <a href="asasmen/pengasuh.html"
-           class="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-white/90 text-emerald-700 text-xs sm:text-sm font-semibold shadow hover:bg-emerald-50 transition">
+           class="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-white/90 text-emerald-700 text-sm font-semibold shadow hover:bg-emerald-50 transition">
           ⬅️ Kembali ke Asasmen Pengasuh
         </a>
         <a href="index.html"
-           class="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-emerald-500/90 text-white text-xs sm:text-sm font-semibold shadow hover:bg-emerald-600 transition">
+           class="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-emerald-500/90 text-white text-sm font-semibold shadow hover:bg-emerald-600 transition">
           🏠 Menu Utama
         </a>
       </div>
@@ -47,54 +47,50 @@
 
   <!-- MAIN -->
   <main class="flex-1 w-full px-4 pb-8">
-    <section class="max-w-5xl mx-auto bg-white/90 backdrop-blur-md rounded-3xl shadow-lg p-4 sm:p-6 md:p-8 fade-in">
+    <section class="max-w-5xl mx-auto bg-white/95 backdrop-blur-md rounded-3xl shadow-lg p-5 sm:p-6 md:p-8 fade-in">
 
-      <!-- Info atas -->
       <div class="mb-6 sm:mb-8 text-center">
-        <h2 class="text-lg sm:text-xl font-semibold text-emerald-800 mb-2">
-          Riyadhah yang Direkomendasikan untuk Anda
-        </h2>
-        <p id="levelInfo" class="text-xs sm:text-sm text-slate-600">
-          Berdasarkan hasil asesmen spiritual Anda, berikut Riyadhah yang relevan untuk dilakukan.
+        <h2 class="text-lg sm:text-2xl font-bold text-emerald-800 mb-2">Daftar Riyadhah Lengkap</h2>
+        <p class="text-base sm:text-lg text-slate-700">
+          Pilih Riyadhah sesuai kebutuhan jiwa dan kondisi spiritual Anda.
         </p>
       </div>
 
-      <!-- GRID KARTU -->
-      <div id="cardsContainer" class="grid gap-4 sm:gap-5 md:gap-6 grid-cols-1 md:grid-cols-2">
-        <!-- Kartu akan di-render via JavaScript -->
+      <div id="cardsContainer" class="grid gap-4 sm:gap-5 md:gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+        <!-- Kartu Riyadhah akan dimuat lewat JavaScript -->
       </div>
     </section>
   </main>
 
-  <footer class="w-full py-4 text-center text-[11px] text-emerald-100/80">
+  <footer class="w-full py-4 text-center text-sm text-emerald-100/80">
     © 2025 Naik Level • Pesantren Fajrul Islam
   </footer>
 
   <!-- MODAL DETAIL -->
   <div id="riyadhahModal"
        class="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-start md:items-center justify-center px-4 py-10 z-50 hidden">
-    <div class="bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[80vh] overflow-y-auto relative p-5 sm:p-6 md:p-7">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[80vh] overflow-y-auto relative p-6 sm:p-7 md:p-8">
       <button id="modalCloseBtn"
               class="absolute top-3 right-3 sm:top-4 sm:right-4 text-slate-400 hover:text-slate-600 text-lg">
         ✕
       </button>
 
       <div class="mb-3">
-        <p id="modalLabel" class="text-[11px] uppercase tracking-[0.2em] text-emerald-500"></p>
-        <h2 id="modalTitle" class="text-lg sm:text-xl font-semibold text-slate-800 mt-1"></h2>
+        <p id="modalLabel" class="text-xs uppercase tracking-[0.2em] text-emerald-500"></p>
+        <h2 id="modalTitle" class="text-lg sm:text-2xl font-semibold text-slate-800 mt-1"></h2>
       </div>
 
-      <div id="modalBody" class="space-y-3 text-xs sm:text-sm text-slate-700 leading-relaxed">
+      <div id="modalBody" class="space-y-3 text-base sm:text-lg text-slate-700 leading-relaxed">
         <!-- isi riyadhah -->
       </div>
 
       <div class="mt-5 border-t pt-3 sm:pt-4 flex flex-wrap gap-2 justify-between items-center">
-        <p class="text-[11px] sm:text-xs text-slate-400">
-          Disarankan diamalkan konsisten minimal 40 hari dengan bimbingan mursyid / supervisor.
+        <p class="text-xs sm:text-sm text-slate-400">
+          Diamalkan konsisten minimal 40 hari dengan bimbingan mursyid/supervisor.
         </p>
-        <a href="asasmen/pengasuh.html"
-           class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-600 text-white text-xs font-semibold hover:bg-emerald-700 transition">
-          ⬅️ Kembali ke Hasil Asasmen
+        <a href="index.html"
+           class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-600 text-white text-sm font-semibold hover:bg-emerald-700 transition">
+          🏠 Menu Utama
         </a>
       </div>
     </div>
@@ -116,42 +112,18 @@
       "from-indigo-500 to-violet-500",
       "from-violet-500 to-fuchsia-500",
       "from-fuchsia-500 to-pink-500",
-      "from-pink-500 to-rose-500",
-      "from-slate-500 to-slate-700",
-      "from-emerald-700 to-emerald-900"
+      "from-pink-500 to-rose-500"
     ];
-
-    // Pemetaan bilingual Indonesia → Inggris
-    const levelMap = {
-      "MALU": "shame",
-      "RASA BERSALAH": "guilt",
-      "APATI": "apathy",
-      "BERDUKA": "grief",
-      "TAKUT": "fear",
-      "KEINGINAN": "desire",
-      "MARAH": "anger",
-      "BANGGA": "pride",
-      "KEBERANIAN": "courage",
-      "NETRALITAS": "neutrality",
-      "KEMAUAN": "willingness",
-      "PENERIMAAN": "acceptance",
-      "AKAL BUDI": "reason",
-      "CINTA": "love",
-      "SUKACITA": "joy",
-      "DAMAI": "peace",
-      "PENCERAHAN": "enlightenment"
-    };
 
     let riyadhahData = [];
 
     async function loadRiyadhah() {
       const container = document.getElementById("cardsContainer");
-      const levelInfo = document.getElementById("levelInfo");
       container.innerHTML = `
-        <div class="col-span-1 md:col-span-2 flex justify-center py-6">
-          <div class="flex items-center gap-2 text-sm text-slate-600">
-            <span class="animate-spin inline-block w-4 h-4 border-2 border-emerald-500 border-t-transparent rounded-full"></span>
-            <span>Memuat panduan riyadhah...</span>
+        <div class="col-span-1 md:col-span-3 flex justify-center py-8">
+          <div class="flex items-center gap-3 text-base text-slate-600">
+            <span class="animate-spin inline-block w-5 h-5 border-2 border-emerald-500 border-t-transparent rounded-full"></span>
+            <span>Memuat panduan Riyadhah...</span>
           </div>
         </div>
       `;
@@ -159,45 +131,14 @@
       try {
         const res = await fetch("riyadhah-data.json");
         riyadhahData = await res.json();
-
-        // Ambil hanya dua level dominan
-        const storedLevels = JSON.parse(localStorage.getItem("dominantLevels")) || [];
-        const topTwoLevels = storedLevels.slice(0, 2);
-
-        console.log("🎯 Dua Level Dominan:", topTwoLevels);
-
-        let filtered = [];
-
-        if (topTwoLevels.length > 0) {
-          filtered = riyadhahData.filter(item =>
-            topTwoLevels.some(lvl => {
-              const engEquivalent = levelMap[lvl.toUpperCase()] || "";
-              const label = item.levelLabel.toLowerCase();
-              return (
-                label.includes(lvl.toLowerCase()) ||
-                label.includes(engEquivalent.toLowerCase())
-              );
-            })
-          );
-
-          levelInfo.innerHTML = `
-            Berdasarkan dua level spiritual tertinggi Anda:
-            <span class="font-semibold text-emerald-600">${topTwoLevels.join(", ")}</span>.
-            Berikut Riyadhah yang relevan untuk dilakukan.
-          `;
-        } else {
-          levelInfo.textContent =
-            "Belum ditemukan hasil asesmen. Silakan selesaikan Asasmen Pengasuh terlebih dahulu.";
-        }
-
-        renderCards(filtered);
+        renderCards(riyadhahData);
       } catch (err) {
         console.error(err);
         container.innerHTML = `
-          <div class="col-span-1 md:col-span-2 bg-rose-50 border border-rose-200 text-rose-700 text-sm rounded-xl p-4">
-            Terjadi kesalahan saat memuat data riyadhah. Pastikan file
-            <code class="px-1 py-0.5 rounded bg-rose-100 text-[11px]">riyadhah-data.json</code>
-            berada di folder yang sama dengan <code class="px-1 py-0.5 rounded bg-rose-100 text-[11px]">riyadhah.html</code>.
+          <div class="col-span-1 md:col-span-3 bg-rose-50 border border-rose-200 text-rose-700 text-base rounded-xl p-5">
+            Gagal memuat data Riyadhah. Pastikan file
+            <code class="bg-rose-100 px-1 py-0.5 rounded text-sm">riyadhah-data.json</code>
+            berada di folder yang sama.
           </div>
         `;
       }
@@ -207,8 +148,8 @@
       const container = document.getElementById("cardsContainer");
       if (!Array.isArray(data) || data.length === 0) {
         container.innerHTML = `
-          <div class="col-span-1 md:col-span-2 text-center text-sm text-slate-600 py-10">
-            Tidak ada Riyadhah yang sesuai dengan level Anda.
+          <div class="col-span-1 md:col-span-3 text-center text-lg text-slate-600 py-10">
+            Belum ada data Riyadhah.
           </div>
         `;
         return;
@@ -217,31 +158,31 @@
       container.innerHTML = data.map((item, index) => {
         const gradient = gradients[index % gradients.length];
         const actionsHtml = (item.bullets || [])
-          .slice(0, 4)
+          .slice(0, 5)
           .map(b => `
-            <li class="flex items-start gap-2">
+            <li class="flex items-start gap-2 leading-relaxed">
               <span class="mt-[3px] text-emerald-500">•</span>
               <span>${b}</span>
             </li>
           `).join("");
 
         return `
-          <article class="rounded-2xl bg-gradient-to-r ${gradient} p-[1px] shadow-md">
-            <div class="bg-white/95 rounded-2xl p-4 sm:p-5 h-full flex flex-col">
-              <p class="text-[11px] uppercase tracking-[0.2em] text-emerald-500 mb-1">
+          <article class="rounded-2xl bg-gradient-to-r ${gradient} p-[1px] shadow-md hover:scale-[1.01] transition">
+            <div class="bg-white/95 rounded-2xl p-5 h-full flex flex-col">
+              <p class="text-sm uppercase tracking-[0.15em] text-emerald-500 mb-1">
                 ${item.levelLabel || "Riyadhah Naik Level"}
               </p>
-              <h3 class="text-sm sm:text-base md:text-lg font-semibold text-slate-800 mb-1.5">
+              <h3 class="text-lg sm:text-xl font-bold text-slate-800 mb-2">
                 ${item.shortTitle}
               </h3>
-              <p class="text-[11px] sm:text-xs text-slate-600 mb-3">
+              <p class="text-base text-slate-700 mb-3">
                 ${item.summary}
               </p>
-              <ul class="text-xs sm:text-[13px] text-slate-700 space-y-1.5 text-left flex-1">
+              <ul class="text-base text-slate-700 space-y-1.5 text-left flex-1 leading-relaxed">
                 ${actionsHtml}
               </ul>
               <button
-                class="mt-3 inline-flex items-center justify-center self-start px-3 py-1.5 rounded-lg bg-emerald-600 text-white text-xs sm:text-[13px] font-semibold hover:bg-emerald-700 transition"
+                class="mt-4 inline-flex items-center justify-center self-start px-4 py-2 rounded-lg bg-emerald-600 text-white text-base font-semibold hover:bg-emerald-700 transition"
                 onclick="openRiyadhahModal('${item.id}')">
                 📖 Baca Selengkapnya
               </button>
