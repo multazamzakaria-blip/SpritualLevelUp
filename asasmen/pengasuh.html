@@ -148,20 +148,126 @@
     document.getElementById("usernameDisplay").textContent = user.username;
 
     const levelMeta = [
-      { level: 1, name: "Malu" }, { level: 2, name: "Rasa Bersalah" }, { level: 3, name: "Apati" },
-      { level: 4, name: "Berduka" }, { level: 5, name: "Takut" }, { level: 6, name: "Keinginan" },
-      { level: 7, name: "Marah" }, { level: 8, name: "Bangga" }, { level: 9, name: "Keberanian" },
-      { level: 10, name: "Netralitas" }, { level: 11, name: "Kemauan" }, { level: 12, name: "Penerimaan" },
-      { level: 13, name: "Akal Budi" }, { level: 14, name: "Cinta" }, { level: 15, name: "Sukacita" },
-      { level: 16, name: "Damai" }, { level: 17, name: "Pencerahan" }
+      { level: 1, name: "Level 1 – Malu (Shame)" },
+      { level: 2, name: "Level 2 – Rasa Bersalah (Guilt)" },
+      { level: 3, name: "Level 3 – Apati (Apathy)" },
+      { level: 4, name: "Level 4 – Berduka (Grief)" },
+      { level: 5, name: "Level 5 – Takut (Fear)" },
+      { level: 6, name: "Level 6 – Keinginan (Desire)" },
+      { level: 7, name: "Level 7 – Marah (Anger)" },
+      { level: 8, name: "Level 8 – Bangga (Pride)" },
+      { level: 9, name: "Level 9 – Keberanian (Courage)" },
+      { level: 10, name: "Level 10 – Netralitas (Neutrality)" },
+      { level: 11, name: "Level 11 – Kemauan (Willingness)" },
+      { level: 12, name: "Level 12 – Penerimaan (Acceptance)" },
+      { level: 13, name: "Level 13 – Akal Budi (Reason)" },
+      { level: 14, name: "Level 14 – Cinta (Love)" },
+      { level: 15, name: "Level 15 – Sukacita (Joy)" },
+      { level: 16, name: "Level 16 – Damai (Peace)" },
+      { level: 17, name: "Level 17 – Pencerahan (Enlightenment)" }
     ];
 
     const questions = [
+      // LEVEL 1 – MALU (Shame)
       { id: 1, level: 1, text: "Dalam 1 bulan ini, saya merasa tidak layak membimbing orang lain karena merasa diri saya penuh kekurangan." },
       { id: 2, level: 1, text: "Dalam 1 bulan ini, saya memilih menarik diri dari peran kepengasuhan karena takut dinilai atau disalahpahami." },
       { id: 3, level: 1, text: "Dalam 1 bulan ini, saya merasa Allah mungkin sudah tidak ridha atas pengabdian saya di pesantren." },
       { id: 4, level: 1, text: "Dalam 1 bulan ini, saya merasa kehadiran saya justru membebani orang lain, bukan membawa manfaat." },
-      // ... lanjutkan sampai id 68 sama persis seperti versi sebelumnya ...
+
+      // LEVEL 2 – RASA BERSALAH (Guilt)
+      { id: 5, level: 2, text: "Dalam 1 bulan ini, saya sering teringat kesalahan masa lalu dan merasa belum pantas diampuni." },
+      { id: 6, level: 2, text: "Dalam 1 bulan ini, saya menolak ketenangan batin karena merasa belum menebus dosa atau kelalaian saya sebagai pengasuh." },
+      { id: 7, level: 2, text: "Dalam 1 bulan ini, saya berbuat baik dengan keras terhadap diri sendiri, bukan karena cinta, tapi karena ingin menebus kesalahan." },
+      { id: 8, level: 2, text: "Dalam 1 bulan ini, saya sulit memaafkan diri sendiri meski saya yakin Allah Maha Pengampun." },
+
+      // LEVEL 3 – APATI (Apathy)
+      { id: 9, level: 3, text: "Dalam 1 bulan ini, saya menjalankan peran pengasuhan secara mekanis, tanpa semangat dan tanpa makna." },
+      { id: 10, level: 3, text: "Dalam 1 bulan ini, saya merasa perubahan di pesantren percuma, seolah tidak ada yang bisa diperbaiki." },
+      { id: 11, level: 3, text: "Dalam 1 bulan ini, saya kehilangan arah dan makna dari pengabdian saya." },
+      { id: 12, level: 3, text: "Dalam 1 bulan ini, saya merasa mati rasa terhadap santri dan rekan kerja, seolah semua tidak lagi berarti." },
+
+      // LEVEL 4 – BERDUKA (Grief)
+      { id: 13, level: 4, text: "Dalam 1 bulan ini, saya sering mengenang masa lalu saat suasana pesantren terasa lebih baik." },
+      { id: 14, level: 4, text: "Dalam 1 bulan ini, saya merasa kesedihan atas perubahan di pesantren sulit saya lepaskan." },
+      { id: 15, level: 4, text: "Dalam 1 bulan ini, saya merasa kehilangan semangat lama dan sulit menemukan kembali gairah membina santri." },
+      { id: 16, level: 4, text: "Dalam 1 bulan ini, saya sering menyesali keputusan atau sikap saya di masa lalu." },
+
+      // LEVEL 5 – TAKUT (Fear)
+      { id: 17, level: 5, text: "Dalam 1 bulan ini, saya menjalankan peran dengan cemas — takut salah, takut dikritik, atau takut mengecewakan pimpinan." },
+      { id: 18, level: 5, text: "Dalam 1 bulan ini, saya menghindari menegur atau mengambil keputusan karena takut menimbulkan konflik." },
+      { id: 19, level: 5, text: "Dalam 1 bulan ini, saya banyak memikirkan hal-hal buruk yang mungkin terjadi pada diri atau pesantren." },
+      { id: 20, level: 5, text: "Dalam 1 bulan ini, saya menjaga jarak dengan santri atau guru karena takut terluka secara emosional." },
+
+      // LEVEL 6 – KEINGINAN (Desire)
+      { id: 21, level: 6, text: "Dalam 1 bulan ini, saya merasa gelisah bila program atau gagasan saya tidak dihargai." },
+      { id: 22, level: 6, text: "Dalam 1 bulan ini, saya membandingkan diri dengan pengasuh lain dan merasa iri dengan pencapaian mereka." },
+      { id: 23, level: 6, text: "Dalam 1 bulan ini, saya merasa terus mengejar sesuatu tapi tidak pernah benar-benar puas." },
+      { id: 24, level: 6, text: "Dalam 1 bulan ini, saya merasa semangat saya muncul hanya bila ada pujian, penghargaan, atau perhatian dari orang lain." },
+
+      // LEVEL 7 – MARAH (Anger)
+      { id: 25, level: 7, text: "Dalam 1 bulan ini, saya mudah tersinggung terhadap ucapan, perilaku, atau keputusan orang lain di pesantren." },
+      { id: 26, level: 7, text: "Dalam 1 bulan ini, suasana di sekitar saya sering menjadi tegang karena sikap saya yang keras atau reaktif." },
+      { id: 27, level: 7, text: "Dalam 1 bulan ini, saya menyimpan kekecewaan pada orang yang tidak sejalan dengan saya." },
+      { id: 28, level: 7, text: "Dalam 1 bulan ini, saya sering menyalahkan keadaan atau orang lain atas hasil yang tidak sesuai harapan." },
+
+      // LEVEL 8 – BANGGA (Pride)
+      { id: 29, level: 8, text: "Dalam 1 bulan ini, saya sulit menerima masukan dari pengurus atau rekan sejawat yang lebih muda." },
+      { id: 30, level: 8, text: "Dalam 1 bulan ini, saya berusaha terlihat kuat dan sempurna agar tidak kehilangan wibawa." },
+      { id: 31, level: 8, text: "Dalam 1 bulan ini, saya menilai orang lain dari penampilan dan hasil lahiriah lebih dari niat dan perjuangannya." },
+      { id: 32, level: 8, text: "Dalam 1 bulan ini, saya cenderung mencari pembenaran diri saat salah, agar tetap terlihat benar di hadapan orang lain." },
+
+      // LEVEL 9 – KEBERANIAN (Courage)
+      { id: 33, level: 9, text: "Dalam 1 bulan ini, saya berani mengakui kesalahan di hadapan santri atau rekan kerja tanpa takut kehilangan wibawa." },
+      { id: 34, level: 9, text: "Dalam 1 bulan ini, saya memandang setiap masalah di pesantren sebagai tantangan yang bisa memperkuat tim." },
+      { id: 35, level: 9, text: "Dalam 1 bulan ini, saya mengambil langkah inisiatif untuk memperbaiki keadaan tanpa menunggu perintah." },
+      { id: 36, level: 9, text: "Dalam 1 bulan ini, saya merasa yakin bahwa Allah akan menolong selama saya jujur dan berusaha." },
+
+      // LEVEL 10 – NETRALITAS (Neutrality)
+      { id: 37, level: 10, text: "Dalam 1 bulan ini, saya mampu menerima perubahan kebijakan atau dinamika pesantren dengan tenang." },
+      { id: 38, level: 10, text: "Dalam 1 bulan ini, saya tidak terburu-buru menghakimi, tetapi berusaha memahami situasi dari berbagai sisi." },
+      { id: 39, level: 10, text: "Dalam 1 bulan ini, saya bisa menyeimbangkan antara keseriusan bekerja dan waktu untuk istirahat." },
+      { id: 40, level: 10, text: "Dalam 1 bulan ini, saya tidak berlebihan menyesali hasil yang kurang baik, karena percaya Allah menilai niat, bukan sekadar hasil." },
+
+      // LEVEL 11 – KEMAUAN (Willingness)
+      { id: 41, level: 11, text: "Dalam 1 bulan ini, saya bekerja dengan antusias tanpa menunggu perintah, karena ingin memberi manfaat." },
+      { id: 42, level: 11, text: "Dalam 1 bulan ini, saya terus belajar hal-hal baru agar bisa menjadi pengasuh yang lebih bijak dan relevan." },
+      { id: 43, level: 11, text: "Dalam 1 bulan ini, saya menghadapi masalah pengasuhan dengan sikap belajar, bukan keluhan." },
+      { id: 44, level: 11, text: "Dalam 1 bulan ini, saya berusaha konsisten menjaga niat tulus dalam setiap pelayanan di pesantren." },
+
+      // LEVEL 12 – PENERIMAAN (Acceptance)
+      { id: 45, level: 12, text: "Dalam 1 bulan ini, saya mudah memaafkan guru, santri, atau staf yang berbuat salah." },
+      { id: 46, level: 12, text: "Dalam 1 bulan ini, saya menerima diri saya apa adanya — dengan kelebihan dan keterbatasan." },
+      { id: 47, level: 12, text: "Dalam 1 bulan ini, saya melihat hikmah dari setiap ujian, bahkan yang menyakitkan." },
+      { id: 48, level: 12, text: "Dalam 1 bulan ini, saya tetap tenang di tengah konflik atau perbedaan pandangan." },
+
+      // LEVEL 13 – AKAL BUDI (Reason)
+      { id: 49, level: 13, text: "Dalam 1 bulan ini, saya mengambil keputusan dengan berpikir jernih, berdasarkan data dan hikmah." },
+      { id: 50, level: 13, text: "Dalam 1 bulan ini, saya mencintai ilmu dan terus belajar dari berbagai sumber untuk memperluas wawasan pengasuhan." },
+      { id: 51, level: 13, text: "Dalam 1 bulan ini, saya sering menemukan tanda kebesaran Allah dalam sistem kehidupan pesantren yang tertata." },
+      { id: 52, level: 13, text: "Dalam 1 bulan ini, saya menyampaikan pendapat dengan tenang, rasional, dan menghormati perbedaan." },
+
+      // LEVEL 14 – CINTA (Love)
+      { id: 53, level: 14, text: "Dalam 1 bulan ini, saya memperlakukan santri dan guru dengan kasih dan kelembutan hati." },
+      { id: 54, level: 14, text: "Dalam 1 bulan ini, saya mudah memaafkan tanpa menuntut balasan atau permintaan maaf." },
+      { id: 55, level: 14, text: "Dalam 1 bulan ini, saya membantu dan melayani dengan niat tulus, bukan demi pujian." },
+      { id: 56, level: 14, text: "Dalam 1 bulan ini, saya melihat keindahan dan kebaikan Allah dalam setiap aspek kehidupan pesantren." },
+
+      // LEVEL 15 – SUKACITA (Joy)
+      { id: 57, level: 15, text: "Dalam 1 bulan ini, saya merasa bahagia dan ringan dalam mengasuh, tanpa harus menunggu hasil besar." },
+      { id: 58, level: 15, text: "Dalam 1 bulan ini, saya menerima ujian dan kritik dengan rasa syukur karena itu bagian dari tarbiyah Allah." },
+      { id: 59, level: 15, text: "Dalam 1 bulan ini, saya membawa suasana cerah dan menenangkan bagi guru dan santri." },
+      { id: 60, level: 15, text: "Dalam 1 bulan ini, saya menikmati momen sederhana di pesantren — kebersamaan, adzan, dan tawa santri — dengan rasa syukur." },
+
+      // LEVEL 16 – DAMAI (Peace)
+      { id: 61, level: 16, text: "Dalam 1 bulan ini, saya tetap tenang menghadapi berbagai persoalan pesantren." },
+      { id: 62, level: 16, text: "Dalam 1 bulan ini, saya berhenti mengeluh dan lebih banyak berserah diri kepada Allah." },
+      { id: 63, level: 16, text: "Dalam 1 bulan ini, kehadiran saya membuat orang lain merasa tenteram dan percaya diri." },
+      { id: 64, level: 16, text: "Dalam 1 bulan ini, saya merasakan ibadah bukan sekadar tugas, tapi perjumpaan yang saya rindukan." },
+
+      // LEVEL 17 – PENCERAHAN (Enlightenment)
+      { id: 65, level: 17, text: "Dalam 1 bulan ini, saya merasa semua yang terjadi di pesantren adalah bagian dari kehendak Allah yang sempurna." },
+      { id: 66, level: 17, text: "Dalam 1 bulan ini, saya melihat kehadiran Allah dalam setiap jiwa yang saya temui." },
+      { id: 67, level: 17, text: "Dalam 1 bulan ini, saya hidup dengan tenang tanpa dorongan ego — cukup menjadi saluran kebaikan-Nya." },
       { id: 68, level: 17, text: "Dalam 1 bulan ini, saya merasa kehadiran saya membawa kedamaian tanpa perlu banyak bicara." }
     ];
 
