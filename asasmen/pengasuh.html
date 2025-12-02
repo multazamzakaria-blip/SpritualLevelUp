@@ -3,166 +3,141 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Asasmen Spiritual Pengasuh</title>
+  <title>Asasmen Spiritual Pengasuh - Naik Level</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gradient-to-b from-emerald-700 to-teal-500 min-h-screen font-sans">
+<body class="bg-gradient-to-b from-emerald-700 to-teal-500 min-h-screen text-gray-800 font-sans">
 
   <!-- HEADER -->
-  <header class="bg-white/20 backdrop-blur-md shadow-lg text-center py-4 text-white">
-    <h1 class="text-2xl font-bold tracking-wide">🕊️ Asasmen Spiritual Pengasuh</h1>
-    <p class="text-sm opacity-90">Panduan Naik Level Kesadaran Spiritual</p>
+  <header class="bg-white/20 backdrop-blur-md text-center text-white py-4 shadow">
+    <h1 class="text-2xl font-bold">🕊️ Asasmen Spiritual Pengasuh</h1>
+    <p class="text-sm opacity-90">Refleksi Naik Level Kesadaran Spiritual</p>
   </header>
 
-  <!-- FORM -->
-  <main class="max-w-2xl mx-auto mt-8 bg-white p-6 rounded-2xl shadow-lg">
-    <h2 class="text-xl font-bold mb-4 text-center text-emerald-700">Isi Asasmen Pribadi</h2>
+  <!-- MAIN CONTAINER -->
+  <main class="max-w-3xl mx-auto mt-8 bg-white p-8 rounded-2xl shadow-lg">
+    <div id="question-container" class="text-center">
+      <h2 id="level-title" class="text-emerald-700 font-bold text-lg mb-2"></h2>
+      <p id="question-text" class="text-lg font-medium mb-6"></p>
 
-    <form id="formAsasmen" class="space-y-4">
-      <div>
-        <label class="block font-semibold text-gray-700 mb-1">Nama Pengasuh:</label>
-        <input type="text" id="nama" required
-          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none">
+      <div class="grid grid-cols-2 gap-4">
+        <button class="answer-btn bg-gray-200 hover:bg-emerald-500 hover:text-white rounded-xl py-3 font-semibold" data-score="10">Tidak Pernah</button>
+        <button class="answer-btn bg-gray-200 hover:bg-emerald-500 hover:text-white rounded-xl py-3 font-semibold" data-score="20">Kadang</button>
+        <button class="answer-btn bg-gray-200 hover:bg-emerald-500 hover:text-white rounded-xl py-3 font-semibold" data-score="40">Sering</button>
+        <button class="answer-btn bg-gray-200 hover:bg-emerald-500 hover:text-white rounded-xl py-3 font-semibold" data-score="80">Selalu</button>
       </div>
 
-      <div>
-        <label class="block font-semibold text-gray-700 mb-1">Level Spiritualitas (1-10):</label>
-        <input type="number" id="level" min="1" max="10" required
-          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none">
-      </div>
+      <div class="mt-6 text-sm text-gray-500" id="progress-text"></div>
+    </div>
 
-      <div>
-        <label class="block font-semibold text-gray-700 mb-1">Catatan Refleksi:</label>
-        <textarea id="refleksi" rows="3"
-          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none"
-          placeholder="Tuliskan refleksi spiritual Anda..."></textarea>
-      </div>
-
-      <div class="flex justify-between mt-6">
-        <button type="submit"
-          class="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-5 py-2 rounded-lg transition">💾 Simpan</button>
-
-        <button type="button" id="lihatHasil"
-          class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-5 py-2 rounded-lg transition">📊 Lihat Hasil</button>
-      </div>
-    </form>
+    <!-- HASIL -->
+    <div id="result-container" class="hidden text-center">
+      <h2 class="text-2xl font-bold text-blue-700 mb-4">📊 Hasil Asasmen</h2>
+      <p class="text-gray-700 mb-6">Tiga Level Spiritual yang paling dominan pada diri Anda:</p>
+      <div id="top-levels" class="space-y-2 text-lg font-semibold"></div>
+      <button id="restart-btn" class="mt-8 bg-emerald-600 text-white px-6 py-2 rounded-lg hover:bg-emerald-700">🔁 Ulangi Asasmen</button>
+    </div>
   </main>
 
-  <!-- HASIL -->
-  <section id="hasilContainer" class="max-w-2xl mx-auto mt-8 hidden bg-white/90 p-6 rounded-2xl shadow-lg mb-8">
-    <h2 class="text-xl font-bold mb-4 text-center text-blue-700">📘 Hasil Asasmen Pengasuh</h2>
-    <div id="hasilTabel" class="overflow-x-auto"></div>
-  </section>
+  <script>
+    // ==========================
+    // DATA ASESMEN
+    // ==========================
+    const questions = [
+      // Format: {level: "LEVEL 1 – MALU (Shame)", text: "...."},
+      {level: "LEVEL 1 – MALU (Shame)", text: "Saya merasa tidak layak membimbing orang lain karena merasa diri penuh kekurangan."},
+      {level: "LEVEL 1 – MALU (Shame)", text: "Saya memilih menarik diri dari peran kepengasuhan karena takut dinilai atau disalahpahami."},
+      {level: "LEVEL 1 – MALU (Shame)", text: "Saya merasa Allah mungkin sudah tidak ridha atas pengabdian saya di pesantren."},
+      {level: "LEVEL 1 – MALU (Shame)", text: "Saya merasa kehadiran saya justru membebani orang lain, bukan membawa manfaat."},
+      {level: "LEVEL 2 – RASA BERSALAH (Guilt)", text: "Saya sering teringat kesalahan masa lalu dan merasa belum pantas diampuni."},
+      {level: "LEVEL 2 – RASA BERSALAH (Guilt)", text: "Saya menolak ketenangan batin karena merasa belum menebus dosa atau kelalaian saya sebagai pengasuh."},
+      {level: "LEVEL 2 – RASA BERSALAH (Guilt)", text: "Saya berbuat baik dengan keras terhadap diri sendiri, bukan karena cinta, tapi karena ingin menebus kesalahan."},
+      {level: "LEVEL 2 – RASA BERSALAH (Guilt)", text: "Saya sulit memaafkan diri sendiri meski saya yakin Allah Maha Pengampun."},
+      {level: "LEVEL 3 – APATI (Apathy)", text: "Saya menjalankan peran pengasuhan secara mekanis, tanpa semangat dan tanpa makna."},
+      {level: "LEVEL 3 – APATI (Apathy)", text: "Saya merasa perubahan di pesantren percuma, seolah tidak ada yang bisa diperbaiki."},
+      // dst... (bisa Abah lanjutkan seluruh 68)
+    ];
 
-  <!-- FIREBASE SDK -->
-  <script type="module">
-    // Import modul Firebase versi 9+
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
-    import { getFirestore, collection, addDoc, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+    // ==========================
+    // VARIABEL
+    // ==========================
+    let currentQuestion = 0;
+    const scores = {}; // {levelName: totalScore}
 
-    // Konfigurasi Firebase Abah
-    const firebaseConfig = {
-      apiKey: "AIzaSyDuxvufRwadUsGh8-Kakl9KTG5ZGVcIoYQ",
-      authDomain: "naik-level-81580.firebaseapp.com",
-      projectId: "naik-level-81580",
-      storageBucket: "naik-level-81580.firebasestorage.app",
-      messagingSenderId: "319872430378",
-      appId: "1:319872430378:web:64db1b51b159d27d622e53",
-      measurementId: "G-RG7JS79MZ1"
-    };
+    const questionText = document.getElementById("question-text");
+    const levelTitle = document.getElementById("level-title");
+    const progressText = document.getElementById("progress-text");
+    const questionContainer = document.getElementById("question-container");
+    const resultContainer = document.getElementById("result-container");
+    const topLevels = document.getElementById("top-levels");
+    const restartBtn = document.getElementById("restart-btn");
 
-    // Inisialisasi Firebase
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
+    // ==========================
+    // TAMPILKAN PERTANYAAN
+    // ==========================
+    function showQuestion() {
+      const q = questions[currentQuestion];
+      levelTitle.textContent = q.level;
+      questionText.textContent = q.text;
+      progressText.textContent = `Pertanyaan ${currentQuestion + 1} dari ${questions.length}`;
+    }
 
-    // Ambil elemen
-    const form = document.getElementById("formAsasmen");
-    const hasilContainer = document.getElementById("hasilContainer");
-    const hasilTabel = document.getElementById("hasilTabel");
-    const lihatHasilBtn = document.getElementById("lihatHasil");
+    // ==========================
+    // PROSES JAWABAN
+    // ==========================
+    document.querySelectorAll(".answer-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const q = questions[currentQuestion];
+        const level = q.level;
+        const value = parseInt(btn.dataset.score);
 
-    // Fungsi: Simpan data ke Firestore
-    form.addEventListener("submit", async (e) => {
-      e.preventDefault();
+        scores[level] = (scores[level] || 0) + value;
 
-      const nama = document.getElementById("nama").value.trim();
-      const level = parseInt(document.getElementById("level").value);
-      const refleksi = document.getElementById("refleksi").value.trim();
-      const tanggal = new Date().toLocaleString("id-ID");
-
-      if (!nama || !level) {
-        alert("Nama dan level wajib diisi!");
-        return;
-      }
-
-      try {
-        await addDoc(collection(db, "asasmen_pengasuh"), {
-          nama,
-          level,
-          refleksi,
-          tanggal
-        });
-        form.reset();
-        alert("✅ Data berhasil disimpan ke Firebase!");
-      } catch (error) {
-        console.error("❌ Gagal menyimpan data:", error);
-        alert("Terjadi kesalahan saat menyimpan data.");
-      }
-    });
-
-    // Fungsi: Menampilkan data dari Firestore
-    lihatHasilBtn.addEventListener("click", async () => {
-      hasilContainer.classList.add("hidden");
-      hasilTabel.innerHTML = `<p class='text-center text-gray-500'>⏳ Memuat data...</p>`;
-
-      try {
-        const q = query(collection(db, "asasmen_pengasuh"), orderBy("tanggal", "desc"));
-        const querySnapshot = await getDocs(q);
-
-        if (querySnapshot.empty) {
-          hasilTabel.innerHTML = `<p class='text-center text-gray-500'>Belum ada data.</p>`;
-          return;
+        currentQuestion++;
+        if (currentQuestion < questions.length) {
+          showQuestion();
+        } else {
+          showResult();
         }
-
-        let tabelHTML = `
-          <table class="w-full border border-gray-300 text-sm">
-            <thead class="bg-emerald-600 text-white">
-              <tr>
-                <th class="py-2 px-3 border">No</th>
-                <th class="py-2 px-3 border">Nama</th>
-                <th class="py-2 px-3 border">Level</th>
-                <th class="py-2 px-3 border">Refleksi</th>
-                <th class="py-2 px-3 border">Tanggal</th>
-              </tr>
-            </thead>
-            <tbody>
-        `;
-
-        let i = 1;
-        querySnapshot.forEach((doc) => {
-          const data = doc.data();
-          tabelHTML += `
-            <tr class="odd:bg-gray-50 even:bg-gray-100 hover:bg-emerald-50 transition">
-              <td class="border px-3 py-2 text-center">${i++}</td>
-              <td class="border px-3 py-2">${data.nama}</td>
-              <td class="border px-3 py-2 text-center font-semibold">${data.level}</td>
-              <td class="border px-3 py-2">${data.refleksi || "-"}</td>
-              <td class="border px-3 py-2 text-center">${data.tanggal}</td>
-            </tr>
-          `;
-        });
-
-        tabelHTML += "</tbody></table>";
-        hasilTabel.innerHTML = tabelHTML;
-        hasilContainer.classList.remove("hidden");
-        window.scrollTo({ top: hasilContainer.offsetTop, behavior: "smooth" });
-
-      } catch (error) {
-        console.error("❌ Gagal memuat data:", error);
-        hasilTabel.innerHTML = `<p class='text-center text-red-500'>Gagal memuat data dari Firebase.</p>`;
-      }
+      });
     });
-  </script>
 
+    // ==========================
+    // HASIL
+    // ==========================
+    function showResult() {
+      questionContainer.classList.add("hidden");
+      resultContainer.classList.remove("hidden");
+
+      // Konversi skor ke array
+      const levelArray = Object.entries(scores).map(([level, score]) => ({level, score}));
+
+      // Urutkan
+      levelArray.sort((a, b) => b.score - a.score);
+
+      // Ambil 3 teratas
+      const top3 = levelArray.slice(0, 3);
+
+      topLevels.innerHTML = top3.map(
+        (l, i) => `<div class="bg-blue-50 border-l-4 border-blue-500 p-3 rounded text-left">
+            <span class="font-bold text-blue-700">#${i + 1}</span> ${l.level} — <span class="text-gray-600">${l.score} poin</span>
+          </div>`
+      ).join("");
+    }
+
+    // ==========================
+    // ULANG ASESMEN
+    // ==========================
+    restartBtn.addEventListener("click", () => {
+      currentQuestion = 0;
+      for (const k in scores) delete scores[k];
+      resultContainer.classList.add("hidden");
+      questionContainer.classList.remove("hidden");
+      showQuestion();
+    });
+
+    // MULAI
+    showQuestion();
+  </script>
 </body>
 </html>
