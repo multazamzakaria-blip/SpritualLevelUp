@@ -121,6 +121,27 @@
       "from-emerald-700 to-emerald-900"
     ];
 
+    // 🧭 Pemetaan bilingual Indonesia → Inggris
+    const levelMap = {
+      "MALU": "shame",
+      "RASA BERSALAH": "guilt",
+      "APATI": "apathy",
+      "BERDUKA": "grief",
+      "TAKUT": "fear",
+      "KEINGINAN": "desire",
+      "MARAH": "anger",
+      "BANGGA": "pride",
+      "KEBERANIAN": "courage",
+      "NETRALITAS": "neutrality",
+      "KEMAUAN": "willingness",
+      "PENERIMAAN": "acceptance",
+      "AKAL BUDI": "reason",
+      "CINTA": "love",
+      "SUKACITA": "joy",
+      "DAMAI": "peace",
+      "PENCERAHAN": "enlightenment"
+    };
+
     let riyadhahData = [];
 
     async function loadRiyadhah() {
@@ -139,7 +160,6 @@
         const res = await fetch("riyadhah-data.json");
         riyadhahData = await res.json();
 
-        // Ambil level dominan dari localStorage
         const storedLevels = JSON.parse(localStorage.getItem("dominantLevels")) || [];
         console.log("🎯 Level Dominan:", storedLevels);
 
@@ -147,10 +167,16 @@
 
         if (storedLevels.length > 0) {
           filtered = riyadhahData.filter(item =>
-            storedLevels.some(lvl =>
-              item.levelLabel.toLowerCase().includes(lvl.toLowerCase())
-            )
+            storedLevels.some(lvl => {
+              const engEquivalent = levelMap[lvl.toUpperCase()] || "";
+              const label = item.levelLabel.toLowerCase();
+              return (
+                label.includes(lvl.toLowerCase()) ||
+                label.includes(engEquivalent.toLowerCase())
+              );
+            })
           );
+
           levelInfo.innerHTML = `
             Berdasarkan hasil asesmen spiritual Anda:
             <span class="font-semibold text-emerald-600">${storedLevels.join(", ")}</span>.
@@ -251,13 +277,10 @@
       document.body.classList.remove("overflow-hidden");
     }
 
-    // Expose to window for inline onclick
     window.openRiyadhahModal = openRiyadhahModal;
 
-    // Event listeners modal
     document.addEventListener("DOMContentLoaded", () => {
       loadRiyadhah();
-
       const modal = document.getElementById("riyadhahModal");
       const closeBtn = document.getElementById("modalCloseBtn");
 
@@ -265,7 +288,6 @@
       modal.addEventListener("click", (e) => {
         if (e.target === modal) closeRiyadhahModal();
       });
-
       document.addEventListener("keydown", (e) => {
         if (e.key === "Escape" && !modal.classList.contains("hidden")) closeRiyadhahModal();
       });
