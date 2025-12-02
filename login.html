@@ -4,50 +4,76 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Login - Naik Level</title>
-  <link rel="stylesheet" href="assets/style.css" />
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
+<body class="min-h-screen flex items-center justify-center bg-gradient-to-br from-emerald-100 to-teal-200 font-sans text-gray-700">
 
-<body>
-  <div class="card fade-in" style="text-align:center;">
-    <img src="assets/logoslu.png" alt="Logo Pesantren" class="logo" />
-    <h2 style="color:#065f46; margin-bottom:0;">🌿 Naik Level</h2>
-    <p style="margin-top:0; color:#0f766e;">Masuk untuk memulai perjalanan spiritualmu</p>
+  <!-- Login Box -->
+  <div class="bg-white/90 backdrop-blur-md shadow-xl rounded-2xl p-8 w-11/12 sm:w-96 text-center">
+    
+    <!-- Logo -->
+    <div class="mb-6">
+      <img src="assets/logoslu.png" alt="Logo Pesantren" class="mx-auto h-16 w-16 mb-3">
+      <h1 class="text-2xl font-bold text-teal-700">🌿 Naik Level</h1>
+      <p class="text-sm text-gray-500">Masuk untuk memulai perjalanan spiritualmu</p>
+    </div>
 
-    <form id="loginForm" style="text-align:left; margin-top:1.5rem;">
-      <label for="username">Nama Pengguna</label>
-      <input type="text" id="username" placeholder="Masukkan nama pengguna" required />
+    <!-- Form -->
+    <form id="loginForm" class="space-y-4">
+      <div class="text-left">
+        <label class="block text-sm font-semibold text-gray-600 mb-1">Nama Pengguna</label>
+        <input type="text" id="username" placeholder="Masukkan nama pengguna"
+               class="w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-teal-400" required>
+      </div>
 
-      <label for="password">Kata Sandi</label>
-      <input type="password" id="password" placeholder="Masukkan kata sandi" required />
+      <div class="text-left">
+        <label class="block text-sm font-semibold text-gray-600 mb-1">Kata Sandi</label>
+        <input type="password" id="password" placeholder="Masukkan kata sandi"
+               class="w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-teal-400" required>
+      </div>
 
-      <label for="role">Masuk sebagai</label>
-      <select id="role">
-        <option value="salik">🧘‍♂️ Salik (Pengguna Umum)</option>
-        <option value="supervisor">👳‍♂️ Supervisor / Mursyid</option>
-      </select>
+      <div class="text-left">
+        <label class="block text-sm font-semibold text-gray-600 mb-1">Masuk sebagai</label>
+        <select id="role"
+                class="w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-teal-400">
+          <option value="salik">🧎‍♂️ Salik (Pengguna Umum)</option>
+          <option value="supervisor">🌿 Supervisor / Mursyid</option>
+        </select>
+      </div>
 
-      <button type="submit" class="btn" style="width:100%;">Masuk</button>
+      <button type="submit"
+              class="w-full bg-teal-600 hover:bg-teal-700 text-white font-semibold py-2 rounded-lg transition duration-200">
+        Masuk
+      </button>
     </form>
 
-    <footer>
-      © 2025 Naik Level • Pesantren Fajrul Islam
-    </footer>
+    <!-- Footer -->
+    <p class="text-xs text-gray-400 mt-6">© 2025 Naik Level · Pesantren Fajrul Islam</p>
   </div>
 
-  <script type="module">
-    import { loginUser } from "./assets/script.js";
-
-    const form = document.getElementById("loginForm");
-    form.addEventListener("submit", (e) => {
+  <script>
+    document.getElementById('loginForm').addEventListener('submit', function(e) {
       e.preventDefault();
-      const username = document.getElementById("username").value.trim();
-      const password = document.getElementById("password").value.trim();
-      const role = document.getElementById("role").value;
 
-      if (username && password) {
-        loginUser(username, role);
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value.trim();
+      const role = document.getElementById('role').value;
+
+      // === Contoh Login Manual (bisa diganti Firebase Auth nanti) ===
+      if (role === "supervisor") {
+        if (username === "supervisor" && password === "cahaya123") {
+          window.location.href = "supervisor/dashboard.html";
+        } else {
+          alert("Username atau password supervisor salah.");
+        }
       } else {
-        alert("Harap isi semua kolom terlebih dahulu.");
+        if (username && password) {
+          // Simpan user sementara agar bisa diakses di halaman berikut
+          localStorage.setItem("naikLevelUser", JSON.stringify({ username, role }));
+          window.location.href = "index.html";
+        } else {
+          alert("Masukkan nama pengguna dan kata sandi dengan benar.");
+        }
       }
     });
   </script>
