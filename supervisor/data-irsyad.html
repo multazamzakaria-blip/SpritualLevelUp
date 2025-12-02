@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Irsyad Supervisor - Naik Level</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="min-h-screen bg-gradient-to-b from-emerald-100 to-teal-200 font-sans text-slate-700 flex flex-col">
+
+  <!-- HEADER -->
+  <header class="bg-emerald-700 text-white py-4 shadow-md">
+    <div class="max-w-4xl mx-auto px-4 flex justify-between items-center">
+      <div>
+        <h1 class="text-lg sm:text-xl font-bold">🕊️ Kirim Irsyad Spiritual</h1>
+        <p class="text-sm opacity-90">Supervisor dapat mengirim pesan bimbingan ke salik tertentu atau ke semua</p>
+      </div>
+      <a href="index.html" class="bg-white text-emerald-700 px-3 py-1.5 rounded-lg text-sm font-semibold shadow hover:bg-emerald-50">🏠 Dashboard</a>
+    </div>
+  </header>
+
+  <!-- MAIN CONTENT -->
+  <main class="flex-1 w-full max-w-3xl mx-auto px-4 py-6">
+
+    <!-- FORM -->
+    <form id="irsyadForm" class="bg-white rounded-2xl shadow-lg p-6 space-y-5">
+      <div>
+        <label class="block text-sm font-semibold text-emerald-700 mb-1">Tujuan Irsyad</label>
+        <select id="targetType" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-400">
+          <option value="personal">Kirim ke Salik Tertentu</option>
+          <option value="all">Kirim ke Semua Salik</option>
+        </select>
+      </div>
+
+      <div id="personalTargetBox">
+        <label class="block text-sm font-semibold text-emerald-700 mb-1">Pilih Nama Salik</label>
+        <select id="targetUser" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-400">
+          <option value="">-- Pilih Salik --</option>
+        </select>
+      </div>
+
+      <div>
+        <label class="block text-sm font-semibold text-emerald-700 mb-1">Judul Irsyad</label>
+        <input id="judul" type="text" placeholder="Contoh: Keikhlasan dalam Mengabdi" required
+          class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-400">
+      </div>
+
+      <div>
+        <label class="block text-sm font-semibold text-emerald-700 mb-1">Isi Pesan Irsyad</label>
+        <textarea id="pesan" rows="5" placeholder="Tuliskan nasihat, refleksi, atau motivasi spiritual di sini..." required
+          class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-400"></textarea>
+      </div>
+
+      <div class="flex justify-end">
+        <button type="submit" class="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2 rounded-lg font-semibold shadow">
+          📩 Kirim Irsyad
+        </button>
+      </div>
+    </form>
+
+    <!-- NOTIF -->
+    <div id="notif" class="hidden mt-4 text-center text-sm font-semibold text-emerald-700 bg-emerald-100 border border-emerald-300 rounded-lg p-3"></div>
+  </main>
+
+  <footer class="w-full text-center py-3 text-xs text-emerald-900">
+    © 2025 Naik Level • Pesantren Fajrul Islam
+  </footer>
+
+  <!-- FIREBASE SCRIPT -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
+    import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
+
+    // Konfigurasi Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyDuxvufRwadUsGh8-Kakl9KTG5ZGVcIoYQ",
+      authDomain: "naik-level-81580.firebaseapp.com",
+      projectId: "naik-level-81580",
+      storageBucket: "naik-level-81580.firebasestorage.app",
+      messagingSenderId: "319872430378",
+      appId: "1:319872430378:web:64db1b51b159d27d622e53",
+      measurementId: "G-RG7JS79MZ1"
+    };
+
+    // Inisialisasi Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // Elemen DOM
+    const targetType = document.getElementById("targetType");
+    const targetUser = document.getElementById("targetUser");
+    const personalTargetBox = document.getElementById("personalTargetBox");
+    const notif = document.getElementById("notif");
+
+    // Ganti tampilan jika kirim ke semua
+    targetType.addEventListener("change", () => {
+      personalTargetBox.style.display = targetType.value === "personal" ? "block" : "none";
+    });
+
+    // Ambil daftar user (koleksi "users")
+    async function loadUsers() {
+      const snapshot = await getDocs(collection(db, "users"));
+      snapshot.forEach(doc => {
+        const data = doc.data();
+        const opt = document.createElement("option");
+        opt.value = doc.id;
+        opt.textContent = data.nama || data.username || "(tanpa nama)";
+        targetUser.appendChild(opt);
+      });
+    }
+
+    loadUsers();
+
+    // Kirim Irsyad
+    document.getElementById("irsyadForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const jenis = targetType.value;
+      const nama = targetUser.options[targetUser.selectedIndex]?.text || "Semua Salik";
+      const userId = targetUser.value || "all";
+      const judul = document.getElementById("judul").value.trim();
+      const pesan = document.getElementById("pesan").value.trim();
+      const tanggal = new Date().toLocaleString("id-ID");
+
+      if (jenis === "personal" && !userId) {
+        alert("Pilih nama salik terlebih dahulu.");
+        return;
+      }
+
+      try {
+        if (jenis === "all") {
+          await addDoc(collection(db, "irsyad_global"), { judul, pesan, tanggal, dari: "Supervisor" });
+        } else {
+          await addDoc(collection(db, "irsyad_personal"), { userId, nama, judul, pesan, tanggal, dari: "Supervisor" });
+        }
+
+        notif.textContent = `✅ Irsyad berhasil dikirim ke ${jenis === "all" ? "semua salik" : nama}.`;
+        notif.classList.remove("hidden");
+        notif.classList.add("bg-emerald-100", "border-emerald-400");
+        e.target.reset();
+      } catch (err) {
+        console.error(err);
+        notif.textContent = "❌ Terjadi kesalahan saat mengirim Irsyad.";
+        notif.classList.remove("hidden");
+        notif.classList.add("bg-rose-100", "border-rose-400");
+      }
+    });
+  </script>
+</body>
+</html>
