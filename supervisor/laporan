@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Supervisor - Laporan Riyadhah</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
@@ -15,22 +15,24 @@
   </header>
 
   <main class="max-w-6xl mx-auto mt-8 bg-white/95 p-8 rounded-2xl shadow-lg">
-    <!-- TAB -->
-    <div class="flex flex-wrap justify-between items-center mb-6">
+    <!-- TAB + TOOLS -->
+    <div class="flex flex-wrap justify-between items-center mb-6 gap-3">
       <div class="flex gap-2">
-        <button id="btnHarian"
-          class="tab-btn bg-emerald-600 text-white px-4 py-2 rounded-lg font-semibold shadow">
+        <button id="btnHarian" class="tab-btn bg-emerald-600 text-white px-4 py-2 rounded-lg font-semibold shadow">
           🕰️ Laporan Harian
         </button>
-        <button id="btnPekanan"
-          class="tab-btn bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-lg font-semibold">
+        <button id="btnPekanan" class="tab-btn bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-lg font-semibold">
           📆 Laporan Pekanan
         </button>
       </div>
-      <button id="refreshBtn"
-        class="bg-sky-600 text-white px-4 py-2 rounded-lg hover:bg-sky-700 shadow">
-        🔄 Refresh Data
-      </button>
+
+      <div class="flex flex-wrap gap-2 items-center">
+        <input type="date" id="startDate" class="border rounded-lg px-3 py-1.5 text-sm" />
+        <input type="date" id="endDate" class="border rounded-lg px-3 py-1.5 text-sm" />
+        <input type="text" id="searchNama" placeholder="🔍 Cari nama..." class="border rounded-lg px-3 py-1.5 text-sm w-40" />
+        <button id="filterBtn" class="bg-sky-600 text-white px-3 py-1.5 rounded-lg hover:bg-sky-700 shadow">🔎 Filter</button>
+        <button id="refreshBtn" class="bg-emerald-600 text-white px-3 py-1.5 rounded-lg hover:bg-emerald-700 shadow">🔄 Refresh</button>
+      </div>
     </div>
 
     <div id="loading" class="text-center text-gray-500 mb-4">⏳ Memuat data...</div>
@@ -55,7 +57,7 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
     import { getFirestore, collection, getDocs, query } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
 
-    // 🔥 Konfigurasi Firebase
+    // 🔥 Firebase Config
     const firebaseConfig = {
       apiKey: "AIzaSyDuxvufRwadUsGh8-Kakl9KTG5ZGVcIoYQ",
       authDomain: "naik-level-81580.firebaseapp.com",
@@ -73,11 +75,16 @@
     const tableHeader = document.getElementById("tableHeader");
     const tableBody = document.getElementById("tableBody");
     const loading = document.getElementById("loading");
+    const startDate = document.getElementById("startDate");
+    const endDate = document.getElementById("endDate");
+    const searchNama = document.getElementById("searchNama");
 
     let currentTab = "harian";
+    let allData = [];
 
     async function loadData() {
       loading.classList.remove("hidden");
+      loading.textContent = "⏳ Memuat data...";
       tableBody.innerHTML = "";
 
       const koleksi = currentTab === "harian" ? "laporan_harian" : "laporan_pekanan";
@@ -89,7 +96,14 @@
         return;
       }
 
+      allData = [];
+      snapshot.forEach(doc => allData.push(doc.data()));
+      renderTable(allData);
       loading.textContent = "";
+    }
+
+    function renderTable(data) {
+      tableBody.innerHTML = "";
 
       if (currentTab === "harian") {
         tableHeader.innerHTML = `
@@ -114,33 +128,51 @@
         `;
       }
 
-      let no = 1;
-      snapshot.forEach(doc => {
-        const d = doc.data();
+      data.forEach((d, i) => {
         const tr = document.createElement("tr");
         tr.className = "odd:bg-gray-50 even:bg-gray-100 hover:bg-emerald-50";
-        tr.innerHTML = currentTab === "harian" ? `
-          <td class="border px-3 py-2">${no++}</td>
-          <td class="border px-3 py-2 font-semibold">${d.nama || "-"}</td>
-          <td class="border px-3 py-2">${d.hariKe || "-"}</td>
-          <td class="border px-3 py-2 text-left">${d.aksi || "-"}</td>
-          <td class="border px-3 py-2 text-left">${d.perubahanDalam || "-"}</td>
-          <td class="border px-3 py-2 text-left">${d.perubahanLuar || "-"}</td>
-          <td class="border px-3 py-2">${d.tanggal || "-"}</td>
-        ` : `
-          <td class="border px-3 py-2">${no++}</td>
-          <td class="border px-3 py-2 font-semibold">${d.nama || "-"}</td>
-          <td class="border px-3 py-2">${d.level || "-"}</td>
-          <td class="border px-3 py-2">${d.komitmen || "-"}</td>
-          <td class="border px-3 py-2 text-left">${d.perasaan || "-"}</td>
-          <td class="border px-3 py-2 text-left">${d.lingkungan || "-"}</td>
-          <td class="border px-3 py-2 text-left">${d.pertanyaan || "-"}</td>
-          <td class="border px-3 py-2">${d.tanggal || "-"}</td>
-        `;
+        tr.innerHTML = currentTab === "harian"
+          ? `
+            <td class="border px-3 py-2">${i + 1}</td>
+            <td class="border px-3 py-2 font-semibold">${d.nama || "-"}</td>
+            <td class="border px-3 py-2">${d.hariKe || "-"}</td>
+            <td class="border px-3 py-2 text-left">${d.aksi || "-"}</td>
+            <td class="border px-3 py-2 text-left">${d.perubahanDalam || "-"}</td>
+            <td class="border px-3 py-2 text-left">${d.perubahanLuar || "-"}</td>
+            <td class="border px-3 py-2">${d.tanggal || "-"}</td>
+          `
+          : `
+            <td class="border px-3 py-2">${i + 1}</td>
+            <td class="border px-3 py-2 font-semibold">${d.nama || "-"}</td>
+            <td class="border px-3 py-2">${d.level || "-"}</td>
+            <td class="border px-3 py-2">${d.komitmen || "-"}</td>
+            <td class="border px-3 py-2 text-left">${d.perasaan || "-"}</td>
+            <td class="border px-3 py-2 text-left">${d.lingkungan || "-"}</td>
+            <td class="border px-3 py-2 text-left">${d.pertanyaan || "-"}</td>
+            <td class="border px-3 py-2">${d.tanggal || "-"}</td>
+          `;
         tableBody.appendChild(tr);
       });
     }
 
+    // 🔍 Filter dan pencarian
+    function applyFilters() {
+      let filtered = [...allData];
+      const start = startDate.value ? new Date(startDate.value) : null;
+      const end = endDate.value ? new Date(endDate.value) : null;
+      const search = searchNama.value.trim().toLowerCase();
+
+      filtered = filtered.filter(d => {
+        const tanggal = new Date(d.tanggal);
+        const namaMatch = d.nama?.toLowerCase().includes(search);
+        const dateMatch = (!start || tanggal >= start) && (!end || tanggal <= end);
+        return namaMatch && dateMatch;
+      });
+
+      renderTable(filtered);
+    }
+
+    // 🎛️ Tombol tab dan kontrol
     btnHarian.addEventListener("click", () => {
       currentTab = "harian";
       btnHarian.classList.replace("bg-gray-200", "bg-emerald-600");
@@ -159,7 +191,10 @@
       loadData();
     });
 
+    document.getElementById("filterBtn").addEventListener("click", applyFilters);
     document.getElementById("refreshBtn").addEventListener("click", loadData);
+    searchNama.addEventListener("input", applyFilters);
+
     loadData();
   </script>
 </body>
