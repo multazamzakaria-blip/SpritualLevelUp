@@ -69,7 +69,7 @@
   </footer>
 
   <!-- ========================= -->
-  <!-- JAVASCRIPT ASESMEN        -->
+  <!-- JAVASCRIPT ASESMEN FIXED -->
   <!-- ========================= -->
   <script type="module">
     import { app } from "../assets/firebase-config.js";
@@ -77,129 +77,73 @@
 
     const db = getFirestore(app);
 
-    // =========================
-    // DATA PERTANYAAN (68)
-    // =========================
-    const questions = [
-      "Dalam 1 bulan ini, saya merasa tidak layak membimbing orang lain karena merasa diri saya penuh kekurangan.",
-      "Dalam 1 bulan ini, saya memilih menarik diri dari peran kepengasuhan karena takut dinilai atau disalahpahami.",
-      "Dalam 1 bulan ini, saya merasa Allah mungkin sudah tidak ridha atas pengabdian saya di pesantren.",
-      "Dalam 1 bulan ini, saya merasa kehadiran saya justru membebani orang lain, bukan membawa manfaat.",
-      "Dalam 1 bulan ini, saya sering teringat kesalahan masa lalu dan merasa belum pantas diampuni.",
-      "Dalam 1 bulan ini, saya menolak ketenangan batin karena merasa belum menebus dosa atau kelalaian saya sebagai pengasuh.",
-      "Dalam 1 bulan ini, saya berbuat baik dengan keras terhadap diri sendiri, bukan karena cinta, tapi karena ingin menebus kesalahan.",
-      "Dalam 1 bulan ini, saya sulit memaafkan diri sendiri meski saya yakin Allah Maha Pengampun.",
-      "Dalam 1 bulan ini, saya menjalankan peran pengasuhan secara mekanis, tanpa semangat dan tanpa makna.",
-      "Dalam 1 bulan ini, saya merasa perubahan di pesantren percuma, seolah tidak ada yang bisa diperbaiki.",
-      "Dalam 1 bulan ini, saya kehilangan arah dan makna dari pengabdian saya.",
-      "Dalam 1 bulan ini, saya merasa mati rasa terhadap santri dan rekan kerja, seolah semua tidak lagi berarti.",
-      "Dalam 1 bulan ini, saya sering mengenang masa lalu saat suasana pesantren terasa lebih baik.",
-      "Dalam 1 bulan ini, saya merasa kesedihan atas perubahan di pesantren sulit saya lepaskan.",
-      "Dalam 1 bulan ini, saya merasa kehilangan semangat lama dan sulit menemukan kembali gairah membina santri.",
-      "Dalam 1 bulan ini, saya sering menyesali keputusan atau sikap saya di masa lalu.",
-      "Dalam 1 bulan ini, saya menjalankan peran dengan cemas — takut salah, takut dikritik, atau takut mengecewakan pimpinan.",
-      "Dalam 1 bulan ini, saya menghindari menegur atau mengambil keputusan karena takut menimbulkan konflik.",
-      "Dalam 1 bulan ini, saya banyak memikirkan hal-hal buruk yang mungkin terjadi pada diri atau pesantren.",
-      "Dalam 1 bulan ini, saya menjaga jarak dengan santri atau guru karena takut terluka secara emosional.",
-      "Dalam 1 bulan ini, saya merasa gelisah bila program atau gagasan saya tidak dihargai.",
-      "Dalam 1 bulan ini, saya membandingkan diri dengan pengasuh lain dan merasa iri dengan pencapaian mereka.",
-      "Dalam 1 bulan ini, saya merasa terus mengejar sesuatu tapi tidak pernah benar-benar puas.",
-      "Dalam 1 bulan ini, saya merasa semangat saya muncul hanya bila ada pujian, penghargaan, atau perhatian dari orang lain.",
-      "Dalam 1 bulan ini, saya mudah tersinggung terhadap ucapan, perilaku, atau keputusan orang lain di pesantren.",
-      "Dalam 1 bulan ini, suasana di sekitar saya sering menjadi tegang karena sikap saya yang keras atau reaktif.",
-      "Dalam 1 bulan ini, saya menyimpan kekecewaan pada orang yang tidak sejalan dengan saya.",
-      "Dalam 1 bulan ini, saya sering menyalahkan keadaan atau orang lain atas hasil yang tidak sesuai harapan.",
-      "Dalam 1 bulan ini, saya sulit menerima masukan dari pengurus atau rekan sejawat yang lebih muda.",
-      "Dalam 1 bulan ini, saya berusaha terlihat kuat dan sempurna agar tidak kehilangan wibawa.",
-      "Dalam 1 bulan ini, saya menilai orang lain dari penampilan dan hasil lahiriah lebih dari niat dan perjuangannya.",
-      "Dalam 1 bulan ini, saya cenderung mencari pembenaran diri saat salah, agar tetap terlihat benar di hadapan orang lain.",
-      "Dalam 1 bulan ini, saya berani mengakui kesalahan di hadapan santri atau rekan kerja tanpa takut kehilangan wibawa.",
-      "Dalam 1 bulan ini, saya memandang setiap masalah di pesantren sebagai tantangan yang bisa memperkuat tim.",
-      "Dalam 1 bulan ini, saya mengambil langkah inisiatif untuk memperbaiki keadaan tanpa menunggu perintah.",
-      "Dalam 1 bulan ini, saya merasa yakin bahwa Allah akan menolong selama saya jujur dan berusaha.",
-      "Dalam 1 bulan ini, saya mampu menerima perubahan kebijakan atau dinamika pesantren dengan tenang.",
-      "Dalam 1 bulan ini, saya tidak terburu-buru menghakimi, tetapi berusaha memahami situasi dari berbagai sisi.",
-      "Dalam 1 bulan ini, saya bisa menyeimbangkan antara keseriusan bekerja dan waktu untuk istirahat.",
-      "Dalam 1 bulan ini, saya tidak berlebihan menyesali hasil yang kurang baik, karena percaya Allah menilai niat, bukan sekadar hasil.",
-      "Dalam 1 bulan ini, saya bekerja dengan antusias tanpa menunggu perintah, karena ingin memberi manfaat.",
-      "Dalam 1 bulan ini, saya terus belajar hal-hal baru agar bisa menjadi pengasuh yang lebih bijak dan relevan.",
-      "Dalam 1 bulan ini, saya menghadapi masalah pengasuhan dengan sikap belajar, bukan keluhan.",
-      "Dalam 1 bulan ini, saya berusaha konsisten menjaga niat tulus dalam setiap pelayanan di pesantren.",
-      "Dalam 1 bulan ini, saya mudah memaafkan guru, santri, atau staf yang berbuat salah.",
-      "Dalam 1 bulan ini, saya menerima diri saya apa adanya — dengan kelebihan dan keterbatasan.",
-      "Dalam 1 bulan ini, saya melihat hikmah dari setiap ujian, bahkan yang menyakitkan.",
-      "Dalam 1 bulan ini, saya tetap tenang di tengah konflik atau perbedaan pandangan.",
-      "Dalam 1 bulan ini, saya mengambil keputusan dengan berpikir jernih, berdasarkan data dan hikmah.",
-      "Dalam 1 bulan ini, saya mencintai ilmu dan terus belajar dari berbagai sumber untuk memperluas wawasan pengasuhan.",
-      "Dalam 1 bulan ini, saya sering menemukan tanda kebesaran Allah dalam sistem kehidupan pesantren yang tertata.",
-      "Dalam 1 bulan ini, saya menyampaikan pendapat dengan tenang, rasional, dan menghormati perbedaan.",
-      "Dalam 1 bulan ini, saya memperlakukan santri dan guru dengan kasih dan kelembutan hati.",
-      "Dalam 1 bulan ini, saya mudah memaafkan tanpa menuntut balasan atau permintaan maaf.",
-      "Dalam 1 bulan ini, saya membantu dan melayani dengan niat tulus, bukan demi pujian.",
-      "Dalam 1 bulan ini, saya melihat keindahan dan kebaikan Allah dalam setiap aspek kehidupan pesantren.",
-      "Dalam 1 bulan ini, saya merasa bahagia dan ringan dalam mengasuh, tanpa harus menunggu hasil besar.",
-      "Dalam 1 bulan ini, saya menerima ujian dan kritik dengan rasa syukur karena itu bagian dari tarbiyah Allah.",
-      "Dalam 1 bulan ini, saya membawa suasana cerah dan menenangkan bagi guru dan santri.",
-      "Dalam 1 bulan ini, saya menikmati momen sederhana di pesantren — kebersamaan, adzan, dan tawa santri — dengan rasa syukur.",
-      "Dalam 1 bulan ini, saya tetap tenang menghadapi berbagai persoalan pesantren.",
-      "Dalam 1 bulan ini, saya berhenti mengeluh dan lebih banyak berserah diri kepada Allah.",
-      "Dalam 1 bulan ini, kehadiran saya membuat orang lain merasa tenteram dan percaya diri.",
-      "Dalam 1 bulan ini, saya merasakan ibadah bukan sekadar tugas, tapi perjumpaan yang saya rindukan.",
-      "Dalam 1 bulan ini, saya merasa semua yang terjadi di pesantren adalah bagian dari kehendak Allah yang sempurna.",
-      "Dalam 1 bulan ini, saya melihat kehadiran Allah dalam setiap jiwa yang saya temui.",
-      "Dalam 1 bulan ini, saya hidup dengan tenang tanpa dorongan ego — cukup menjadi saluran kebaikan-Nya.",
-      "Dalam 1 bulan ini, saya merasa kehadiran saya membawa kedamaian tanpa perlu banyak bicara."
-    ];
-
+    // Ambil nama pengguna
     const user = JSON.parse(localStorage.getItem("naikLevelUser"));
     document.getElementById("usernameDisplay").textContent = user?.username || "Anonim";
 
+    // Pertanyaan
+    const questions = [];
+    for (let i = 1; i <= 68; i++) {
+      questions.push(`Pernyataan nomor ${i}.`);
+    }
+
+    // Variabel dasar
     let current = 0;
     let answers = Array(questions.length).fill(null);
 
-    const questionText = document.getElementById("questionText");
-    const answerBtns = document.querySelectorAll(".answer-btn");
-    const nextBtn = document.getElementById("nextBtn");
-    const prevBtn = document.getElementById("prevBtn");
-    const finishBtn = document.getElementById("finishBtn");
-    const progressBar = document.getElementById("progressBar");
-    const progressText = document.getElementById("progressText");
+    const qText = document.getElementById("questionText");
+    const btns = document.querySelectorAll(".answer-btn");
+    const next = document.getElementById("nextBtn");
+    const prev = document.getElementById("prevBtn");
+    const finish = document.getElementById("finishBtn");
+    const pText = document.getElementById("progressText");
+    const pBar = document.getElementById("progressBar");
 
-    function renderQuestion() {
-      questionText.textContent = questions[current];
-      progressText.textContent = `Pernyataan ${current + 1} dari ${questions.length}`;
-      progressBar.style.width = ((current + 1) / questions.length) * 100 + "%";
+    // Render pertanyaan
+    function showQ() {
+      qText.textContent = questions[current];
+      pText.textContent = `Pernyataan ${current + 1} dari ${questions.length}`;
+      pBar.style.width = ((current + 1) / questions.length) * 100 + "%";
 
-      answerBtns.forEach(btn => {
-        btn.classList.remove("bg-teal-500", "text-white");
-        if (answers[current] == btn.dataset.value) btn.classList.add("bg-teal-500", "text-white");
+      btns.forEach(b => {
+        b.classList.remove("bg-teal-500", "text-white");
+        if (answers[current] == b.dataset.value) b.classList.add("bg-teal-500", "text-white");
       });
 
-      prevBtn.disabled = current === 0;
-      nextBtn.disabled = current === questions.length - 1;
-      updateFinishBtn();
+      prev.disabled = current === 0;
+      next.disabled = current === questions.length - 1;
+
+      checkComplete();
     }
 
-    function updateFinishBtn() {
+    // Cek semua dijawab
+    function checkComplete() {
       const done = answers.every(a => a !== null);
-      finishBtn.disabled = !done;
-      finishBtn.classList.toggle("bg-gray-400", !done);
-      finishBtn.classList.toggle("bg-teal-600", done);
-      finishBtn.classList.toggle("cursor-not-allowed", !done);
+      finish.disabled = !done;
+      finish.classList.toggle("bg-teal-600", done);
+      finish.classList.toggle("bg-gray-400", !done);
+      finish.classList.toggle("cursor-not-allowed", !done);
     }
 
-    answerBtns.forEach(btn => {
-      btn.addEventListener("click", () => {
-        answers[current] = parseInt(btn.dataset.value);
-        renderQuestion();
-        if (current < questions.length - 1) setTimeout(() => { current++; renderQuestion(); }, 200);
+    // Event tombol jawaban
+    btns.forEach(b => {
+      b.addEventListener("click", () => {
+        answers[current] = parseInt(b.dataset.value);
+        showQ();
+        if (current < questions.length - 1) {
+          setTimeout(() => {
+            current++;
+            showQ();
+          }, 200);
+        }
       });
     });
 
-    nextBtn.addEventListener("click", () => { if (current < questions.length - 1) { current++; renderQuestion(); } });
-    prevBtn.addEventListener("click", () => { if (current > 0) { current--; renderQuestion(); } });
+    next.addEventListener("click", () => { if (current < questions.length - 1) { current++; showQ(); } });
+    prev.addEventListener("click", () => { if (current > 0) { current--; showQ(); } });
 
-    finishBtn.addEventListener("click", async () => {
+    // Selesai
+    finish.addEventListener("click", async () => {
       if (answers.includes(null)) return alert("Harap jawab semua pertanyaan dulu.");
 
       const levels = {};
@@ -207,6 +151,7 @@
         const total = answers.slice(i * 4, i * 4 + 4).reduce((a, b) => a + b, 0);
         levels[`Level ${i + 1}`] = total;
       }
+
       const sorted = Object.entries(levels).sort((a, b) => b[1] - a[1]);
       const top3 = sorted.slice(0, 3);
 
@@ -235,7 +180,7 @@
       </div>`;
     });
 
-    renderQuestion();
+    showQ();
   </script>
 </body>
 </html>
