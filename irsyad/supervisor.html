@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tulis Irsyad Supervisor - Naik Level</title>
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    input, textarea, select {
+      width: 100%;
+      padding: 10px;
+      border-radius: 10px;
+      border: 1px solid #d1fae5;
+      background: #f0fdfa;
+      margin-bottom: 1rem;
+      font-family: "Poppins", sans-serif;
+    }
+    textarea { height: 150px; resize: vertical; }
+    .irsyad-list {
+      margin-top: 1rem;
+      background: #ecfdf5;
+      padding: 10px;
+      border-radius: 12px;
+    }
+    .irsyad-item {
+      border-bottom: 1px solid #a7f3d0;
+      padding: 8px 0;
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <img src="../assets/logoslu.png" class="logo">
+    <h2>🕊️ Tulis Irsyad untuk Salik</h2>
+    <p>Kirim pesan bimbingan spiritual untuk santri/salik</p>
+  </header>
+
+  <main class="card fade-in">
+    <form id="irsyadForm">
+      <label>Nama Penerima (Salik)</label>
+      <input type="text" id="penerima" placeholder="contoh: Ahmad Maulana" required>
+
+      <label>Judul Irsyad</label>
+      <input type="text" id="judul" placeholder="contoh: Tentang Keikhlasan" required>
+
+      <label>Isi Pesan Irsyad</label>
+      <textarea id="pesan" placeholder="Tulis pesan bimbingan dan doa di sini..." required></textarea>
+
+      <button type="submit" class="btn" style="width:100%;">Kirim Irsyad</button>
+    </form>
+
+    <div class="irsyad-list" id="recentIrsyad">
+      <h4>📜 Irsyad Terakhir Dikirim</h4>
+      <p>Memuat data...</p>
+    </div>
+  </main>
+
+  <footer>© 2025 Naik Level • Pesantren Fajrul Islam</footer>
+
+  <script type="module">
+    import { app } from "../assets/firebase-config.js";
+    import { getFirestore, addDoc, collection, serverTimestamp, query, orderBy, limit, getDocs } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
+    import { checkUser } from "../assets/script.js";
+
+    const db = getFirestore(app);
+    const user = checkUser();
+    const form = document.getElementById("irsyadForm");
+    const recentContainer = document.getElementById("recentIrsyad");
+
+    // Simpan irsyad ke Firestore
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const data = {
+        dari: user.username,
+        penerima: form.penerima.value.trim(),
+        judul: form.judul.value.trim(),
+        pesan: form.pesan.value.trim(),
+        createdAt: serverTimestamp(),
+      };
+
+      if (!data.penerima || !data.pesan) {
+        alert("Lengkapi semua kolom sebelum mengirim 🌿");
+        return;
+      }
+
+      try {
+        await addDoc(collection(db, "irsyad"), data);
+        alert("Irsyad berhasil dikirim 🌸");
+        form.reset();
+        loadRecent();
+      } catch (err) {
+        alert("Terjadi kesalahan: " + err.message);
+      }
+    });
+
+    // Menampilkan irsyad terakhir yang dikirim
+    async function loadRecent() {
+      const q = query(collection(db, "irsyad"), orderBy("createdAt", "desc"), limit(5));
+      const docsSnap = await getDocs(q);
+
+      if (docsSnap.empty) {
+        recentContainer.innerHTML = "<p>Belum ada irsyad yang dikirim.</p>";
+        return;
+      }
+
+      recentContainer.innerHTML = "<h4>📜 Irsyad Terakhir Dikirim</h4>";
+      docsSnap.forEach(doc => {
+        const d = doc.data();
+        const item = document.createElement("div");
+        item.className = "irsyad-item";
+        item.innerHTML = `
+          <strong>${d.judul}</strong> — untuk <em>${d.penerima}</em><br>
+          <small>${new Date(d.createdAt?.toDate()).toLocaleString()}</small>
+        `;
+        recentContainer.appendChild(item);
+      });
+    }
+
+    loadRecent();
+  </script>
+</body>
+</html>
