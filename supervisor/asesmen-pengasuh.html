@@ -1,134 +1,47 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Hasil Asasmen Pengasuh - Naik Level</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Supervisor Dashboard - Asasmen Pengasuh</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <style>
-    body {
-      font-family: "Poppins", system-ui, sans-serif;
-    }
-    .badge {
-      display: inline-flex;
-      align-items: center;
-      padding: 0.1rem 0.4rem;
-      border-radius: 999px;
-      font-size: 0.65rem;
-      font-weight: 600;
-    }
-  </style>
 </head>
 
-<body class="min-h-screen bg-gradient-to-br from-emerald-100 to-teal-200 text-gray-700">
-
-  <!-- NAV / HEADER -->
-  <header class="w-full bg-white/70 backdrop-blur-md shadow-sm">
-    <div class="max-w-5xl mx-auto flex items-center justify-between px-4 py-3">
-      <div class="flex items-center gap-3">
-        <img src="../assets/logoslu.png" alt="Logo Pesantren" class="w-10 h-10 rounded-full shadow">
-        <div>
-          <h1 class="text-lg sm:text-xl font-bold text-teal-700">
-            Hasil Asasmen Pengasuh
-          </h1>
-          <p class="text-xs text-gray-500">
-            Pantauan perjalanan batin para pengasuh dalam 1 bulan terakhir
-          </p>
-        </div>
-      </div>
-      <div class="text-right">
-        <p class="text-[11px] text-gray-400">Supervisor:</p>
-        <p id="supervisorName" class="text-xs sm:text-sm font-semibold text-emerald-800">-</p>
-        <a href="index.html" class="text-[11px] text-teal-700 hover:underline block mt-1">
-          ⬅ Kembali ke dashboard
-        </a>
-      </div>
-    </div>
+<body class="bg-gradient-to-b from-sky-700 to-indigo-600 min-h-screen font-sans text-gray-800">
+  <header class="bg-white/20 backdrop-blur-md text-center text-white py-4 shadow">
+    <h1 class="text-2xl font-bold">📊 Dashboard Supervisor</h1>
+    <p class="text-sm opacity-90">Hasil Asasmen Spiritual Pengasuh</p>
   </header>
 
-  <!-- MAIN CONTENT -->
-  <main class="max-w-5xl mx-auto px-4 pt-4 pb-10">
-    <!-- Info box -->
-    <section class="mb-4">
-      <div class="bg-emerald-50 border border-emerald-100 rounded-2xl px-4 py-3 text-xs sm:text-sm text-gray-600">
-        <p>
-          Halaman ini menampilkan <span class="font-semibold">hasil asesmen pengasuh</span> yang diisi melalui
-          formulir “Asasmen Pengasuh Naik Level”.
-        </p>
-        <p class="mt-1">
-          Supervisor dapat melihat <span class="font-semibold">3 level batin paling dominan</span> dari setiap asesmen
-          untuk memudahkan proses irsyad dan pendampingan.
-        </p>
-      </div>
-    </section>
+  <main class="max-w-5xl mx-auto mt-8 bg-white p-8 rounded-2xl shadow-lg">
+    <div class="flex justify-between items-center mb-6">
+      <h2 class="text-xl font-bold text-emerald-700">Rekap Asasmen Pengasuh</h2>
+      <button id="refresh-btn" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg">🔄 Refresh Data</button>
+    </div>
 
-    <!-- FILTER kecil bisa ditambah nanti jika perlu -->
+    <div id="loading" class="text-center text-gray-500">⏳ Memuat data dari Firebase...</div>
 
-    <!-- TABLE RESULT -->
-    <section class="bg-white/90 backdrop-blur-md rounded-3xl shadow-md border border-emerald-50 p-4 sm:p-5">
-      <div class="flex items-center justify-between mb-3">
-        <h2 class="text-sm sm:text-base font-semibold text-teal-700">
-          Daftar Hasil Asesmen Pengasuh
-        </h2>
-        <span id="totalCount" class="text-[11px] text-gray-500"></span>
-      </div>
-
-      <div id="loadingBox" class="text-center py-6 text-sm text-gray-500">
-        Memuat data asesmen pengasuh...
-      </div>
-
-      <div id="emptyBox" class="hidden text-center py-6 text-sm text-gray-500">
-        Belum ada data asesmen pengasuh yang tersimpan.
-      </div>
-
-      <div id="tableWrapper" class="hidden overflow-x-auto">
-        <table class="min-w-full text-xs sm:text-sm border-collapse">
-          <thead>
-            <tr class="bg-emerald-50 text-emerald-900">
-              <th class="px-3 py-2 text-left border-b border-emerald-100">No</th>
-              <th class="px-3 py-2 text-left border-b border-emerald-100">Pengasuh</th>
-              <th class="px-3 py-2 text-left border-b border-emerald-100">Tanggal</th>
-              <th class="px-3 py-2 text-left border-b border-emerald-100">Level Dominan</th>
-            </tr>
-          </thead>
-          <tbody id="resultsBody">
-            <!-- diisi via JS -->
-          </tbody>
-        </table>
-      </div>
-    </section>
-
-    <!-- KETERANGAN -->
-    <section class="mt-4 text-[11px] text-gray-400">
-      <p>
-        Catatan: Skor yang ditampilkan adalah akumulasi nilai (10, 20, 40, 80) dari setiap pernyataan pada level terkait.
-        Supervisor disarankan menggunakan data ini sebagai bahan dialog penuh kasih, bukan penilaian.
-      </p>
-    </section>
+    <div id="data-container" class="hidden overflow-x-auto">
+      <table class="w-full text-sm border border-gray-300">
+        <thead class="bg-emerald-700 text-white">
+          <tr>
+            <th class="py-2 px-3 border">No</th>
+            <th class="py-2 px-3 border">Nama Pengasuh</th>
+            <th class="py-2 px-3 border">Tanggal</th>
+            <th class="py-2 px-3 border">Level Dominan 1</th>
+            <th class="py-2 px-3 border">Level Dominan 2</th>
+            <th class="py-2 px-3 border">Level Dominan 3</th>
+          </tr>
+        </thead>
+        <tbody id="tabel-body" class="text-center"></tbody>
+      </table>
+    </div>
   </main>
 
-  <!-- SCRIPT -->
+  <!-- FIREBASE SDK -->
   <script type="module">
-    // ============================
-    // Proteksi login Supervisor
-    // ============================
-    const currentUser = JSON.parse(localStorage.getItem("naikLevelUser") || "null");
-    if (!currentUser || currentUser.role !== "supervisor") {
-      window.location.href = "../index.html";
-    }
-    document.getElementById("supervisorName").textContent = currentUser.username;
-
-    // ============================
-    // Firebase init
-    // ============================
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
-    import {
-      getFirestore,
-      collection,
-      getDocs,
-      query,
-      orderBy
-    } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+    import { getFirestore, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyDuxvufRwadUsGh8-Kakl9KTG5ZGVcIoYQ",
@@ -137,112 +50,67 @@
       storageBucket: "naik-level-81580.firebasestorage.app",
       messagingSenderId: "319872430378",
       appId: "1:319872430378:web:64db1b51b159d27d622e53",
+      measurementId: "G-RG7JS79MZ1"
     };
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    // ============================
-    // Elemen DOM
-    // ============================
-    const loadingBox = document.getElementById("loadingBox");
-    const emptyBox = document.getElementById("emptyBox");
-    const tableWrapper = document.getElementById("tableWrapper");
-    const resultsBody = document.getElementById("resultsBody");
-    const totalCountEl = document.getElementById("totalCount");
+    const tabelBody = document.getElementById("tabel-body");
+    const loading = document.getElementById("loading");
+    const dataContainer = document.getElementById("data-container");
+    const refreshBtn = document.getElementById("refresh-btn");
 
-    // ============================
-    // Helper format
-    // ============================
-    function formatDate(ts) {
-      if (!ts || !ts.toDate) return "-";
-      const d = ts.toDate();
-      const dd = String(d.getDate()).padStart(2, "0");
-      const mm = String(d.getMonth() + 1).padStart(2, "0");
-      const yyyy = d.getFullYear();
-      const hh = String(d.getHours()).padStart(2, "0");
-      const min = String(d.getMinutes()).padStart(2, "0");
-      return `${dd}/${mm}/${yyyy} ${hh}:${min}`;
-    }
+    async function loadData() {
+      loading.classList.remove("hidden");
+      dataContainer.classList.add("hidden");
+      tabelBody.innerHTML = "";
 
-    function renderRow(index, data) {
-      const tr = document.createElement("tr");
-      tr.className = index % 2 === 0 ? "bg-white" : "bg-emerald-50/40";
-
-      const top3 = Array.isArray(data.top3) ? data.top3 : [];
-
-      const topHtml = top3
-        .slice(0, 3)
-        .map((t, i) => {
-          const badgeColor =
-            i === 0
-              ? "bg-emerald-100 text-emerald-800"
-              : i === 1
-              ? "bg-teal-100 text-teal-800"
-              : "bg-sky-100 text-sky-800";
-          return `
-            <div class="mb-1">
-              <span class="badge ${badgeColor}">
-                ${i + 1}
-              </span>
-              <span class="font-semibold">${t.name || "-"}</span>
-              <span class="text-[11px] text-gray-500"> · skor: ${t.score ?? "-"}</span>
-            </div>
-          `;
-        })
-        .join("");
-
-      tr.innerHTML = `
-        <td class="px-3 py-2 border-b border-emerald-50 align-top">${index + 1}</td>
-        <td class="px-3 py-2 border-b border-emerald-50 align-top">
-          <span class="font-semibold text-emerald-800">${data.userId || "-"}</span>
-        </td>
-        <td class="px-3 py-2 border-b border-emerald-50 align-top text-[11px] sm:text-xs text-gray-500">
-          ${formatDate(data.createdAt)}
-        </td>
-        <td class="px-3 py-2 border-b border-emerald-50 align-top">
-          ${topHtml || '<span class="text-[11px] text-gray-400">Belum ada ringkasan level.</span>'}
-        </td>
-      `;
-      return tr;
-    }
-
-    // ============================
-    // Load data dari Firestore
-    // ============================
-    async function loadAssessments() {
       try {
-        const q = query(
-          collection(db, "asasmen_pengasuh"),
-          orderBy("createdAt", "desc")
-        );
-        const snap = await getDocs(q);
-
-        loadingBox.classList.add("hidden");
-
-        if (snap.empty) {
-          emptyBox.classList.remove("hidden");
-          totalCountEl.textContent = "0 asesmen";
+        const q = query(collection(db, "asasmen_pengasuh"), orderBy("tanggal", "desc"));
+        const snapshot = await getDocs(q);
+        if (snapshot.empty) {
+          loading.textContent = "Belum ada data asesmen.";
           return;
         }
 
-        tableWrapper.classList.remove("hidden");
-        let index = 0;
-        snap.forEach(doc => {
+        let no = 1;
+        snapshot.forEach((doc) => {
           const data = doc.data();
-          const row = renderRow(index, data);
-          resultsBody.appendChild(row);
-          index++;
+          const hasil = data.hasil || {};
+
+          // Ambil 3 level tertinggi
+          const sorted = Object.entries(hasil)
+            .map(([level, score]) => ({ level, score }))
+            .sort((a, b) => b.score - a.score)
+            .slice(0, 3);
+
+          const top1 = sorted[0] ? `${sorted[0].level} (${sorted[0].score})` : "-";
+          const top2 = sorted[1] ? `${sorted[1].level} (${sorted[1].score})` : "-";
+          const top3 = sorted[2] ? `${sorted[2].level} (${sorted[2].score})` : "-";
+
+          const tr = `
+            <tr class="odd:bg-gray-50 even:bg-gray-100 hover:bg-emerald-50 transition">
+              <td class="border px-3 py-2">${no++}</td>
+              <td class="border px-3 py-2 font-semibold text-left">${data.nama}</td>
+              <td class="border px-3 py-2">${data.tanggal}</td>
+              <td class="border px-3 py-2 text-emerald-700 font-semibold">${top1}</td>
+              <td class="border px-3 py-2">${top2}</td>
+              <td class="border px-3 py-2">${top3}</td>
+            </tr>`;
+          tabelBody.innerHTML += tr;
         });
 
-        totalCountEl.textContent = `${index} asesmen`;
+        loading.classList.add("hidden");
+        dataContainer.classList.remove("hidden");
       } catch (err) {
-        console.error(err);
-        loadingBox.textContent = "Terjadi kesalahan saat memuat data.";
+        console.error("❌ Error:", err);
+        loading.textContent = "Terjadi kesalahan saat memuat data.";
       }
     }
 
-    loadAssessments();
+    refreshBtn.addEventListener("click", loadData);
+    loadData();
   </script>
 </body>
 </html>
