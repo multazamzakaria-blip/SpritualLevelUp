@@ -2,112 +2,14 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Login Supervisor - Naik Level</title>
-  <link rel="stylesheet" href="../assets/style.css">
-  <style>
-    body {
-      background: linear-gradient(135deg, #0d9488, #134e4a);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-      color: white;
-      font-family: "Poppins", sans-serif;
-    }
-
-    .login-box {
-      background: rgba(255,255,255,0.1);
-      border-radius: 16px;
-      padding: 2rem;
-      width: 90%;
-      max-width: 360px;
-      backdrop-filter: blur(10px);
-      box-shadow: 0 6px 15px rgba(0,0,0,0.2);
-    }
-
-    .login-box img {
-      display: block;
-      width: 80px;
-      margin: 0 auto 1rem;
-    }
-
-    input {
-      width: 100%;
-      padding: 10px;
-      border-radius: 8px;
-      border: none;
-      margin-bottom: 1rem;
-      font-family: inherit;
-    }
-
-    button {
-      width: 100%;
-      background: #10b981;
-      color: white;
-      padding: 10px;
-      border-radius: 8px;
-      border: none;
-      cursor: pointer;
-      font-weight: bold;
-    }
-
-    button:hover {
-      background: #059669;
-    }
-
-    h2 {
-      text-align: center;
-      margin-bottom: 1rem;
-    }
-
-    .error {
-      color: #fecaca;
-      text-align: center;
-      font-size: 14px;
-      margin-top: 5px;
-    }
-  </style>
-</head>
-
-<body>
-  <div class="login-box fade-in">
-    <img src="../assets/logoslu.png" alt="Logo Naik Level">
-    <h2>Supervisor Login</h2>
-    <form id="loginForm">
-      <input type="text" id="username" placeholder="Username" required>
-      <input type="password" id="password" placeholder="Password" required>
-      <button type="submit">Masuk</button>
-      <p id="errorMsg" class="error"></p>
-    </form>
-  </div>
-
-  <script type="module">
-    // 🔐 Supervisor Login Script
-    import { checkSupervisor } from "../assets/script.js";
-
-    const form = document.getElementById("loginForm");
-    const errorMsg = document.getElementById("errorMsg");
-
-    form.addEventListener("submit", (e) => {
-      e.preventDefault();
-      const username = form.username.value.trim();
-      const password = form.password.value.trim();
-
-      const valid = checkSupervisor(username, password);
-
-      if (valid) {
-        // Simpan info login ke localStorage
-        localStorage.setItem("naikLevelSupervisor", JSON.stringify({
-          username,
-          role: "supervisor",
-          loginTime: new Date().toISOString(),
-        }));
-        window.location.href = "./index.html";
-      } else {
-        errorMsg.textContent = "Username atau password salah.";
-      }
-    });
+  <meta http-equiv="refresh" content="0;url=../login.html">
+  <script>
+    // Jika meta refresh tidak jalan, pakai JS
+    window.location.href = "../login.html";
   </script>
+</head>
+<body>
+  <p>Mengarahkan ke halaman login...</p>
 </body>
 </html>
