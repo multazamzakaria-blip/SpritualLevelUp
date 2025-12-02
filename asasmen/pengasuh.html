@@ -178,7 +178,7 @@
       "Dalam 1 bulan ini, saya hidup dengan tenang tanpa dorongan ego — cukup menjadi saluran kebaikan-Nya.",
       "Dalam 1 bulan ini, saya merasa kehadiran saya membawa kedamaian tanpa perlu banyak bicara."
     ];
-    // =========================
+        // =========================
     // VARIABEL GLOBAL
     // =========================
     let currentQuestion = 0;
@@ -210,16 +210,16 @@
       const progressPercent = ((currentQuestion + 1) / questions.length) * 100;
       progressBar.style.width = progressPercent + "%";
 
-      // Reset tampilan tombol
+      // Reset warna tombol
       answerButtons.forEach(btn => {
-        btn.classList.remove("bg-teal-500", "text-white");
+        btn.classList.remove("bg-teal-500", "text-white", "ring-2", "ring-teal-400");
         btn.classList.add("bg-gray-100", "text-gray-700");
+
         if (answers[currentQuestion] == btn.dataset.value) {
-          btn.classList.add("bg-teal-500", "text-white");
+          btn.classList.add("bg-teal-500", "text-white", "ring-2", "ring-teal-400");
         }
       });
 
-      // Atur navigasi
       prevBtn.disabled = currentQuestion === 0;
       nextBtn.disabled = currentQuestion === questions.length - 1;
     }
@@ -232,22 +232,22 @@
         const value = parseInt(btn.dataset.value);
         answers[currentQuestion] = value;
 
-        // Highlight pilihan
-        answerButtons.forEach(b => b.classList.remove("bg-teal-500", "text-white"));
-        btn.classList.add("bg-teal-500", "text-white");
+        // Highlight pilihan aktif
+        answerButtons.forEach(b => b.classList.remove("bg-teal-500", "text-white", "ring-2"));
+        btn.classList.add("bg-teal-500", "text-white", "ring-2", "ring-teal-400");
 
-        // Jika belum di pertanyaan terakhir, pindah otomatis
+        // Pindah otomatis ke soal berikut
         if (currentQuestion < questions.length - 1) {
-          setTimeout(() => nextQuestion(), 250);
+          setTimeout(() => nextQuestion(), 200);
         }
 
-        // Cek apakah semua pertanyaan sudah dijawab
+        // Cek semua terjawab
         checkCompletion();
       });
     });
 
     // =========================
-    // NAVIGASI ANTAR PERTANYAAN
+    // NAVIGASI
     // =========================
     function nextQuestion() {
       if (currentQuestion < questions.length - 1) {
@@ -267,19 +267,27 @@
     prevBtn.addEventListener("click", prevQuestion);
 
     // =========================
-    // CEK KELENGKAPAN JAWABAN
+    // CEK KELENGKAPAN ASESMEN
     // =========================
     function checkCompletion() {
-      const allAnswered = answers.every(a => a !== null);
+      const answered = answers.filter(a => a !== null).length;
+      const allAnswered = answered === questions.length;
+
       if (allAnswered) {
         finishBtn.disabled = false;
-        finishBtn.classList.remove("bg-gray-400");
-        finishBtn.classList.add("bg-teal-600", "hover:bg-teal-700");
+        finishBtn.classList.remove("bg-gray-400", "cursor-not-allowed");
+        finishBtn.classList.add("bg-teal-600", "hover:bg-teal-700", "text-white");
+      } else {
+        finishBtn.disabled = true;
+        finishBtn.classList.add("bg-gray-400", "cursor-not-allowed");
+        finishBtn.classList.remove("bg-teal-600", "hover:bg-teal-700", "text-white");
       }
     }
 
-    // Tampilkan pertanyaan pertama
+    // Inisialisasi tampilan awal
     showQuestion();
+    checkCompletion();
+
     // =========================
     // PROSES HASIL ASESMEN
     // =========================
