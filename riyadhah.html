@@ -10,9 +10,7 @@
       font-family: "Poppins", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
       background: radial-gradient(circle at top, #a7f3d0 0, #0f766e 45%, #022c22 100%);
     }
-    .fade-in {
-      animation: fadeIn 0.5s ease-out;
-    }
+    .fade-in { animation: fadeIn 0.5s ease-out; }
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(6px); }
       to   { opacity: 1; transform: translateY(0); }
@@ -52,13 +50,12 @@
     <section class="max-w-5xl mx-auto bg-white/90 backdrop-blur-md rounded-3xl shadow-lg p-4 sm:p-6 md:p-8 fade-in">
 
       <!-- Info atas -->
-      <div class="mb-6 sm:mb-8">
+      <div class="mb-6 sm:mb-8 text-center">
         <h2 class="text-lg sm:text-xl font-semibold text-emerald-800 mb-2">
-          Pilih Riyadhah sesuai level dominan Anda
+          Riyadhah yang Direkomendasikan untuk Anda
         </h2>
-        <p class="text-xs sm:text-sm text-slate-600">
-          Setelah menyelesaikan asesmen, Anda akan mendapatkan 3 level spiritual paling dominan.
-          Gunakan daftar di bawah ini sebagai panduan Riyadhah praktis untuk <span class="font-semibold">naik satu level demi satu level</span>.
+        <p id="levelInfo" class="text-xs sm:text-sm text-slate-600">
+          Berdasarkan hasil asesmen spiritual Anda, berikut Riyadhah yang relevan untuk dilakukan.
         </p>
       </div>
 
@@ -128,6 +125,7 @@
 
     async function loadRiyadhah() {
       const container = document.getElementById("cardsContainer");
+      const levelInfo = document.getElementById("levelInfo");
       container.innerHTML = `
         <div class="col-span-1 md:col-span-2 flex justify-center py-6">
           <div class="flex items-center gap-2 text-sm text-slate-600">
@@ -140,7 +138,30 @@
       try {
         const res = await fetch("riyadhah-data.json");
         riyadhahData = await res.json();
-        renderCards();
+
+        // Ambil level dominan dari localStorage
+        const storedLevels = JSON.parse(localStorage.getItem("dominantLevels")) || [];
+        console.log("🎯 Level Dominan:", storedLevels);
+
+        let filtered = riyadhahData;
+
+        if (storedLevels.length > 0) {
+          filtered = riyadhahData.filter(item =>
+            storedLevels.some(lvl =>
+              item.levelLabel.toLowerCase().includes(lvl.toLowerCase())
+            )
+          );
+          levelInfo.innerHTML = `
+            Berdasarkan hasil asesmen spiritual Anda:
+            <span class="font-semibold text-emerald-600">${storedLevels.join(", ")}</span>.
+            Berikut Riyadhah yang relevan untuk dilakukan.
+          `;
+        } else {
+          levelInfo.textContent =
+            "Belum ditemukan hasil asesmen. Silakan selesaikan Asasmen Pengasuh terlebih dahulu.";
+        }
+
+        renderCards(filtered);
       } catch (err) {
         console.error(err);
         container.innerHTML = `
@@ -153,18 +174,18 @@
       }
     }
 
-    function renderCards() {
+    function renderCards(data) {
       const container = document.getElementById("cardsContainer");
-      if (!Array.isArray(riyadhahData) || riyadhahData.length === 0) {
+      if (!Array.isArray(data) || data.length === 0) {
         container.innerHTML = `
-          <div class="col-span-1 md:col-span-2 text-sm text-slate-600">
-            Belum ada data riyadhah.
+          <div class="col-span-1 md:col-span-2 text-center text-sm text-slate-600 py-10">
+            Tidak ada Riyadhah yang sesuai dengan level Anda.
           </div>
         `;
         return;
       }
 
-      container.innerHTML = riyadhahData.map((item, index) => {
+      container.innerHTML = data.map((item, index) => {
         const gradient = gradients[index % gradients.length];
         const actionsHtml = (item.bullets || [])
           .slice(0, 4)
@@ -242,15 +263,11 @@
 
       closeBtn.addEventListener("click", closeRiyadhahModal);
       modal.addEventListener("click", (e) => {
-        if (e.target === modal) {
-          closeRiyadhahModal();
-        }
+        if (e.target === modal) closeRiyadhahModal();
       });
 
       document.addEventListener("keydown", (e) => {
-        if (e.key === "Escape" && !modal.classList.contains("hidden")) {
-          closeRiyadhahModal();
-        }
+        if (e.key === "Escape" && !modal.classList.contains("hidden")) closeRiyadhahModal();
       });
     });
   </script>
