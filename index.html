@@ -1,95 +1,49 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Halaman Utama - Naik Level</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Naik Level - Halaman Utama</title>
+  <link rel="stylesheet" href="assets/style.css">
 </head>
 
-<body class="min-h-screen bg-gradient-to-br from-emerald-100 to-teal-200 flex flex-col items-center justify-center font-sans text-gray-700">
-
-  <!-- Header -->
-  <header class="text-center mb-8">
-    <img src="assets/logofi.png" alt="Logo Pesantren" class="w-16 h-16 mx-auto mb-3">
-    <h1 class="text-3xl font-bold text-teal-700">🌿 Naik Level</h1>
-    <p class="text-gray-600">Panduan Perjalanan Spiritual & Refleksi Batin</p>
+<body>
+  <header class="fade-in" style="text-align:center;">
+    <img src="assets/logoslu.png" alt="Logo Naik Level" class="logo">
+    <h1>🌿 Naik Level</h1>
+    <p>Perjalanan spiritual menuju kesadaran tertinggi</p>
   </header>
 
-  <!-- User Info -->
-  <div id="userInfo" class="text-center mb-6 bg-white/80 p-4 rounded-xl shadow-md w-80">
-    <p class="text-sm text-gray-600">Selamat datang,</p>
-    <h2 id="usernameDisplay" class="text-lg font-semibold text-teal-700"></h2>
-    <p id="roleDisplay" class="text-sm text-gray-500"></p>
-  </div>
+  <main class="fade-in" style="max-width:450px; margin:auto; text-align:center;">
+    <div class="card" style="text-align:left;">
+      <h3 style="text-align:center; color:#065f46;">Menu Utama</h3>
+      <ul style="list-style:none; padding:0;">
+        <li><a href="asasmen/santri.html" class="btn" style="display:block; margin-bottom:10px;">🧘‍♂️ Asasmen Santri Naik Level</a></li>
+        <li><a href="asasmen/pengasuh.html" class="btn" style="display:block; margin-bottom:10px;">👳‍♂️ Asasmen Pengasuh Naik Level</a></li>
+        <li><a href="asasmen/hamba.html" class="btn" style="display:block; margin-bottom:10px;">🤲 Asasmen Hamba Naik Level</a></li>
+        <li><a href="laporan/harian.html" class="btn" style="display:block; margin-bottom:10px;">📅 Laporan Harian</a></li>
+        <li><a href="laporan/pekanan.html" class="btn" style="display:block; margin-bottom:10px;">📖 Laporan Pekanan</a></li>
+        <li><a href="irsyad/index.html" class="btn" style="display:block; margin-bottom:10px;">💬 Irsyad (Bimbingan)</a></li>
+      </ul>
 
-  <!-- Menu Grid -->
-  <section class="grid grid-cols-2 gap-4 w-80 text-center">
-    <!-- Asasmen -->
-    <a href="asasmen/pengasuh.html" class="menu-card">Asasmen Pengasuh</a>
-    <a href="asasmen/santri.html" class="menu-card">Asasmen Santri</a>
-    <a href="asasmen/hamba.html" class="menu-card">Asasmen Hamba</a>
+      <button id="logoutBtn" class="btn" style="background:#dc2626; width:100%; margin-top:15px;">Keluar</button>
+    </div>
+  </main>
 
-    <!-- Laporan -->
-    <a href="laporan/harian.html" class="menu-card">Laporan Harian</a>
-    <a href="laporan/pekanan.html" class="menu-card">Laporan Pekanan</a>
+  <footer>© 2025 Naik Level • Pesantren Fajrul Islam</footer>
 
-    <!-- Irsyad -->
-    <a href="irsyad/index.html" class="menu-card">Irsyad</a>
-  </section>
-
-  <!-- Logout Button -->
-  <button id="logoutBtn"
-    class="mt-8 bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-lg shadow transition duration-200">
-    Keluar
-  </button>
-
-  <!-- Footer -->
-  <footer class="mt-8 text-xs text-gray-500">
-    © 2025 Naik Level · Pesantren Fajrul Islam
-  </footer>
-
-  <!-- Script -->
   <script type="module">
-    // Ambil data user dari localStorage
-    const user = JSON.parse(localStorage.getItem("naikLevelUser"));
-    const usernameDisplay = document.getElementById("usernameDisplay");
-    const roleDisplay = document.getElementById("roleDisplay");
+    import { checkUser, logoutUser, getUserName } from "./assets/script.js";
+    const user = checkUser();
 
-    if (!user) {
-      window.location.href = "login.html";
-    } else {
-      usernameDisplay.textContent = user.username;
-      roleDisplay.textContent = user.role === "supervisor"
-        ? "Supervisor / Mursyid"
-        : "Salik (Pengguna Umum)";
-    }
+    document.addEventListener("DOMContentLoaded", () => {
+      const header = document.querySelector("header p");
+      header.innerHTML = `Selamat datang, <b>${getUserName()}</b> 🌼`;
+    });
 
-    // Tombol Logout
     document.getElementById("logoutBtn").addEventListener("click", () => {
-      localStorage.removeItem("naikLevelUser");
-      window.location.href = "login.html";
+      logoutUser();
     });
   </script>
-
-  <style>
-    .menu-card {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      height: 100px;
-      border-radius: 1rem;
-      background: white;
-      font-weight: 600;
-      color: #0f766e;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-      transition: transform 0.2s, background 0.2s;
-    }
-    .menu-card:hover {
-      transform: translateY(-3px);
-      background: #ccfbf1;
-    }
-  </style>
-
 </body>
 </html>
