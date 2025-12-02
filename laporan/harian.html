@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Laporan Harian - Naik Level</title>
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    textarea, select, input {
+      width: 100%;
+      padding: 10px;
+      border-radius: 10px;
+      border: 1px solid #d1fae5;
+      background: #f0fdfa;
+      margin-bottom: 1rem;
+      font-family: "Poppins", sans-serif;
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <img src="../assets/logoslu.png" class="logo">
+    <h2>📖 Laporan Harian</h2>
+    <p>Catatan singkat perjalanan harimu di pesantren 🌿</p>
+  </header>
+
+  <main class="card fade-in">
+    <form id="laporanHarianForm">
+      <label for="tanggal">Tanggal</label>
+      <input type="date" id="tanggal" required>
+
+      <label>1. Bagaimana kualitas ibadah harimu?</label>
+      <select id="ibadah" required>
+        <option value="">Pilih...</option>
+        <option>Tidak Fokus</option>
+        <option>Cukup Baik</option>
+        <option>Khusyuk</option>
+        <option>Sangat Khusyuk</option>
+      </select>
+
+      <label>2. Apakah kamu menjaga adab dan hubungan dengan teman?</label>
+      <select id="adab" required>
+        <option value="">Pilih...</option>
+        <option>Tidak Baik</option>
+        <option>Cukup Baik</option>
+        <option>Baik</option>
+        <option>Sangat Baik</option>
+      </select>
+
+      <label>3. Apakah kamu mengikuti kegiatan dengan semangat?</label>
+      <select id="semangat" required>
+        <option value="">Pilih...</option>
+        <option>Tidak</option>
+        <option>Kadang</option>
+        <option>Sering</option>
+        <option>Selalu</option>
+      </select>
+
+      <label>Catatan atau refleksi harian</label>
+      <textarea id="catatan" placeholder="Tuliskan kesan, pelajaran, atau rasa syukurmu hari ini..."></textarea>
+
+      <button type="submit" class="btn" style="width:100%;">Kirim Laporan</button>
+    </form>
+  </main>
+
+  <footer>© 2025 Naik Level • Pesantren Fajrul Islam</footer>
+
+  <script type="module">
+    import { app } from "../assets/firebase-config.js";
+    import { getFirestore, addDoc, collection, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
+    import { checkUser } from "../assets/script.js";
+
+    const db = getFirestore(app);
+    const user = checkUser();
+
+    const form = document.getElementById("laporanHarianForm");
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const data = {
+        user: user.username,
+        tanggal: form.tanggal.value,
+        ibadah: form.ibadah.value,
+        adab: form.adab.value,
+        semangat: form.semangat.value,
+        catatan: form.catatan.value,
+        createdAt: serverTimestamp(),
+      };
+
+      if (!data.tanggal) {
+        alert("Tanggal belum diisi 🌿");
+        return;
+      }
+
+      try {
+        await addDoc(collection(db, "laporan_harian"), data);
+        alert("Laporan harian berhasil dikirim 🌷");
+        form.reset();
+      } catch (err) {
+        alert("Gagal menyimpan data: " + err.message);
+      }
+    });
+  </script>
+</body>
+</html>
