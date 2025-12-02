@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Supervisor - Laporan Riyadhah</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gradient-to-b from-emerald-700 to-teal-600 min-h-screen font-sans text-gray-800">
+  <!-- HEADER -->
+  <header class="bg-white/20 backdrop-blur-md text-center text-white py-4 shadow">
+    <h1 class="text-2xl font-bold">📋 Supervisor - Laporan Riyadhah</h1>
+    <p class="text-sm opacity-90">Pemantauan Harian & Pekanan Pengasuh</p>
+  </header>
+
+  <main class="max-w-6xl mx-auto mt-8 bg-white/95 p-8 rounded-2xl shadow-lg">
+    <!-- TAB -->
+    <div class="flex flex-wrap justify-between items-center mb-6">
+      <div class="flex gap-2">
+        <button id="btnHarian"
+          class="tab-btn bg-emerald-600 text-white px-4 py-2 rounded-lg font-semibold shadow">
+          🕰️ Laporan Harian
+        </button>
+        <button id="btnPekanan"
+          class="tab-btn bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-lg font-semibold">
+          📆 Laporan Pekanan
+        </button>
+      </div>
+      <button id="refreshBtn"
+        class="bg-sky-600 text-white px-4 py-2 rounded-lg hover:bg-sky-700 shadow">
+        🔄 Refresh Data
+      </button>
+    </div>
+
+    <div id="loading" class="text-center text-gray-500 mb-4">⏳ Memuat data...</div>
+
+    <!-- TABEL -->
+    <div class="overflow-x-auto">
+      <table id="dataTable" class="w-full border border-gray-300 text-sm text-center">
+        <thead class="bg-emerald-700 text-white">
+          <tr id="tableHeader"></tr>
+        </thead>
+        <tbody id="tableBody" class="divide-y divide-gray-200"></tbody>
+      </table>
+    </div>
+  </main>
+
+  <footer class="text-xs text-white/80 text-center mt-8 mb-4">
+    © 2025 Naik Level • Pesantren Fajrul Islam
+  </footer>
+
+  <!-- FIREBASE -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
+    import { getFirestore, collection, getDocs, query } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
+
+    // 🔥 Konfigurasi Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyDuxvufRwadUsGh8-Kakl9KTG5ZGVcIoYQ",
+      authDomain: "naik-level-81580.firebaseapp.com",
+      projectId: "naik-level-81580",
+      storageBucket: "naik-level-81580.firebasestorage.app",
+      messagingSenderId: "319872430378",
+      appId: "1:319872430378:web:64db1b51b159d27d622e53"
+    };
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // 🔹 Elemen DOM
+    const btnHarian = document.getElementById("btnHarian");
+    const btnPekanan = document.getElementById("btnPekanan");
+    const tableHeader = document.getElementById("tableHeader");
+    const tableBody = document.getElementById("tableBody");
+    const loading = document.getElementById("loading");
+
+    let currentTab = "harian";
+
+    async function loadData() {
+      loading.classList.remove("hidden");
+      tableBody.innerHTML = "";
+
+      const koleksi = currentTab === "harian" ? "laporan_harian" : "laporan_pekanan";
+      const q = query(collection(db, koleksi));
+      const snapshot = await getDocs(q);
+
+      if (snapshot.empty) {
+        loading.textContent = "Belum ada data laporan.";
+        return;
+      }
+
+      loading.textContent = "";
+
+      if (currentTab === "harian") {
+        tableHeader.innerHTML = `
+          <th class="border px-3 py-2">No</th>
+          <th class="border px-3 py-2">Nama</th>
+          <th class="border px-3 py-2">Hari ke</th>
+          <th class="border px-3 py-2 text-left">Aksi Riyadhah</th>
+          <th class="border px-3 py-2 text-left">Perubahan Dalam</th>
+          <th class="border px-3 py-2 text-left">Perubahan Luar</th>
+          <th class="border px-3 py-2">Tanggal</th>
+        `;
+      } else {
+        tableHeader.innerHTML = `
+          <th class="border px-3 py-2">No</th>
+          <th class="border px-3 py-2">Nama</th>
+          <th class="border px-3 py-2">Level</th>
+          <th class="border px-3 py-2">Komitmen</th>
+          <th class="border px-3 py-2 text-left">Perasaan</th>
+          <th class="border px-3 py-2 text-left">Lingkungan</th>
+          <th class="border px-3 py-2 text-left">Pertanyaan</th>
+          <th class="border px-3 py-2">Tanggal</th>
+        `;
+      }
+
+      let no = 1;
+      snapshot.forEach(doc => {
+        const d = doc.data();
+        const tr = document.createElement("tr");
+        tr.className = "odd:bg-gray-50 even:bg-gray-100 hover:bg-emerald-50";
+        tr.innerHTML = currentTab === "harian" ? `
+          <td class="border px-3 py-2">${no++}</td>
+          <td class="border px-3 py-2 font-semibold">${d.nama || "-"}</td>
+          <td class="border px-3 py-2">${d.hariKe || "-"}</td>
+          <td class="border px-3 py-2 text-left">${d.aksi || "-"}</td>
+          <td class="border px-3 py-2 text-left">${d.perubahanDalam || "-"}</td>
+          <td class="border px-3 py-2 text-left">${d.perubahanLuar || "-"}</td>
+          <td class="border px-3 py-2">${d.tanggal || "-"}</td>
+        ` : `
+          <td class="border px-3 py-2">${no++}</td>
+          <td class="border px-3 py-2 font-semibold">${d.nama || "-"}</td>
+          <td class="border px-3 py-2">${d.level || "-"}</td>
+          <td class="border px-3 py-2">${d.komitmen || "-"}</td>
+          <td class="border px-3 py-2 text-left">${d.perasaan || "-"}</td>
+          <td class="border px-3 py-2 text-left">${d.lingkungan || "-"}</td>
+          <td class="border px-3 py-2 text-left">${d.pertanyaan || "-"}</td>
+          <td class="border px-3 py-2">${d.tanggal || "-"}</td>
+        `;
+        tableBody.appendChild(tr);
+      });
+    }
+
+    btnHarian.addEventListener("click", () => {
+      currentTab = "harian";
+      btnHarian.classList.replace("bg-gray-200", "bg-emerald-600");
+      btnHarian.classList.add("text-white");
+      btnPekanan.classList.replace("bg-emerald-600", "bg-gray-200");
+      btnPekanan.classList.remove("text-white");
+      loadData();
+    });
+
+    btnPekanan.addEventListener("click", () => {
+      currentTab = "pekanan";
+      btnPekanan.classList.replace("bg-gray-200", "bg-emerald-600");
+      btnPekanan.classList.add("text-white");
+      btnHarian.classList.replace("bg-emerald-600", "bg-gray-200");
+      btnHarian.classList.remove("text-white");
+      loadData();
+    });
+
+    document.getElementById("refreshBtn").addEventListener("click", loadData);
+    loadData();
+  </script>
+</body>
+</html>
