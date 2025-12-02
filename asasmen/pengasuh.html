@@ -53,39 +53,26 @@
 
     <!-- Kartu Pertanyaan -->
     <div id="questionCard" class="bg-white/90 rounded-2xl shadow-lg p-5 mb-4">
-      <p id="questionText" class="text-base font-semibold text-gray-800 leading-relaxed mb-5"></p>
+      <p id="questionText" class="text-lg font-semibold text-gray-800 leading-relaxed mb-5 text-left"></p>
 
       <!-- Pilihan Jawaban -->
       <div class="grid grid-cols-2 gap-3 mb-4">
-        <button class="answer-btn border rounded-xl py-3 px-3 text-sm font-medium bg-white"
-                data-value="10">Tidak Pernah</button>
-        <button class="answer-btn border rounded-xl py-3 px-3 text-sm font-medium bg-white"
-                data-value="20">Kadang</button>
-        <button class="answer-btn border rounded-xl py-3 px-3 text-sm font-medium bg-white"
-                data-value="40">Sering</button>
-        <button class="answer-btn border rounded-xl py-3 px-3 text-sm font-medium bg-white"
-                data-value="80">Selalu</button>
+        <button class="answer-btn border rounded-xl py-3 px-3 text-sm font-medium bg-white" data-value="10">Tidak Pernah</button>
+        <button class="answer-btn border rounded-xl py-3 px-3 text-sm font-medium bg-white" data-value="20">Kadang</button>
+        <button class="answer-btn border rounded-xl py-3 px-3 text-sm font-medium bg-white" data-value="40">Sering</button>
+        <button class="answer-btn border rounded-xl py-3 px-3 text-sm font-medium bg-white" data-value="80">Selalu</button>
       </div>
 
       <!-- Navigasi -->
       <div class="flex justify-between items-center text-xs">
-        <button id="prevBtn"
-                class="px-3 py-1 border border-teal-400 text-teal-700 rounded-lg disabled:opacity-30 disabled:cursor-not-allowed">
-          ⬅️ Sebelumnya
-        </button>
-        <button id="nextBtn"
-                class="px-3 py-1 bg-teal-500 text-white rounded-lg disabled:opacity-30 disabled:cursor-not-allowed">
-          Berikutnya ➡️
-        </button>
+        <button id="prevBtn" class="px-3 py-1 border border-teal-400 text-teal-700 rounded-lg disabled:opacity-30 disabled:cursor-not-allowed">⬅️ Sebelumnya</button>
+        <button id="nextBtn" class="px-3 py-1 bg-teal-500 text-white rounded-lg disabled:opacity-30 disabled:cursor-not-allowed">Berikutnya ➡️</button>
       </div>
     </div>
 
     <!-- Tombol Selesai -->
     <div class="flex justify-end mb-4">
-      <button id="finishBtn"
-              class="px-4 py-2 bg-emerald-600 text-white text-sm font-semibold rounded-lg shadow disabled:opacity-30 disabled:cursor-not-allowed">
-        Selesai & Lihat Hasil
-      </button>
+      <button id="finishBtn" class="px-4 py-2 bg-emerald-600 text-white text-sm font-semibold rounded-lg shadow disabled:opacity-30 disabled:cursor-not-allowed">Selesai & Lihat Hasil</button>
     </div>
 
     <!-- Hasil -->
@@ -102,9 +89,7 @@
 
   <script type="module">
     import { app, db } from "../assets/firebase-config.js";
-    import {
-      collection, addDoc, serverTimestamp
-    } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
+    import { collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
 
     const user = JSON.parse(localStorage.getItem("naikLevelUser") || "null");
     if (!user) window.location.href = "../index.html";
@@ -130,6 +115,7 @@
       { level: 17, name: "Level 17 – Pencerahan (Enlightenment)" }
     ];
 
+    // 🔹 Daftar 68 pernyataan reflektif lengkap
     const questions = [
       { id: 1, level: 1, text: "Dalam 3 bulan ini, saya merasa tidak layak membimbing orang lain karena merasa diri saya penuh kekurangan." },
       { id: 2, level: 1, text: "Dalam 3 bulan ini, saya memilih menarik diri dari peran kepengasuhan karena takut dinilai atau disalahpahami." },
@@ -189,7 +175,7 @@
       { id: 56, level: 14, text: "Dalam 3 bulan ini, saya melihat keindahan dan kebaikan Allah dalam setiap aspek kehidupan pesantren." },
       { id: 57, level: 15, text: "Dalam 3 bulan ini, saya merasa bahagia dan ringan dalam mengasuh, tanpa harus menunggu hasil besar." },
       { id: 58, level: 15, text: "Dalam 3 bulan ini, saya menerima ujian dan kritik dengan rasa syukur karena itu bagian dari tarbiyah Allah." },
-      { id: 59, level: 15, text: "Dalam 3 bulan ini, saya membawa suasana cerah dan menenangkan bagi guru dan santri." },
+            { id: 59, level: 15, text: "Dalam 3 bulan ini, saya membawa suasana cerah dan menenangkan bagi guru dan santri." },
       { id: 60, level: 15, text: "Dalam 3 bulan ini, saya menikmati momen sederhana di pesantren — kebersamaan, adzan, dan tawa santri — dengan rasa syukur." },
       { id: 61, level: 16, text: "Dalam 3 bulan ini, saya tetap tenang menghadapi berbagai persoalan pesantren." },
       { id: 62, level: 16, text: "Dalam 3 bulan ini, saya berhenti mengeluh dan lebih banyak berserah diri kepada Allah." },
@@ -216,6 +202,7 @@
     const resultBox = document.getElementById("resultBox");
     const saveStatus = document.getElementById("saveStatus");
 
+    // 🔹 Fungsi tampilkan pertanyaan
     function renderQuestion() {
       const q = questions[currentIndex];
       qText.textContent = q.text;
@@ -225,14 +212,17 @@
 
       prevBtn.disabled = currentIndex === 0;
       nextBtn.disabled = currentIndex === questions.length - 1 || answers[currentIndex] === null;
+
       answerBtns.forEach(btn => {
         const val = Number(btn.dataset.value);
         btn.classList.toggle("selected", answers[currentIndex] === val);
       });
 
+      // tombol selesai hanya aktif jika semua terisi
       finishBtn.disabled = !answers.every(a => a !== null);
     }
 
+    // 🔹 Klik jawaban
     answerBtns.forEach(btn => {
       btn.addEventListener("click", () => {
         answers[currentIndex] = Number(btn.dataset.value);
@@ -244,6 +234,7 @@
       });
     });
 
+    // 🔹 Navigasi sebelumnya dan berikutnya
     prevBtn.addEventListener("click", () => {
       if (currentIndex > 0) {
         currentIndex--;
@@ -258,6 +249,7 @@
       }
     });
 
+    // 🔹 Proses hasil akhir & simpan ke Firebase
     finishBtn.addEventListener("click", async () => {
       const levelScores = {};
       levelMeta.forEach(l => levelScores[l.level] = 0);
@@ -268,7 +260,7 @@
       })).sort((a,b)=>b.score-a.score);
       const top3 = sorted.slice(0,3);
 
-      topList.innerHTML = top3.map(t => `<li>${t.name} — <b>${t.score}</b></li>`).join("");
+      topList.innerHTML = top3.map(t => `<li>${t.name}</li>`).join("");
       resultBox.classList.remove("hidden");
       saveStatus.textContent = "⏳ Menyimpan ke Firebase...";
 
@@ -281,14 +273,16 @@
           topLevels: top3,
           createdAt: serverTimestamp()
         });
-        saveStatus.textContent = "✅ Hasil tersimpan di server.";
+        saveStatus.textContent = "✅ Hasil tersimpan ke server.";
       } catch (err) {
         console.error(err);
         saveStatus.textContent = "❌ Gagal menyimpan ke Firebase.";
       }
     });
 
+    // Jalankan tampilan awal
     renderQuestion();
   </script>
 </body>
 </html>
+
