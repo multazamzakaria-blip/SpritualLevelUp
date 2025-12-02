@@ -224,11 +224,8 @@
       dataContainer.innerHTML = "<p>⏳ Mengambil data dari server...</p>";
 
       try {
-        const q = query(
-          collection(db, type),
-          orderBy("createdAt", "desc"),
-          limit(50)
-        );
+        const q = query(collection(db, type), limit(50));
+
         const docsSnap = await getDocs(q);
 
         if (docsSnap.empty) {
@@ -237,48 +234,53 @@
           return;
         }
 
-        // ===========================
-        // KHUSUS: ASASMEN PENGASUH
-        // ===========================
-        if (type === "asasmen_pengasuh") {
-          let html = `
-            <table>
-              <thead>
-                <tr>
-                  <th>No</th>
-                  <th>Pengasuh</th>
-                  <th>Tanggal Asasmen</th>
-                  <th>3 Level Dominan</th>
-                </tr>
-              </thead>
-              <tbody>
-          `;
+      if (type === "asasmen_pengasuh") {
+  let html = `
+    <table>
+      <thead>
+        <tr>
+          <th>No</th>
+          <th>Nama Pengasuh</th>
+          <th>Tanggal Asasmen</th>
+          <th>3 Level Dominan</th>
+        </tr>
+      </thead>
+      <tbody>
+  `;
 
-          let index = 1;
-          docsSnap.forEach(doc => {
-            const data = doc.data();
-            const userId = data.userId || "-";
-            const createdAt = formatDate(data.createdAt);
-            const top3Html = renderTop3(data.top3);
+  let index = 1;
+  docsSnap.forEach(doc => {
+    const data = doc.data();
+    const nama = data.nama || "-";
+    const tanggal = data.tanggal || "-";
+    const hasil = data.hasil || {};
 
-            html += `
-              <tr>
-                <td>${index}</td>
-                <td><strong>${userId}</strong></td>
-                <td class="small-text">${createdAt}</td>
-                <td>${top3Html}</td>
-              </tr>
-            `;
-            index++;
-          });
+    // Ambil tiga level tertinggi
+    const top3 = Object.entries(hasil)
+      .map(([level, score]) => ({ name: level, score }))
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 3);
 
-          html += `</tbody></table>`;
-          dataContainer.innerHTML = html;
-          title.textContent = "📊 Data: " + niceName;
-          refreshBtn.style.display = "block";
-          refreshBtn.onclick = () => loadData(type);
-          return;
-        }
+    const top3Html = renderTop3(top3);
+
+    html += `
+      <tr>
+        <td>${index}</td>
+        <td><strong>${nama}</strong></td>
+        <td class="small-text">${tanggal}</td>
+        <td>${top3Html}</td>
+      </tr>
+    `;
+    index++;
+  });
+
+  html += `</tbody></table>`;
+  dataContainer.innerHTML = html;
+  title.textContent = "📊 Data: " + niceName;
+  refreshBtn.style.display = "block";
+  refreshBtn.onclick = () => loadData(type);
+  return;
+}
 
         // ===========================
         // GENERIC VIEW UNTUK KOLEKSI LAIN
