@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard Supervisor - Naik Level</title>
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    .menu-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5rem;
+      margin-top: 2rem;
+    }
+
+    .card-menu {
+      background: #ecfdf5;
+      border-radius: 16px;
+      padding: 1.5rem;
+      text-align: center;
+      border: 1px solid #a7f3d0;
+      transition: all 0.25s ease;
+      cursor: pointer;
+    }
+
+    .card-menu:hover {
+      background: #d1fae5;
+      transform: translateY(-4px);
+      box-shadow: 0 6px 10px rgba(0,0,0,0.05);
+    }
+
+    .card-menu h3 {
+      margin-top: 10px;
+      color: #065f46;
+    }
+
+    .table-box {
+      margin-top: 2rem;
+      background: #ffffff;
+      border-radius: 14px;
+      padding: 1rem;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+
+    th, td {
+      padding: 10px;
+      text-align: left;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    th {
+      background: #ecfdf5;
+      color: #065f46;
+    }
+
+    button.refresh-btn {
+      margin-top: 1rem;
+      background: #059669;
+      color: white;
+      padding: 8px 14px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <img src="../assets/logoslu.png" class="logo">
+    <h2>🌿 Dashboard Supervisor Naik Level</h2>
+    <p>Pusat pemantauan asasmen, laporan, dan irsyad santri</p>
+  </header>
+
+  <main class="fade-in">
+    <section class="menu-grid">
+      <div class="card-menu" onclick="window.location.href='../irsyad/supervisor.html'">
+        <h3>🕊️ Tulis Irsyad</h3>
+        <p>Buat dan kirim bimbingan spiritual kepada Salik</p>
+      </div>
+
+      <div class="card-menu" onclick="loadData('asasmen_santri')">
+        <h3>📘 Asasmen Santri</h3>
+        <p>Lihat hasil refleksi spiritual santri</p>
+      </div>
+
+      <div class="card-menu" onclick="loadData('laporan_harian')">
+        <h3>📖 Laporan Harian</h3>
+        <p>Pantau rutinitas harian santri</p>
+      </div>
+
+      <div class="card-menu" onclick="loadData('laporan_pekanan')">
+        <h3>📆 Laporan Pekanan</h3>
+        <p>Tinjau pertumbuhan mingguan</p>
+      </div>
+
+      <div class="card-menu" onclick="loadData('irsyad')">
+        <h3>💬 Data Irsyad</h3>
+        <p>Lihat semua pesan bimbingan yang telah dikirim</p>
+      </div>
+    </section>
+
+    <section class="table-box">
+      <h3 id="tableTitle">📊 Data Asasmen / Laporan</h3>
+      <div id="dataContainer">
+        <p>Pilih menu di atas untuk melihat data.</p>
+      </div>
+      <button class="refresh-btn" id="refreshBtn" style="display:none;">🔄 Segarkan Data</button>
+    </section>
+  </main>
+
+  <footer>© 2025 Naik Level • Pesantren Fajrul Islam</footer>
+
+  <script type="module">
+    import { app } from "../assets/firebase-config.js";
+    import { getFirestore, collection, getDocs, orderBy, query, limit } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
+    import { checkUser } from "../assets/script.js";
+
+    const db = getFirestore(app);
+    const user = checkUser();
+
+    const dataContainer = document.getElementById("dataContainer");
+    const title = document.getElementById("tableTitle");
+    const refreshBtn = document.getElementById("refreshBtn");
+
+    window.loadData = async function(type) {
+      title.textContent = "📊 Memuat data " + type.replace("_", " ") + "...";
+      dataContainer.innerHTML = "<p>⏳ Mengambil data dari server...</p>";
+
+      try {
+        const q = query(collection(db, type), orderBy("createdAt", "desc"), limit(20));
+        const docsSnap = await getDocs(q);
+
+        if (docsSnap.empty) {
+          dataContainer.innerHTML = "<p>Tidak ada data yang ditemukan.</p>";
+          return;
+        }
+
+        let html = `<table><thead><tr>`;
+        const first = docsSnap.docs[0].data();
+        Object.keys(first).forEach(key => {
+          html += `<th>${key}</th>`;
+        });
+        html += `</tr></thead><tbody>`;
+
+        docsSnap.forEach(doc => {
+          const data = doc.data();
+          html += `<tr>`;
+          Object.values(data).forEach(v => {
+            html += `<td>${typeof v === 'object' && v?.toDate ? v.toDate().toLocaleString() : v}</td>`;
+          });
+          html += `</tr>`;
+        });
+
+        html += `</tbody></table>`;
+        dataContainer.innerHTML = html;
+        title.textContent = "📊 Data: " + type.replace("_", " ");
+        refreshBtn.style.display = "block";
+        refreshBtn.onclick = () => loadData(type);
+      } catch (err) {
+        dataContainer.innerHTML = `<p>⚠️ Gagal memuat data: ${err.message}</p>`;
+      }
+    }
+  </script>
+</body>
+</html>
