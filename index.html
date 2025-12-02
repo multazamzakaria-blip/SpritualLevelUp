@@ -5,84 +5,47 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Halaman Utama - Naik Level</title>
   <script src="https://cdn.tailwindcss.com"></script>
-</head>
-
-<body class="min-h-screen bg-gradient-to-br from-emerald-100 to-teal-200 flex flex-col items-center justify-center font-sans text-gray-700">
-
-  <!-- Header -->
-  <header class="text-center mb-8">
-    <img src="assets/logoslu.png" alt="Logo Pesantren" class="w-16 h-16 mx-auto mb-3">
-    <h1 class="text-3xl font-bold text-teal-700">Spiritual Level Up</h1>
-    <p class="text-gray-600">Panduan Perjalanan Spiritual & Refleksi Batin</p>
-  </header>
-
-  <!-- User Info -->
-  <div id="userInfo" class="text-center mb-6 bg-white/80 p-4 rounded-xl shadow-md w-80">
-    <p class="text-sm text-gray-600">Selamat datang,</p>
-    <h2 id="usernameDisplay" class="text-lg font-semibold text-teal-700"></h2>
-    <p id="roleDisplay" class="text-sm text-gray-500"></p>
-  </div>
-
-  <!-- Menu Grid -->
-  <section class="grid grid-cols-2 gap-4 w-80 text-center">
-    <!-- Asasmen -->
-    <a href="asasmen/pengasuh.html" class="menu-card">Asasmen Pengasuh</a>
-
-    <!-- Laporan -->
-    <a href="laporan/harian.html" class="menu-card">Laporan Harian</a>
-    <a href="laporan/pekanan.html" class="menu-card">Laporan Pekanan</a>
-
-    <!-- Irsyad -->
-    <a href="irsyad/index.html" class="menu-card">Irsyad</a>
-  </section>
-
-  <!-- Logout Button -->
-  <button id="logoutBtn"
-    class="mt-8 bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-lg shadow transition duration-200">
-    Keluar
-  </button>
-
-  <!-- Footer -->
-  <footer class="mt-8 text-xs text-gray-500">
-    © 2025 Naik Level · Pesantren Fajrul Islam
-  </footer>
-
-  <!-- Script -->
-  <script type="module">
-    // ==============================
-    // 🔒 Proteksi Login Salik / Supervisor
-    // ==============================
-    const userData = localStorage.getItem("naikLevelUser");
-    let user = null;
-
-    try {
-      user = JSON.parse(userData);
-    } catch (err) {
-      console.error("Data user tidak valid:", err);
-    }
-
-    const usernameDisplay = document.getElementById("usernameDisplay");
-    const roleDisplay = document.getElementById("roleDisplay");
-
-    if (!user || !user.username || !user.role) {
-      // belum login, arahkan ke login
-      window.location.href = "login.html";
-    } else {
-      usernameDisplay.textContent = user.username;
-      roleDisplay.textContent =
-        user.role === "supervisor" ? "Supervisor / Mursyid" : "Salik";
-    }
-
-    // ==============================
-    // 🚪 Tombol Logout
-    // ==============================
-    document.getElementById("logoutBtn").addEventListener("click", () => {
-      localStorage.removeItem("naikLevelUser");
-      window.location.href = "login.html";
-    });
-  </script>
-
   <style>
+    /* Animasi fade-in dan fade-out lembut */
+    @keyframes fadeInOut {
+      0% { opacity: 0; transform: scale(0.9); }
+      20% { opacity: 1; transform: scale(1.02); }
+      80% { opacity: 1; transform: scale(1); }
+      100% { opacity: 0; transform: scale(1); }
+    }
+
+    /* Layar splash logo */
+    #splash {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: radial-gradient(circle at center, #d1fae5, #a7f3d0, #10b981);
+      z-index: 50;
+      animation: fadeInOut 2.2s ease-in-out forwards;
+    }
+
+    #splash img {
+      width: 110px;
+      animation: pulse 2s ease-in-out infinite alternate;
+    }
+
+    @keyframes pulse {
+      from { transform: scale(1); opacity: 0.9; }
+      to { transform: scale(1.08); opacity: 1; }
+    }
+
+    /* Menyembunyikan konten utama sementara splash aktif */
+    body.loaded #mainContent {
+      opacity: 1;
+      transition: opacity 0.8s ease;
+    }
+    #mainContent {
+      opacity: 0;
+    }
+
+    /* Kartu menu */
     .menu-card {
       display: flex;
       align-items: center;
@@ -100,6 +63,94 @@
       background: #ccfbf1;
     }
   </style>
+</head>
 
+<body class="min-h-screen bg-gradient-to-br from-emerald-100 to-teal-200 flex flex-col items-center justify-center font-sans text-gray-700">
+
+  <!-- 🌿 SPLASH LOGO -->
+  <div id="splash">
+    <img src="assets/logoslu.png" alt="Logo Spiritual Level Up">
+  </div>
+
+  <!-- 🌸 MAIN CONTENT -->
+  <div id="mainContent" class="w-full flex flex-col items-center justify-center min-h-screen">
+    <!-- Header -->
+    <header class="text-center mb-8">
+      <img src="assets/logoslu.png" alt="Logo Pesantren" class="w-16 h-16 mx-auto mb-3">
+      <h1 class="text-3xl font-bold text-teal-700">Spiritual Level Up</h1>
+      <p class="text-gray-600">Panduan Perjalanan Spiritual & Refleksi Batin</p>
+    </header>
+
+    <!-- User Info -->
+    <div id="userInfo" class="text-center mb-6 bg-white/80 p-4 rounded-xl shadow-md w-80">
+      <p class="text-sm text-gray-600">Selamat datang,</p>
+      <h2 id="usernameDisplay" class="text-lg font-semibold text-teal-700"></h2>
+      <p id="roleDisplay" class="text-sm text-gray-500"></p>
+    </div>
+
+    <!-- Menu Grid -->
+    <section class="grid grid-cols-2 gap-4 w-80 text-center">
+      <a href="asasmen/pengasuh.html" class="menu-card">Asasmen Pengasuh</a>
+      <a href="laporan/harian.html" class="menu-card">Laporan Harian</a>
+      <a href="laporan/pekanan.html" class="menu-card">Laporan Pekanan</a>
+      <a href="irsyad/index.html" class="menu-card">Irsyad</a>
+    </section>
+
+    <!-- Logout -->
+    <button id="logoutBtn"
+      class="mt-8 bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-lg shadow transition duration-200">
+      Keluar
+    </button>
+
+    <!-- Footer -->
+    <footer class="mt-8 text-xs text-gray-500">
+      © 2025 Naik Level · Pesantren Fajrul Islam
+    </footer>
+  </div>
+
+  <!-- SCRIPT -->
+  <script type="module">
+    // ==============================
+    // 🌟 Splash Fade Transition
+    // ==============================
+    window.addEventListener("load", () => {
+      const splash = document.getElementById("splash");
+      setTimeout(() => {
+        splash.style.display = "none";
+        document.body.classList.add("loaded");
+      }, 2200); // Durasi animasi splash
+    });
+
+    // ==============================
+    // 🔒 Proteksi Login Salik / Supervisor
+    // ==============================
+    const userData = localStorage.getItem("naikLevelUser");
+    let user = null;
+
+    try {
+      user = JSON.parse(userData);
+    } catch (err) {
+      console.error("Data user tidak valid:", err);
+    }
+
+    const usernameDisplay = document.getElementById("usernameDisplay");
+    const roleDisplay = document.getElementById("roleDisplay");
+
+    if (!user || !user.username || !user.role) {
+      window.location.href = "login.html";
+    } else {
+      usernameDisplay.textContent = user.username;
+      roleDisplay.textContent =
+        user.role === "supervisor" ? "Supervisor / Mursyid" : "Salik";
+    }
+
+    // ==============================
+    // 🚪 Tombol Logout
+    // ==============================
+    document.getElementById("logoutBtn").addEventListener("click", () => {
+      localStorage.removeItem("naikLevelUser");
+      window.location.href = "login.html";
+    });
+  </script>
 </body>
 </html>
