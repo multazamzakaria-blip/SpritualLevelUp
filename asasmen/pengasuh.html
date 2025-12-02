@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Asasmen Pengasuh Naik Level</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <script type="module" src="../assets/firebase-config.js"></script>
 </head>
 
 <body class="min-h-screen bg-gradient-to-br from-emerald-100 to-teal-200 font-sans text-gray-700">
@@ -59,7 +58,7 @@
 
   <!-- BUTTON SELESAI -->
   <div class="text-center mt-6">
-    <button id="finishBtn" class="px-6 py-3 bg-gray-400 text-white font-semibold rounded-xl shadow-md" disabled>
+    <button id="finishBtn" class="px-6 py-3 bg-gray-400 text-white font-semibold rounded-xl shadow-md cursor-not-allowed" disabled>
       Selesai & Lihat Hasil
     </button>
     <p class="text-xs text-gray-500 mt-1">Tombol ini aktif setelah semua pernyataan terjawab.</p>
@@ -68,413 +67,175 @@
   <footer class="text-center text-gray-500 text-sm mt-8 mb-4">
     © 2025 Spiritual Level Up · Pesantren Fajrul Islam
   </footer>
+
+  <!-- ========================= -->
+  <!-- JAVASCRIPT ASESMEN        -->
+  <!-- ========================= -->
   <script type="module">
-    import { db } from "../assets/firebase-config.js";
-    import { collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js";
+    import { app } from "../assets/firebase-config.js";
+    import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
+
+    const db = getFirestore(app);
 
     // =========================
-    // DATA PERTANYAAN ASESMEN
+    // DATA PERTANYAAN (68)
     // =========================
     const questions = [
-      // LEVEL 1 – MALU (Shame)
       "Dalam 1 bulan ini, saya merasa tidak layak membimbing orang lain karena merasa diri saya penuh kekurangan.",
       "Dalam 1 bulan ini, saya memilih menarik diri dari peran kepengasuhan karena takut dinilai atau disalahpahami.",
       "Dalam 1 bulan ini, saya merasa Allah mungkin sudah tidak ridha atas pengabdian saya di pesantren.",
       "Dalam 1 bulan ini, saya merasa kehadiran saya justru membebani orang lain, bukan membawa manfaat.",
-
-      // LEVEL 2 – RASA BERSALAH (Guilt)
       "Dalam 1 bulan ini, saya sering teringat kesalahan masa lalu dan merasa belum pantas diampuni.",
       "Dalam 1 bulan ini, saya menolak ketenangan batin karena merasa belum menebus dosa atau kelalaian saya sebagai pengasuh.",
       "Dalam 1 bulan ini, saya berbuat baik dengan keras terhadap diri sendiri, bukan karena cinta, tapi karena ingin menebus kesalahan.",
       "Dalam 1 bulan ini, saya sulit memaafkan diri sendiri meski saya yakin Allah Maha Pengampun.",
-
-      // LEVEL 3 – APATI (Apathy)
       "Dalam 1 bulan ini, saya menjalankan peran pengasuhan secara mekanis, tanpa semangat dan tanpa makna.",
       "Dalam 1 bulan ini, saya merasa perubahan di pesantren percuma, seolah tidak ada yang bisa diperbaiki.",
       "Dalam 1 bulan ini, saya kehilangan arah dan makna dari pengabdian saya.",
       "Dalam 1 bulan ini, saya merasa mati rasa terhadap santri dan rekan kerja, seolah semua tidak lagi berarti.",
-
-      // LEVEL 4 – BERDUKA (Grief)
       "Dalam 1 bulan ini, saya sering mengenang masa lalu saat suasana pesantren terasa lebih baik.",
       "Dalam 1 bulan ini, saya merasa kesedihan atas perubahan di pesantren sulit saya lepaskan.",
       "Dalam 1 bulan ini, saya merasa kehilangan semangat lama dan sulit menemukan kembali gairah membina santri.",
       "Dalam 1 bulan ini, saya sering menyesali keputusan atau sikap saya di masa lalu.",
-
-      // LEVEL 5 – TAKUT (Fear)
       "Dalam 1 bulan ini, saya menjalankan peran dengan cemas — takut salah, takut dikritik, atau takut mengecewakan pimpinan.",
       "Dalam 1 bulan ini, saya menghindari menegur atau mengambil keputusan karena takut menimbulkan konflik.",
       "Dalam 1 bulan ini, saya banyak memikirkan hal-hal buruk yang mungkin terjadi pada diri atau pesantren.",
       "Dalam 1 bulan ini, saya menjaga jarak dengan santri atau guru karena takut terluka secara emosional.",
-
-      // LEVEL 6 – KEINGINAN (Desire)
       "Dalam 1 bulan ini, saya merasa gelisah bila program atau gagasan saya tidak dihargai.",
       "Dalam 1 bulan ini, saya membandingkan diri dengan pengasuh lain dan merasa iri dengan pencapaian mereka.",
       "Dalam 1 bulan ini, saya merasa terus mengejar sesuatu tapi tidak pernah benar-benar puas.",
       "Dalam 1 bulan ini, saya merasa semangat saya muncul hanya bila ada pujian, penghargaan, atau perhatian dari orang lain.",
-
-      // LEVEL 7 – MARAH (Anger)
       "Dalam 1 bulan ini, saya mudah tersinggung terhadap ucapan, perilaku, atau keputusan orang lain di pesantren.",
       "Dalam 1 bulan ini, suasana di sekitar saya sering menjadi tegang karena sikap saya yang keras atau reaktif.",
       "Dalam 1 bulan ini, saya menyimpan kekecewaan pada orang yang tidak sejalan dengan saya.",
       "Dalam 1 bulan ini, saya sering menyalahkan keadaan atau orang lain atas hasil yang tidak sesuai harapan.",
-
-      // LEVEL 8 – BANGGA (Pride)
       "Dalam 1 bulan ini, saya sulit menerima masukan dari pengurus atau rekan sejawat yang lebih muda.",
       "Dalam 1 bulan ini, saya berusaha terlihat kuat dan sempurna agar tidak kehilangan wibawa.",
       "Dalam 1 bulan ini, saya menilai orang lain dari penampilan dan hasil lahiriah lebih dari niat dan perjuangannya.",
       "Dalam 1 bulan ini, saya cenderung mencari pembenaran diri saat salah, agar tetap terlihat benar di hadapan orang lain.",
-
-      // LEVEL 9 – KEBERANIAN (Courage)
       "Dalam 1 bulan ini, saya berani mengakui kesalahan di hadapan santri atau rekan kerja tanpa takut kehilangan wibawa.",
       "Dalam 1 bulan ini, saya memandang setiap masalah di pesantren sebagai tantangan yang bisa memperkuat tim.",
       "Dalam 1 bulan ini, saya mengambil langkah inisiatif untuk memperbaiki keadaan tanpa menunggu perintah.",
       "Dalam 1 bulan ini, saya merasa yakin bahwa Allah akan menolong selama saya jujur dan berusaha.",
-
-      // LEVEL 10 – NETRALITAS (Neutrality)
       "Dalam 1 bulan ini, saya mampu menerima perubahan kebijakan atau dinamika pesantren dengan tenang.",
       "Dalam 1 bulan ini, saya tidak terburu-buru menghakimi, tetapi berusaha memahami situasi dari berbagai sisi.",
       "Dalam 1 bulan ini, saya bisa menyeimbangkan antara keseriusan bekerja dan waktu untuk istirahat.",
       "Dalam 1 bulan ini, saya tidak berlebihan menyesali hasil yang kurang baik, karena percaya Allah menilai niat, bukan sekadar hasil.",
-
-      // LEVEL 11 – KEMAUAN (Willingness)
       "Dalam 1 bulan ini, saya bekerja dengan antusias tanpa menunggu perintah, karena ingin memberi manfaat.",
       "Dalam 1 bulan ini, saya terus belajar hal-hal baru agar bisa menjadi pengasuh yang lebih bijak dan relevan.",
       "Dalam 1 bulan ini, saya menghadapi masalah pengasuhan dengan sikap belajar, bukan keluhan.",
       "Dalam 1 bulan ini, saya berusaha konsisten menjaga niat tulus dalam setiap pelayanan di pesantren.",
-
-      // LEVEL 12 – PENERIMAAN (Acceptance)
       "Dalam 1 bulan ini, saya mudah memaafkan guru, santri, atau staf yang berbuat salah.",
       "Dalam 1 bulan ini, saya menerima diri saya apa adanya — dengan kelebihan dan keterbatasan.",
       "Dalam 1 bulan ini, saya melihat hikmah dari setiap ujian, bahkan yang menyakitkan.",
       "Dalam 1 bulan ini, saya tetap tenang di tengah konflik atau perbedaan pandangan.",
-
-      // LEVEL 13 – AKAL BUDI (Reason)
       "Dalam 1 bulan ini, saya mengambil keputusan dengan berpikir jernih, berdasarkan data dan hikmah.",
       "Dalam 1 bulan ini, saya mencintai ilmu dan terus belajar dari berbagai sumber untuk memperluas wawasan pengasuhan.",
       "Dalam 1 bulan ini, saya sering menemukan tanda kebesaran Allah dalam sistem kehidupan pesantren yang tertata.",
       "Dalam 1 bulan ini, saya menyampaikan pendapat dengan tenang, rasional, dan menghormati perbedaan.",
-
-      // LEVEL 14 – CINTA (Love)
       "Dalam 1 bulan ini, saya memperlakukan santri dan guru dengan kasih dan kelembutan hati.",
       "Dalam 1 bulan ini, saya mudah memaafkan tanpa menuntut balasan atau permintaan maaf.",
       "Dalam 1 bulan ini, saya membantu dan melayani dengan niat tulus, bukan demi pujian.",
       "Dalam 1 bulan ini, saya melihat keindahan dan kebaikan Allah dalam setiap aspek kehidupan pesantren.",
-
-      // LEVEL 15 – SUKACITA (Joy)
       "Dalam 1 bulan ini, saya merasa bahagia dan ringan dalam mengasuh, tanpa harus menunggu hasil besar.",
       "Dalam 1 bulan ini, saya menerima ujian dan kritik dengan rasa syukur karena itu bagian dari tarbiyah Allah.",
       "Dalam 1 bulan ini, saya membawa suasana cerah dan menenangkan bagi guru dan santri.",
       "Dalam 1 bulan ini, saya menikmati momen sederhana di pesantren — kebersamaan, adzan, dan tawa santri — dengan rasa syukur.",
-
-      // LEVEL 16 – DAMAI (Peace)
       "Dalam 1 bulan ini, saya tetap tenang menghadapi berbagai persoalan pesantren.",
       "Dalam 1 bulan ini, saya berhenti mengeluh dan lebih banyak berserah diri kepada Allah.",
       "Dalam 1 bulan ini, kehadiran saya membuat orang lain merasa tenteram dan percaya diri.",
       "Dalam 1 bulan ini, saya merasakan ibadah bukan sekadar tugas, tapi perjumpaan yang saya rindukan.",
-
-      // LEVEL 17 – PENCERAHAN (Enlightenment)
       "Dalam 1 bulan ini, saya merasa semua yang terjadi di pesantren adalah bagian dari kehendak Allah yang sempurna.",
       "Dalam 1 bulan ini, saya melihat kehadiran Allah dalam setiap jiwa yang saya temui.",
       "Dalam 1 bulan ini, saya hidup dengan tenang tanpa dorongan ego — cukup menjadi saluran kebaikan-Nya.",
       "Dalam 1 bulan ini, saya merasa kehadiran saya membawa kedamaian tanpa perlu banyak bicara."
     ];
-        // =========================
-    // VARIABEL GLOBAL
-    // =========================
-    let currentQuestion = 0;
-    let answers = Array(questions.length).fill(null);
 
-    const usernameDisplay = document.getElementById("usernameDisplay");
-    const questionText = document.getElementById("questionText");
-    const answerButtons = document.querySelectorAll(".answer-btn");
-    const nextBtn = document.getElementById("nextBtn");
-    const prevBtn = document.getElementById("prevBtn");
-    const finishBtn = document.getElementById("finishBtn");
-    const progressText = document.getElementById("progressText");
-    const progressBar = document.getElementById("progressBar");
-
-    // Ambil nama pengguna dari localStorage
     const user = JSON.parse(localStorage.getItem("naikLevelUser"));
-    if (user) {
-      usernameDisplay.textContent = user.username;
-    } else {
-      usernameDisplay.textContent = "Anonim";
-    }
+    document.getElementById("usernameDisplay").textContent = user?.username || "Anonim";
 
-    // =========================
-    // TAMPILKAN PERTANYAAN
-    // =========================
-    function showQuestion() {
-      questionText.textContent = questions[currentQuestion];
-      progressText.textContent = `Pernyataan ${currentQuestion + 1} dari ${questions.length}`;
-      const progressPercent = ((currentQuestion + 1) / questions.length) * 100;
-      progressBar.style.width = progressPercent + "%";
-
-      // Reset warna tombol
-      answerButtons.forEach(btn => {
-        btn.classList.remove("bg-teal-500", "text-white", "ring-2", "ring-teal-400");
-        btn.classList.add("bg-gray-100", "text-gray-700");
-
-        if (answers[currentQuestion] == btn.dataset.value) {
-          btn.classList.add("bg-teal-500", "text-white", "ring-2", "ring-teal-400");
-        }
-      });
-
-      prevBtn.disabled = currentQuestion === 0;
-      nextBtn.disabled = currentQuestion === questions.length - 1;
-    }
-
-    // =========================
-    // PILIH JAWABAN
-    // =========================
-    answerButtons.forEach(btn => {
-      btn.addEventListener("click", () => {
-        const value = parseInt(btn.dataset.value);
-        answers[currentQuestion] = value;
-
-        // Highlight pilihan aktif
-        answerButtons.forEach(b => b.classList.remove("bg-teal-500", "text-white", "ring-2"));
-        btn.classList.add("bg-teal-500", "text-white", "ring-2", "ring-teal-400");
-
-        // Pindah otomatis ke soal berikut
-        if (currentQuestion < questions.length - 1) {
-          setTimeout(() => nextQuestion(), 200);
-        }
-
-        // Cek semua terjawab
-        checkCompletion();
-      });
-    });
-
-    // =========================
-    // NAVIGASI
-    // =========================
-    function nextQuestion() {
-      if (currentQuestion < questions.length - 1) {
-        currentQuestion++;
-        showQuestion();
-      }
-    }
-
-    function prevQuestion() {
-      if (currentQuestion > 0) {
-        currentQuestion--;
-        showQuestion();
-      }
-    }
-
-    nextBtn.addEventListener("click", nextQuestion);
-    prevBtn.addEventListener("click", prevQuestion);
-
-    // =========================
-    // CEK KELENGKAPAN ASESMEN
-    // =========================
-    function checkCompletion() {
-      const answered = answers.filter(a => a !== null).length;
-      const allAnswered = answered === questions.length;
-
-      if (allAnswered) {
-        finishBtn.disabled = false;
-        finishBtn.classList.remove("bg-gray-400", "cursor-not-allowed");
-        finishBtn.classList.add("bg-teal-600", "hover:bg-teal-700", "text-white");
-      } else {
-        finishBtn.disabled = true;
-        finishBtn.classList.add("bg-gray-400", "cursor-not-allowed");
-        finishBtn.classList.remove("bg-teal-600", "hover:bg-teal-700", "text-white");
-      }
-    }
-
-    // Inisialisasi tampilan awal
-    showQuestion();
-    checkCompletion();
-
-    // =========================
-    // PROSES HASIL ASESMEN
-    // =========================
-    finishBtn.addEventListener("click", async () => {
-      if (answers.includes(null)) {
-        alert("⚠️ Harap jawab semua pertanyaan terlebih dahulu.");
-        return;
-      }
-
-      // Hitung total nilai per level
-      const levels = {};
-      for (let i = 0; i < 17; i++) {
-        const levelName = `Level ${i + 1}`;
-        const levelAnswers = answers.slice(i * 4, i * 4 + 4);
-        const total = levelAnswers.reduce((a, b) => a + b, 0);
-        levels[levelName] = total;
-      }
-
-      // Urutkan level dari tertinggi ke terendah
-      const sortedLevels = Object.entries(levels).sort((a, b) => b[1] - a[1]);
-      const topThree = sortedLevels.slice(0, 3);
-
-      // Simpan hasil ke Firebase
-      try {
-        await addDoc(collection(db, "asasmen_pengasuh"), {
-          username: user?.username || "Anonim",
-          role: user?.role || "pengasuh",
-          answers,
-          topThree,
-          createdAt: serverTimestamp()
-        });
-
-        showResult(topThree);
-      } catch (error) {
-        alert("❌ Gagal menyimpan hasil: " + error.message);
-      }
-    });
-
-    // =========================
-    // TAMPILKAN HASIL AKHIR
-    // =========================
-    function showResult(topThree) {
-      document.body.innerHTML = `
-        <div class="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-emerald-100 to-teal-200 p-6 text-center">
-          <img src="../assets/logoslu.png" class="w-16 h-16 mb-4" />
-          <h1 class="text-2xl font-bold text-teal-700 mb-4">🌿 Hasil Asasmen Pengasuh</h1>
-          <p class="text-gray-600 mb-6">Berikut 3 Level Spiritual Dominan Anda</p>
-          
-          <div class="bg-white p-6 rounded-2xl shadow-lg max-w-md w-full">
-            <ol class="text-left space-y-3 font-semibold text-gray-800">
-              <li>🥇 ${topThree[0][0]} — Nilai ${topThree[0][1]}</li>
-              <li>🥈 ${topThree[1][0]} — Nilai ${topThree[1][1]}</li>
-              <li>🥉 ${topThree[2][0]} — Nilai ${topThree[2][1]}</li>
-            </ol>
-          </div>
-
-          <p class="text-sm text-gray-500 mt-6">Hasil ini tersimpan di database dan bisa diakses oleh Mursyid.</p>
-
-          <a href="../index.html" class="mt-6 inline-block bg-teal-600 hover:bg-teal-700 text-white font-semibold px-6 py-3 rounded-xl">
-            ⬅ Kembali ke Menu Utama
-          </a>
-        </div>
-      `;
-    }
-    <script type="module">
-  import { app } from "../assets/firebase-config.js";
-  import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
-
-  const db = getFirestore(app);
-
-  document.addEventListener("DOMContentLoaded", () => {
-    const user = JSON.parse(localStorage.getItem("naikLevelUser"));
-    const usernameDisplay = document.getElementById("usernameDisplay");
-    usernameDisplay.textContent = user ? user.username : "Anonim";
-
-    let currentQuestion = 0;
+    let current = 0;
     let answers = Array(questions.length).fill(null);
 
     const questionText = document.getElementById("questionText");
-    const answerButtons = document.querySelectorAll(".answer-btn");
+    const answerBtns = document.querySelectorAll(".answer-btn");
     const nextBtn = document.getElementById("nextBtn");
     const prevBtn = document.getElementById("prevBtn");
     const finishBtn = document.getElementById("finishBtn");
-    const progressText = document.getElementById("progressText");
     const progressBar = document.getElementById("progressBar");
+    const progressText = document.getElementById("progressText");
 
-    function showQuestion() {
-      questionText.textContent = questions[currentQuestion];
-      progressText.textContent = `Pernyataan ${currentQuestion + 1} dari ${questions.length}`;
-      progressBar.style.width = ((currentQuestion + 1) / questions.length) * 100 + "%";
+    function renderQuestion() {
+      questionText.textContent = questions[current];
+      progressText.textContent = `Pernyataan ${current + 1} dari ${questions.length}`;
+      progressBar.style.width = ((current + 1) / questions.length) * 100 + "%";
 
-      answerButtons.forEach(btn => {
+      answerBtns.forEach(btn => {
         btn.classList.remove("bg-teal-500", "text-white");
-        if (answers[currentQuestion] == btn.dataset.value) {
-          btn.classList.add("bg-teal-500", "text-white");
-        }
+        if (answers[current] == btn.dataset.value) btn.classList.add("bg-teal-500", "text-white");
       });
 
-      prevBtn.disabled = currentQuestion === 0;
-      nextBtn.disabled = currentQuestion === questions.length - 1;
-      updateFinishButton();
+      prevBtn.disabled = current === 0;
+      nextBtn.disabled = current === questions.length - 1;
+      updateFinishBtn();
     }
 
-    function updateFinishButton() {
-      const allAnswered = answers.every(a => a !== null);
-      finishBtn.disabled = !allAnswered;
-      finishBtn.classList.toggle("bg-teal-600", allAnswered);
-      finishBtn.classList.toggle("bg-gray-400", !allAnswered);
+    function updateFinishBtn() {
+      const done = answers.every(a => a !== null);
+      finishBtn.disabled = !done;
+      finishBtn.classList.toggle("bg-gray-400", !done);
+      finishBtn.classList.toggle("bg-teal-600", done);
+      finishBtn.classList.toggle("cursor-not-allowed", !done);
     }
 
-    answerButtons.forEach(btn => {
+    answerBtns.forEach(btn => {
       btn.addEventListener("click", () => {
-        answers[currentQuestion] = parseInt(btn.dataset.value);
-        showQuestion();
-        if (currentQuestion < questions.length - 1) {
-          setTimeout(() => {
-            currentQuestion++;
-            showQuestion();
-          }, 200);
-        }
+        answers[current] = parseInt(btn.dataset.value);
+        renderQuestion();
+        if (current < questions.length - 1) setTimeout(() => { current++; renderQuestion(); }, 200);
       });
     });
 
-    nextBtn.addEventListener("click", () => {
-      if (currentQuestion < questions.length - 1) {
-        currentQuestion++;
-        showQuestion();
-      }
-    });
-
-    prevBtn.addEventListener("click", () => {
-      if (currentQuestion > 0) {
-        currentQuestion--;
-        showQuestion();
-      }
-    });
+    nextBtn.addEventListener("click", () => { if (current < questions.length - 1) { current++; renderQuestion(); } });
+    prevBtn.addEventListener("click", () => { if (current > 0) { current--; renderQuestion(); } });
 
     finishBtn.addEventListener("click", async () => {
-      if (answers.includes(null)) {
-        alert("Harap jawab semua pertanyaan terlebih dahulu.");
-        return;
-      }
+      if (answers.includes(null)) return alert("Harap jawab semua pertanyaan dulu.");
 
       const levels = {};
       for (let i = 0; i < 17; i++) {
-        const levelName = `Level ${i + 1}`;
-        const levelAnswers = answers.slice(i * 4, i * 4 + 4);
-        levels[levelName] = levelAnswers.reduce((a, b) => a + b, 0);
+        const total = answers.slice(i * 4, i * 4 + 4).reduce((a, b) => a + b, 0);
+        levels[`Level ${i + 1}`] = total;
       }
+      const sorted = Object.entries(levels).sort((a, b) => b[1] - a[1]);
+      const top3 = sorted.slice(0, 3);
 
-      const sortedLevels = Object.entries(levels).sort((a, b) => b[1] - a[1]);
-      const topThree = sortedLevels.slice(0, 3);
+      await addDoc(collection(db, "asasmen_pengasuh"), {
+        username: user?.username || "Anonim",
+        answers,
+        top3,
+        createdAt: serverTimestamp()
+      });
 
-      try {
-        await addDoc(collection(db, "asasmen_pengasuh"), {
-          username: user?.username || "Anonim",
-          role: user?.role || "pengasuh",
-          answers,
-          topThree,
-          createdAt: serverTimestamp()
-        });
-
-        document.body.innerHTML = `
-          <div class="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-emerald-100 to-teal-200 p-6 text-center">
-            <img src="../assets/logoslu.png" class="w-16 h-16 mb-4" />
-            <h1 class="text-2xl font-bold text-teal-700 mb-4">🌿 Hasil Asasmen Pengasuh</h1>
-            <p class="text-gray-600 mb-6">3 Level Spiritual Dominan Anda</p>
-            <div class="bg-white p-6 rounded-2xl shadow-lg max-w-md w-full">
-              <ol class="text-left space-y-3 font-semibold text-gray-800">
-                <li>🥇 ${topThree[0][0]} — Nilai ${topThree[0][1]}</li>
-                <li>🥈 ${topThree[1][0]} — Nilai ${topThree[1][1]}</li>
-                <li>🥉 ${topThree[2][0]} — Nilai ${topThree[2][1]}</li>
-              </ol>
-            </div>
-            <a href="../index.html" class="mt-6 inline-block bg-teal-600 hover:bg-teal-700 text-white font-semibold px-6 py-3 rounded-xl">
-              ⬅ Kembali ke Menu Utama
-            </a>
-          </div>`;
-      } catch (err) {
-        alert("Gagal menyimpan ke database: " + err.message);
-      }
+      document.body.innerHTML = `
+      <div class="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-emerald-100 to-teal-200 p-6 text-center">
+        <img src="../assets/logoslu.png" class="w-16 h-16 mb-4" />
+        <h1 class="text-2xl font-bold text-teal-700 mb-4">🌿 Hasil Asasmen Pengasuh</h1>
+        <p class="text-gray-600 mb-6">3 Level Spiritual Dominan Anda</p>
+        <div class="bg-white p-6 rounded-2xl shadow-lg max-w-md w-full">
+          <ol class="text-left space-y-3 font-semibold text-gray-800">
+            <li>🥇 ${top3[0][0]} — Nilai ${top3[0][1]}</li>
+            <li>🥈 ${top3[1][0]} — Nilai ${top3[1][1]}</li>
+            <li>🥉 ${top3[2][0]} — Nilai ${top3[2][1]}</li>
+          </ol>
+        </div>
+        <a href="../index.html" class="mt-6 inline-block bg-teal-600 hover:bg-teal-700 text-white font-semibold px-6 py-3 rounded-xl">
+          ⬅ Kembali ke Menu Utama
+        </a>
+      </div>`;
     });
 
-    showQuestion();
-  });
-</script>
-
+    renderQuestion();
   </script>
 </body>
 </html>
