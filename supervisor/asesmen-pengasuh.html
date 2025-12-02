@@ -1,59 +1,133 @@
-<script type="module">
-  import { db } from "../assets/firebase-config.js";
-  import { collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Supervisor - Asasmen Pengasuh</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
 
-  const tabelBody = document.getElementById("tabel-body");
-  const loading = document.getElementById("loading");
-  const dataContainer = document.getElementById("data-container");
-  const refreshBtn = document.getElementById("refresh-btn");
+<body class="bg-gradient-to-b from-sky-700 to-indigo-600 min-h-screen font-sans text-gray-800">
+  <!-- HEADER (kalau ini tidak tampil, berarti file di GitHub belum benar) -->
+  <header class="bg-white/20 backdrop-blur-md text-center text-white py-4 shadow">
+    <h1 class="text-2xl font-bold">📊 Dashboard Supervisor</h1>
+    <p class="text-sm opacity-90">Hasil Asasmen Spiritual Pengasuh</p>
+  </header>
 
-  async function loadData() {
-    loading.classList.remove("hidden");
-    dataContainer.classList.add("hidden");
-    tabelBody.innerHTML = "";
+  <main class="max-w-5xl mx-auto mt-8 bg-white p-8 rounded-2xl shadow-lg">
+    <div class="flex justify-between items-center mb-6">
+      <h2 class="text-xl font-bold text-emerald-700">Rekap Asasmen Pengasuh</h2>
+      <button id="refresh-btn" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg">
+        🔄 Refresh Data
+      </button>
+    </div>
 
-    try {
-      const q = query(collection(db, "asasmen_pengasuh"));
-      const snapshot = await getDocs(q);
-      if (snapshot.empty) {
-        loading.textContent = "Belum ada data asesmen.";
-        return;
+    <div id="loading" class="text-center text-gray-500">
+      ⏳ Memuat data dari Firebase...
+    </div>
+
+    <div id="data-container" class="hidden overflow-x-auto">
+      <table class="w-full text-sm border border-gray-300">
+        <thead class="bg-emerald-700 text-white">
+          <tr>
+            <th class="py-2 px-3 border">No</th>
+            <th class="py-2 px-3 border">Nama Pengasuh</th>
+            <th class="py-2 px-3 border">Tanggal</th>
+            <th class="py-2 px-3 border">Level Dominan 1</th>
+            <th class="py-2 px-3 border">Level Dominan 2</th>
+            <th class="py-2 px-3 border">Level Dominan 3</th>
+          </tr>
+        </thead>
+        <tbody id="tabel-body" class="text-center"></tbody>
+      </table>
+    </div>
+  </main>
+
+  <!-- FIREBASE SCRIPT -->
+  <script type="module">
+    // 1. Import Firebase v12.6.0 langsung dari CDN
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
+    import {
+      getFirestore,
+      collection,
+      getDocs,
+      query
+    } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
+
+    // 2. Konfigurasi Firebase (sama seperti di firebase-config.js)
+    const firebaseConfig = {
+      apiKey: "AIzaSyDuxvufRwadUsGh8-Kakl9KTG5ZGVcIoYQ",
+      authDomain: "naik-level-81580.firebaseapp.com",
+      projectId: "naik-level-81580",
+      storageBucket: "naik-level-81580.firebasestorage.app",
+      messagingSenderId: "319872430378",
+      appId: "1:319872430378:web:64db1b51b159d27d622e53",
+      measurementId: "G-RG7JS79MZ1"
+    };
+
+    // 3. Inisialisasi app & firestore
+    const app = initializeApp(firebaseConfig);
+    const db  = getFirestore(app);
+
+    // 4. Elemen DOM
+    const tabelBody    = document.getElementById("tabel-body");
+    const loading      = document.getElementById("loading");
+    const dataContainer= document.getElementById("data-container");
+    const refreshBtn   = document.getElementById("refresh-btn");
+
+    async function loadData() {
+      loading.classList.remove("hidden");
+      dataContainer.classList.add("hidden");
+      tabelBody.innerHTML = "";
+
+      try {
+        // Ambil semua dokumen dari koleksi 'asasmen_pengasuh'
+        const q = query(collection(db, "asasmen_pengasuh"));
+        const snapshot = await getDocs(q);
+
+        if (snapshot.empty) {
+          loading.textContent = "Belum ada data asesmen.";
+          return;
+        }
+
+        let no = 1;
+        snapshot.forEach(doc => {
+          const data  = doc.data();
+          const hasil = data.hasil || {};
+
+          // Urutkan level berdasarkan skor tertinggi
+          const sorted = Object.entries(hasil)
+            .map(([level, score]) => ({ level, score }))
+            .sort((a, b) => b.score - a.score)
+            .slice(0, 3);
+
+          const top1 = sorted[0] ? `${sorted[0].level} (${sorted[0].score})` : "-";
+          const top2 = sorted[1] ? `${sorted[1].level} (${sorted[1].score})` : "-";
+          const top3 = sorted[2] ? `${sorted[2].level} (${sorted[2].score})` : "-";
+
+          const tr = `
+            <tr class="odd:bg-gray-50 even:bg-gray-100 hover:bg-emerald-50 transition">
+              <td class="border px-3 py-2">${no++}</td>
+              <td class="border px-3 py-2 font-semibold text-left">${data.nama || "-"}</td>
+              <td class="border px-3 py-2">${data.tanggal || "-"}</td>
+              <td class="border px-3 py-2 text-emerald-700 font-semibold">${top1}</td>
+              <td class="border px-3 py-2">${top2}</td>
+              <td class="border px-3 py-2">${top3}</td>
+            </tr>
+          `;
+          tabelBody.innerHTML += tr;
+        });
+
+        loading.classList.add("hidden");
+        dataContainer.classList.remove("hidden");
+      } catch (err) {
+        console.error("❌ Error:", err);
+        loading.textContent = "Terjadi kesalahan saat memuat data.";
       }
-
-      let no = 1;
-      snapshot.forEach((doc) => {
-        const data = doc.data();
-        const hasil = data.hasil || {};
-
-        const sorted = Object.entries(hasil)
-          .map(([level, score]) => ({ level, score }))
-          .sort((a, b) => b.score - a.score)
-          .slice(0, 3);
-
-        const top1 = sorted[0] ? `${sorted[0].level} (${sorted[0].score})` : "-";
-        const top2 = sorted[1] ? `${sorted[1].level} (${sorted[1].score})` : "-";
-        const top3 = sorted[2] ? `${sorted[2].level} (${sorted[2].score})` : "-";
-
-        const tr = `
-          <tr class="odd:bg-gray-50 even:bg-gray-100 hover:bg-emerald-50 transition">
-            <td class="border px-3 py-2">${no++}</td>
-            <td class="border px-3 py-2 font-semibold text-left">${data.nama}</td>
-            <td class="border px-3 py-2">${data.tanggal}</td>
-            <td class="border px-3 py-2 text-emerald-700 font-semibold">${top1}</td>
-            <td class="border px-3 py-2">${top2}</td>
-            <td class="border px-3 py-2">${top3}</td>
-          </tr>`;
-        tabelBody.innerHTML += tr;
-      });
-
-      loading.classList.add("hidden");
-      dataContainer.classList.remove("hidden");
-    } catch (err) {
-      console.error("❌ Error:", err);
-      loading.textContent = "Terjadi kesalahan saat memuat data.";
     }
-  }
 
-  refreshBtn.addEventListener("click", loadData);
-  loadData();
-</script>
+    refreshBtn.addEventListener("click", loadData);
+    loadData();
+  </script>
+</body>
+</html>
