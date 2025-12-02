@@ -60,16 +60,109 @@
     ];
 
     const statements = [
-      "Saya merasa tidak layak membimbing orang lain karena merasa diri penuh kekurangan.",
-      "Saya memilih menarik diri dari peran kepengasuhan karena takut dinilai atau disalahpahami.",
-      "Saya merasa Allah mungkin sudah tidak ridha atas pengabdian saya di pesantren.",
-      "Saya merasa kehadiran saya justru membebani orang lain, bukan membawa manfaat.",
-      "Saya sering teringat kesalahan masa lalu dan merasa belum pantas diampuni.",
-      "Saya menolak ketenangan batin karena merasa belum menebus dosa atau kelalaian saya sebagai pengasuh.",
-      "Saya berbuat baik dengan keras terhadap diri sendiri, bukan karena cinta, tapi karena ingin menebus kesalahan.",
-      "Saya sulit memaafkan diri sendiri meski saya yakin Allah Maha Pengampun.",
-      // ... dst (semua 68 pernyataan tetap sama)
-    ];
+  // Level 1 — MALU (Shame)
+  "Dalam 1 bulan terakhir, saya merasa tidak layak membimbing orang lain karena merasa diri penuh kekurangan.",
+  "Dalam 1 bulan terakhir, saya memilih menarik diri dari peran kepengasuhan karena takut dinilai atau disalahpahami.",
+  "Dalam 1 bulan terakhir, saya merasa Allah mungkin sudah tidak ridha atas pengabdian saya di pesantren.",
+  "Dalam 1 bulan terakhir, saya merasa kehadiran saya justru membebani orang lain, bukan membawa manfaat.",
+
+  // Level 2 — RASA BERSALAH (Guilt)
+  "Dalam 1 bulan terakhir, saya sering teringat kesalahan masa lalu dan merasa belum pantas diampuni.",
+  "Dalam 1 bulan terakhir, saya menolak ketenangan batin karena merasa belum menebus dosa atau kelalaian saya sebagai pengasuh.",
+  "Dalam 1 bulan terakhir, saya berbuat baik dengan keras terhadap diri sendiri, bukan karena cinta, tapi karena ingin menebus kesalahan.",
+  "Dalam 1 bulan terakhir, saya sulit memaafkan diri sendiri meski saya yakin Allah Maha Pengampun.",
+
+  // Level 3 — APATI (Apathy)
+  "Dalam 1 bulan terakhir, saya menjalankan peran pengasuhan secara mekanis, tanpa semangat dan tanpa makna.",
+  "Dalam 1 bulan terakhir, saya merasa perubahan di pesantren percuma, seolah tidak ada yang bisa diperbaiki.",
+  "Dalam 1 bulan terakhir, saya kehilangan arah dan makna dari pengabdian saya.",
+  "Dalam 1 bulan terakhir, saya merasa mati rasa terhadap santri dan rekan kerja, seolah semua tidak lagi berarti.",
+
+  // Level 4 — BERDUKA (Grief)
+  "Dalam 1 bulan terakhir, saya sering mengenang masa lalu saat suasana pesantren terasa lebih baik.",
+  "Dalam 1 bulan terakhir, saya merasa kesedihan atas perubahan di pesantren sulit saya lepaskan.",
+  "Dalam 1 bulan terakhir, saya merasa kehilangan semangat lama dan sulit menemukan kembali gairah membina santri.",
+  "Dalam 1 bulan terakhir, saya sering menyesali keputusan atau sikap saya di masa lalu.",
+
+  // Level 5 — TAKUT (Fear)
+  "Dalam 1 bulan terakhir, saya menjalankan peran dengan cemas — takut salah, takut dikritik, atau takut mengecewakan pimpinan.",
+  "Dalam 1 bulan terakhir, saya menghindari menegur atau mengambil keputusan karena takut menimbulkan konflik.",
+  "Dalam 1 bulan terakhir, saya banyak memikirkan hal-hal buruk yang mungkin terjadi pada diri atau pesantren.",
+  "Dalam 1 bulan terakhir, saya menjaga jarak dengan santri atau guru karena takut terluka secara emosional.",
+
+  // Level 6 — KEINGINAN (Desire)
+  "Dalam 1 bulan terakhir, saya merasa gelisah bila program atau gagasan saya tidak dihargai.",
+  "Dalam 1 bulan terakhir, saya membandingkan diri dengan pengasuh lain dan merasa iri dengan pencapaian mereka.",
+  "Dalam 1 bulan terakhir, saya merasa terus mengejar sesuatu tapi tidak pernah benar-benar puas.",
+  "Dalam 1 bulan terakhir, saya merasa semangat saya muncul hanya bila ada pujian, penghargaan, atau perhatian dari orang lain.",
+
+  // Level 7 — MARAH (Anger)
+  "Dalam 1 bulan terakhir, saya mudah tersinggung terhadap ucapan, perilaku, atau keputusan orang lain di pesantren.",
+  "Dalam 1 bulan terakhir, suasana di sekitar saya sering menjadi tegang karena sikap saya yang keras atau reaktif.",
+  "Dalam 1 bulan terakhir, saya menyimpan kekecewaan pada orang yang tidak sejalan dengan saya.",
+  "Dalam 1 bulan terakhir, saya sering menyalahkan keadaan atau orang lain atas hasil yang tidak sesuai harapan.",
+
+  // Level 8 — BANGGA (Pride)
+  "Dalam 1 bulan terakhir, saya sulit menerima masukan dari pengurus atau rekan sejawat yang lebih muda.",
+  "Dalam 1 bulan terakhir, saya berusaha terlihat kuat dan sempurna agar tidak kehilangan wibawa.",
+  "Dalam 1 bulan terakhir, saya menilai orang lain dari penampilan dan hasil lahiriah lebih dari niat dan perjuangannya.",
+  "Dalam 1 bulan terakhir, saya cenderung mencari pembenaran diri saat salah, agar tetap terlihat benar di hadapan orang lain.",
+
+  // Level 9 — KEBERANIAN (Courage)
+  "Dalam 1 bulan terakhir, saya berani mengakui kesalahan di hadapan santri atau rekan kerja tanpa takut kehilangan wibawa.",
+  "Dalam 1 bulan terakhir, saya memandang setiap masalah di pesantren sebagai tantangan yang bisa memperkuat tim.",
+  "Dalam 1 bulan terakhir, saya mengambil langkah inisiatif untuk memperbaiki keadaan tanpa menunggu perintah.",
+  "Dalam 1 bulan terakhir, saya merasa yakin bahwa Allah akan menolong selama saya jujur dan berusaha.",
+
+  // Level 10 — NETRALITAS (Neutrality)
+  "Dalam 1 bulan terakhir, saya mampu menerima perubahan kebijakan atau dinamika pesantren dengan tenang.",
+  "Dalam 1 bulan terakhir, saya tidak terburu-buru menghakimi, tetapi berusaha memahami situasi dari berbagai sisi.",
+  "Dalam 1 bulan terakhir, saya bisa menyeimbangkan antara keseriusan bekerja dan waktu untuk istirahat.",
+  "Dalam 1 bulan terakhir, saya tidak berlebihan menyesali hasil yang kurang baik, karena percaya Allah menilai niat, bukan sekadar hasil.",
+
+  // Level 11 — KEMAUAN (Willingness)
+  "Dalam 1 bulan terakhir, saya bekerja dengan antusias tanpa menunggu perintah, karena ingin memberi manfaat.",
+  "Dalam 1 bulan terakhir, saya terus belajar hal-hal baru agar bisa menjadi pengasuh yang lebih bijak dan relevan.",
+  "Dalam 1 bulan terakhir, saya menghadapi masalah pengasuhan dengan sikap belajar, bukan keluhan.",
+  "Dalam 1 bulan terakhir, saya berusaha konsisten menjaga niat tulus dalam setiap pelayanan di pesantren.",
+
+  // Level 12 — PENERIMAAN (Acceptance)
+  "Dalam 1 bulan terakhir, saya mudah memaafkan guru, santri, atau staf yang berbuat salah.",
+  "Dalam 1 bulan terakhir, saya menerima diri saya apa adanya — dengan kelebihan dan keterbatasan.",
+  "Dalam 1 bulan terakhir, saya melihat hikmah dari setiap ujian, bahkan yang menyakitkan.",
+  "Dalam 1 bulan terakhir, saya tetap tenang di tengah konflik atau perbedaan pandangan.",
+
+  // Level 13 — AKAL BUDI (Reason)
+  "Dalam 1 bulan terakhir, saya mengambil keputusan dengan berpikir jernih, berdasarkan data dan hikmah.",
+  "Dalam 1 bulan terakhir, saya mencintai ilmu dan terus belajar dari berbagai sumber untuk memperluas wawasan pengasuhan.",
+  "Dalam 1 bulan terakhir, saya sering menemukan tanda kebesaran Allah dalam sistem kehidupan pesantren yang tertata.",
+  "Dalam 1 bulan terakhir, saya menyampaikan pendapat dengan tenang, rasional, dan menghormati perbedaan.",
+
+  // Level 14 — CINTA (Love)
+  "Dalam 1 bulan terakhir, saya memperlakukan santri dan guru dengan kasih dan kelembutan hati.",
+  "Dalam 1 bulan terakhir, saya mudah memaafkan tanpa menuntut balasan atau permintaan maaf.",
+  "Dalam 1 bulan terakhir, saya membantu dan melayani dengan niat tulus, bukan demi pujian.",
+  "Dalam 1 bulan terakhir, saya melihat keindahan dan kebaikan Allah dalam setiap aspek kehidupan pesantren.",
+
+  // Level 15 — SUKACITA (Joy)
+  "Dalam 1 bulan terakhir, saya merasa bahagia dan ringan dalam mengasuh, tanpa harus menunggu hasil besar.",
+  "Dalam 1 bulan terakhir, saya menerima ujian dan kritik dengan rasa syukur karena itu bagian dari tarbiyah Allah.",
+  "Dalam 1 bulan terakhir, saya membawa suasana cerah dan menenangkan bagi guru dan santri.",
+  "Dalam 1 bulan terakhir, saya menikmati momen sederhana di pesantren — kebersamaan, adzan, dan tawa santri — dengan rasa syukur.",
+
+  // Level 16 — DAMAI (Peace)
+  "Dalam 1 bulan terakhir, saya tetap tenang menghadapi berbagai persoalan pesantren.",
+  "Dalam 1 bulan terakhir, saya berhenti mengeluh dan lebih banyak berserah diri kepada Allah.",
+  "Dalam 1 bulan terakhir, kehadiran saya membuat orang lain merasa tenteram dan percaya diri.",
+  "Dalam 1 bulan terakhir, saya merasakan ibadah bukan sekadar tugas, tapi perjumpaan yang saya rindukan.",
+
+  // Level 17 — PENCERAHAN (Enlightenment)
+  "Dalam 1 bulan terakhir, saya merasa semua yang terjadi di pesantren adalah bagian dari kehendak Allah yang sempurna.",
+  "Dalam 1 bulan terakhir, saya melihat kehadiran Allah dalam setiap jiwa yang saya temui.",
+  "Dalam 1 bulan terakhir, saya hidup dengan tenang tanpa dorongan ego — cukup menjadi saluran kebaikan-Nya.",
+  "Dalam 1 bulan terakhir, saya merasa kehadiran saya membawa kedamaian tanpa perlu banyak bicara."
+];
+
 
     // =========================
     // 🔹 VARIABEL
