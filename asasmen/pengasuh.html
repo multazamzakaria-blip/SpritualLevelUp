@@ -3,184 +3,166 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Asasmen Pengasuh Naik Level</title>
+  <title>Asasmen Spiritual Pengasuh</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
-
-<body class="min-h-screen bg-gradient-to-br from-emerald-100 to-teal-200 font-sans text-gray-700">
+<body class="bg-gradient-to-b from-emerald-700 to-teal-500 min-h-screen font-sans">
 
   <!-- HEADER -->
-  <header class="max-w-3xl mx-auto py-6 text-center">
-    <div class="flex items-center justify-center gap-3 mb-3">
-      <img src="../assets/logoslu.png" alt="Logo Pesantren" class="w-12 h-12">
-      <h1 class="text-2xl font-bold text-teal-700">Asasmen Pengasuh Naik Level</h1>
-    </div>
-    <p class="text-gray-600 text-sm">Refleksi <span class="font-semibold">1 bulan</span> terakhir perjalanan batinmu</p>
+  <header class="bg-white/20 backdrop-blur-md shadow-lg text-center py-4 text-white">
+    <h1 class="text-2xl font-bold tracking-wide">🕊️ Asasmen Spiritual Pengasuh</h1>
+    <p class="text-sm opacity-90">Panduan Naik Level Kesadaran Spiritual</p>
   </header>
 
-  <!-- USER INFO -->
-  <section class="max-w-3xl mx-auto bg-white/70 backdrop-blur-md p-4 rounded-xl mb-4 text-center">
-    <div class="flex justify-between items-center text-sm">
-      <p>Pengasuh: <span id="usernameDisplay" class="font-semibold text-teal-700">-</span></p>
-      <a href="../index.html" class="text-teal-600 hover:underline">Kembali ke menu</a>
-    </div>
-    <p class="text-gray-500 text-xs mt-1">Jawab jujur untuk mengenali level batin dominanmu</p>
-  </section>
+  <!-- FORM -->
+  <main class="max-w-2xl mx-auto mt-8 bg-white p-6 rounded-2xl shadow-lg">
+    <h2 class="text-xl font-bold mb-4 text-center text-emerald-700">Isi Asasmen Pribadi</h2>
 
-  <!-- PROGRESS BAR -->
-  <section class="max-w-3xl mx-auto px-4 mb-4">
-    <p id="progressText" class="text-sm mb-1 text-gray-600">Pernyataan 1 dari 68</p>
-    <div class="w-full bg-gray-200 rounded-full h-2.5">
-      <div id="progressBar" class="bg-teal-500 h-2.5 rounded-full transition-all duration-300" style="width: 0%;"></div>
-    </div>
-  </section>
+    <form id="formAsasmen" class="space-y-4">
+      <div>
+        <label class="block font-semibold text-gray-700 mb-1">Nama Pengasuh:</label>
+        <input type="text" id="nama" required
+          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none">
+      </div>
 
-  <!-- CARD PERTANYAAN -->
-  <main id="questionBox" class="max-w-3xl mx-auto bg-white p-6 rounded-2xl shadow-lg text-center">
-    <p id="questionText" class="text-lg font-semibold text-gray-800 leading-relaxed mb-6">
-      Memuat pertanyaan...
-    </p>
+      <div>
+        <label class="block font-semibold text-gray-700 mb-1">Level Spiritualitas (1-10):</label>
+        <input type="number" id="level" min="1" max="10" required
+          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none">
+      </div>
 
-    <!-- PILIHAN JAWABAN -->
-    <div class="grid grid-cols-2 gap-4">
-      <button class="answer-btn bg-gray-100 py-3 rounded-xl border hover:bg-emerald-50" data-value="10">Tidak Pernah</button>
-      <button class="answer-btn bg-gray-100 py-3 rounded-xl border hover:bg-emerald-50" data-value="20">Kadang</button>
-      <button class="answer-btn bg-gray-100 py-3 rounded-xl border hover:bg-emerald-50" data-value="40">Sering</button>
-      <button class="answer-btn bg-gray-100 py-3 rounded-xl border hover:bg-emerald-50" data-value="80">Selalu</button>
-    </div>
+      <div>
+        <label class="block font-semibold text-gray-700 mb-1">Catatan Refleksi:</label>
+        <textarea id="refleksi" rows="3"
+          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none"
+          placeholder="Tuliskan refleksi spiritual Anda..."></textarea>
+      </div>
 
-    <!-- NAVIGASI -->
-    <div class="flex justify-between items-center mt-6">
-      <button id="prevBtn" class="px-4 py-2 border rounded-lg text-teal-600 hover:bg-teal-50" disabled>⬅ Sebelumnya</button>
-      <button id="nextBtn" class="px-4 py-2 bg-teal-500 text-white rounded-lg hover:bg-teal-600">Berikutnya ➡</button>
-    </div>
+      <div class="flex justify-between mt-6">
+        <button type="submit"
+          class="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-5 py-2 rounded-lg transition">💾 Simpan</button>
+
+        <button type="button" id="lihatHasil"
+          class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-5 py-2 rounded-lg transition">📊 Lihat Hasil</button>
+      </div>
+    </form>
   </main>
 
-  <!-- BUTTON SELESAI -->
-  <div class="text-center mt-6">
-    <button id="finishBtn" class="px-6 py-3 bg-gray-400 text-white font-semibold rounded-xl shadow-md cursor-not-allowed" disabled>
-      Selesai & Lihat Hasil
-    </button>
-    <p class="text-xs text-gray-500 mt-1">Tombol ini aktif setelah semua pernyataan terjawab.</p>
-  </div>
+  <!-- HASIL -->
+  <section id="hasilContainer" class="max-w-2xl mx-auto mt-8 hidden bg-white/90 p-6 rounded-2xl shadow-lg mb-8">
+    <h2 class="text-xl font-bold mb-4 text-center text-blue-700">📘 Hasil Asasmen Pengasuh</h2>
+    <div id="hasilTabel" class="overflow-x-auto"></div>
+  </section>
 
-  <footer class="text-center text-gray-500 text-sm mt-8 mb-4">
-    © 2025 Spiritual Level Up · Pesantren Fajrul Islam
-  </footer>
-
-  <!-- ========================= -->
-  <!-- JAVASCRIPT ASESMEN FIXED -->
-  <!-- ========================= -->
+  <!-- FIREBASE SDK -->
   <script type="module">
-    import { app } from "../assets/firebase-config.js";
-    import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
+    // Import modul Firebase versi 9+
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+    import { getFirestore, collection, addDoc, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
 
+    // Konfigurasi Firebase Abah
+    const firebaseConfig = {
+      apiKey: "AIzaSyDuxvufRwadUsGh8-Kakl9KTG5ZGVcIoYQ",
+      authDomain: "naik-level-81580.firebaseapp.com",
+      projectId: "naik-level-81580",
+      storageBucket: "naik-level-81580.firebasestorage.app",
+      messagingSenderId: "319872430378",
+      appId: "1:319872430378:web:64db1b51b159d27d622e53",
+      measurementId: "G-RG7JS79MZ1"
+    };
+
+    // Inisialisasi Firebase
+    const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    // Ambil nama pengguna
-    const user = JSON.parse(localStorage.getItem("naikLevelUser"));
-    document.getElementById("usernameDisplay").textContent = user?.username || "Anonim";
+    // Ambil elemen
+    const form = document.getElementById("formAsasmen");
+    const hasilContainer = document.getElementById("hasilContainer");
+    const hasilTabel = document.getElementById("hasilTabel");
+    const lihatHasilBtn = document.getElementById("lihatHasil");
 
-    // Pertanyaan
-    const questions = [];
-    for (let i = 1; i <= 68; i++) {
-      questions.push(`Pernyataan nomor ${i}.`);
-    }
+    // Fungsi: Simpan data ke Firestore
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
 
-    // Variabel dasar
-    let current = 0;
-    let answers = Array(questions.length).fill(null);
+      const nama = document.getElementById("nama").value.trim();
+      const level = parseInt(document.getElementById("level").value);
+      const refleksi = document.getElementById("refleksi").value.trim();
+      const tanggal = new Date().toLocaleString("id-ID");
 
-    const qText = document.getElementById("questionText");
-    const btns = document.querySelectorAll(".answer-btn");
-    const next = document.getElementById("nextBtn");
-    const prev = document.getElementById("prevBtn");
-    const finish = document.getElementById("finishBtn");
-    const pText = document.getElementById("progressText");
-    const pBar = document.getElementById("progressBar");
-
-    // Render pertanyaan
-    function showQ() {
-      qText.textContent = questions[current];
-      pText.textContent = `Pernyataan ${current + 1} dari ${questions.length}`;
-      pBar.style.width = ((current + 1) / questions.length) * 100 + "%";
-
-      btns.forEach(b => {
-        b.classList.remove("bg-teal-500", "text-white");
-        if (answers[current] == b.dataset.value) b.classList.add("bg-teal-500", "text-white");
-      });
-
-      prev.disabled = current === 0;
-      next.disabled = current === questions.length - 1;
-
-      checkComplete();
-    }
-
-    // Cek semua dijawab
-    function checkComplete() {
-      const done = answers.every(a => a !== null);
-      finish.disabled = !done;
-      finish.classList.toggle("bg-teal-600", done);
-      finish.classList.toggle("bg-gray-400", !done);
-      finish.classList.toggle("cursor-not-allowed", !done);
-    }
-
-    // Event tombol jawaban
-    btns.forEach(b => {
-      b.addEventListener("click", () => {
-        answers[current] = parseInt(b.dataset.value);
-        showQ();
-        if (current < questions.length - 1) {
-          setTimeout(() => {
-            current++;
-            showQ();
-          }, 200);
-        }
-      });
-    });
-
-    next.addEventListener("click", () => { if (current < questions.length - 1) { current++; showQ(); } });
-    prev.addEventListener("click", () => { if (current > 0) { current--; showQ(); } });
-
-    // Selesai
-    finish.addEventListener("click", async () => {
-      if (answers.includes(null)) return alert("Harap jawab semua pertanyaan dulu.");
-
-      const levels = {};
-      for (let i = 0; i < 17; i++) {
-        const total = answers.slice(i * 4, i * 4 + 4).reduce((a, b) => a + b, 0);
-        levels[`Level ${i + 1}`] = total;
+      if (!nama || !level) {
+        alert("Nama dan level wajib diisi!");
+        return;
       }
 
-      const sorted = Object.entries(levels).sort((a, b) => b[1] - a[1]);
-      const top3 = sorted.slice(0, 3);
-
-      await addDoc(collection(db, "asasmen_pengasuh"), {
-        username: user?.username || "Anonim",
-        answers,
-        top3,
-        createdAt: serverTimestamp()
-      });
-
-      document.body.innerHTML = `
-      <div class="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-emerald-100 to-teal-200 p-6 text-center">
-        <img src="../assets/logoslu.png" class="w-16 h-16 mb-4" />
-        <h1 class="text-2xl font-bold text-teal-700 mb-4">🌿 Hasil Asasmen Pengasuh</h1>
-        <p class="text-gray-600 mb-6">3 Level Spiritual Dominan Anda</p>
-        <div class="bg-white p-6 rounded-2xl shadow-lg max-w-md w-full">
-          <ol class="text-left space-y-3 font-semibold text-gray-800">
-            <li>🥇 ${top3[0][0]} — Nilai ${top3[0][1]}</li>
-            <li>🥈 ${top3[1][0]} — Nilai ${top3[1][1]}</li>
-            <li>🥉 ${top3[2][0]} — Nilai ${top3[2][1]}</li>
-          </ol>
-        </div>
-        <a href="../index.html" class="mt-6 inline-block bg-teal-600 hover:bg-teal-700 text-white font-semibold px-6 py-3 rounded-xl">
-          ⬅ Kembali ke Menu Utama
-        </a>
-      </div>`;
+      try {
+        await addDoc(collection(db, "asasmen_pengasuh"), {
+          nama,
+          level,
+          refleksi,
+          tanggal
+        });
+        form.reset();
+        alert("✅ Data berhasil disimpan ke Firebase!");
+      } catch (error) {
+        console.error("❌ Gagal menyimpan data:", error);
+        alert("Terjadi kesalahan saat menyimpan data.");
+      }
     });
 
-    showQ();
+    // Fungsi: Menampilkan data dari Firestore
+    lihatHasilBtn.addEventListener("click", async () => {
+      hasilContainer.classList.add("hidden");
+      hasilTabel.innerHTML = `<p class='text-center text-gray-500'>⏳ Memuat data...</p>`;
+
+      try {
+        const q = query(collection(db, "asasmen_pengasuh"), orderBy("tanggal", "desc"));
+        const querySnapshot = await getDocs(q);
+
+        if (querySnapshot.empty) {
+          hasilTabel.innerHTML = `<p class='text-center text-gray-500'>Belum ada data.</p>`;
+          return;
+        }
+
+        let tabelHTML = `
+          <table class="w-full border border-gray-300 text-sm">
+            <thead class="bg-emerald-600 text-white">
+              <tr>
+                <th class="py-2 px-3 border">No</th>
+                <th class="py-2 px-3 border">Nama</th>
+                <th class="py-2 px-3 border">Level</th>
+                <th class="py-2 px-3 border">Refleksi</th>
+                <th class="py-2 px-3 border">Tanggal</th>
+              </tr>
+            </thead>
+            <tbody>
+        `;
+
+        let i = 1;
+        querySnapshot.forEach((doc) => {
+          const data = doc.data();
+          tabelHTML += `
+            <tr class="odd:bg-gray-50 even:bg-gray-100 hover:bg-emerald-50 transition">
+              <td class="border px-3 py-2 text-center">${i++}</td>
+              <td class="border px-3 py-2">${data.nama}</td>
+              <td class="border px-3 py-2 text-center font-semibold">${data.level}</td>
+              <td class="border px-3 py-2">${data.refleksi || "-"}</td>
+              <td class="border px-3 py-2 text-center">${data.tanggal}</td>
+            </tr>
+          `;
+        });
+
+        tabelHTML += "</tbody></table>";
+        hasilTabel.innerHTML = tabelHTML;
+        hasilContainer.classList.remove("hidden");
+        window.scrollTo({ top: hasilContainer.offsetTop, behavior: "smooth" });
+
+      } catch (error) {
+        console.error("❌ Gagal memuat data:", error);
+        hasilTabel.innerHTML = `<p class='text-center text-red-500'>Gagal memuat data dari Firebase.</p>`;
+      }
+    });
   </script>
+
 </body>
 </html>
