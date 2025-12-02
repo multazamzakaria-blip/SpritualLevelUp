@@ -8,18 +8,23 @@
 </head>
 
 <body class="bg-gradient-to-b from-sky-700 to-indigo-600 min-h-screen font-sans text-gray-800">
-  <!-- HEADER (kalau ini tidak tampil, berarti file di GitHub belum benar) -->
+  <!-- HEADER -->
   <header class="bg-white/20 backdrop-blur-md text-center text-white py-4 shadow">
     <h1 class="text-2xl font-bold">📊 Dashboard Supervisor</h1>
     <p class="text-sm opacity-90">Hasil Asasmen Spiritual Pengasuh</p>
   </header>
 
   <main class="max-w-5xl mx-auto mt-8 bg-white p-8 rounded-2xl shadow-lg">
-    <div class="flex justify-between items-center mb-6">
+    <div class="flex flex-wrap justify-between items-center gap-3 mb-6">
       <h2 class="text-xl font-bold text-emerald-700">Rekap Asasmen Pengasuh</h2>
-      <button id="refresh-btn" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg">
-        🔄 Refresh Data
-      </button>
+      <div class="flex flex-wrap gap-2">
+        <button id="refresh-btn" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg transition">
+          🔄 Refresh Data
+        </button>
+        <button id="delete-db-btn" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition">
+          🗑️ Hapus Database
+        </button>
+      </div>
     </div>
 
     <div id="loading" class="text-center text-gray-500">
@@ -45,16 +50,17 @@
 
   <!-- FIREBASE SCRIPT -->
   <script type="module">
-    // 1. Import Firebase v12.6.0 langsung dari CDN
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
     import {
       getFirestore,
       collection,
       getDocs,
+      deleteDoc,
+      doc,
       query
     } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
 
-    // 2. Konfigurasi Firebase (sama seperti di firebase-config.js)
+    // Konfigurasi Firebase
     const firebaseConfig = {
       apiKey: "AIzaSyDuxvufRwadUsGh8-Kakl9KTG5ZGVcIoYQ",
       authDomain: "naik-level-81580.firebaseapp.com",
@@ -65,23 +71,26 @@
       measurementId: "G-RG7JS79MZ1"
     };
 
-    // 3. Inisialisasi app & firestore
+    // Inisialisasi Firebase
     const app = initializeApp(firebaseConfig);
     const db  = getFirestore(app);
 
-    // 4. Elemen DOM
-    const tabelBody    = document.getElementById("tabel-body");
-    const loading      = document.getElementById("loading");
-    const dataContainer= document.getElementById("data-container");
-    const refreshBtn   = document.getElementById("refresh-btn");
+    // Elemen DOM
+    const tabelBody     = document.getElementById("tabel-body");
+    const loading       = document.getElementById("loading");
+    const dataContainer = document.getElementById("data-container");
+    const refreshBtn    = document.getElementById("refresh-btn");
+    const deleteDbBtn   = document.getElementById("delete-db-btn");
 
+    // ===================================
+    // 🔹 Fungsi memuat data dari Firestore
+    // ===================================
     async function loadData() {
       loading.classList.remove("hidden");
       dataContainer.classList.add("hidden");
       tabelBody.innerHTML = "";
 
       try {
-        // Ambil semua dokumen dari koleksi 'asasmen_pengasuh'
         const q = query(collection(db, "asasmen_pengasuh"));
         const snapshot = await getDocs(q);
 
@@ -91,11 +100,10 @@
         }
 
         let no = 1;
-        snapshot.forEach(doc => {
-          const data  = doc.data();
+        snapshot.forEach(docSnap => {
+          const data = docSnap.data();
           const hasil = data.hasil || {};
 
-          // Urutkan level berdasarkan skor tertinggi
           const sorted = Object.entries(hasil)
             .map(([level, score]) => ({ level, score }))
             .sort((a, b) => b.score - a.score)
@@ -126,7 +134,43 @@
       }
     }
 
+    // ===================================
+    // 🗑️ Fungsi hapus seluruh data
+    // ===================================
+    async function deleteAllData() {
+      const konfirmasi1 = confirm("⚠️ Anda akan menghapus SELURUH data Asasmen Pengasuh dari database. Lanjutkan?");
+      if (!konfirmasi1) return;
+      const konfirmasi2 = confirm("❗ Konfirmasi ulang: Semua data akan HILANG PERMANEN. Apakah Anda yakin?");
+      if (!konfirmasi2) return;
+
+      try {
+        const q = query(collection(db, "asasmen_pengasuh"));
+        const snapshot = await getDocs(q);
+
+        if (snapshot.empty) {
+          alert("Tidak ada data yang perlu dihapus.");
+          return;
+        }
+
+        let count = 0;
+        for (const docSnap of snapshot.docs) {
+          await deleteDoc(doc(db, "asasmen_pengasuh", docSnap.id));
+          count++;
+        }
+
+        alert(`✅ ${count} data berhasil dihapus.`);
+        loadData();
+      } catch (err) {
+        console.error("❌ Gagal menghapus data:", err);
+        alert("Terjadi kesalahan saat menghapus data.");
+      }
+    }
+
+    // Event listeners
     refreshBtn.addEventListener("click", loadData);
+    deleteDbBtn.addEventListener("click", deleteAllData);
+
+    // Load data pertama kali
     loadData();
   </script>
 </body>
