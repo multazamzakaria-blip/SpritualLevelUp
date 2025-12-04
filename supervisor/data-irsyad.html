@@ -5,6 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Irsyad Supervisor - Naik Level</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .active-tab {
+      background-color: #047857;
+      color: white;
+    }
+  </style>
 </head>
 
 <body class="min-h-screen bg-gradient-to-b from-emerald-100 to-teal-200 font-sans text-slate-700 flex flex-col">
@@ -13,8 +19,8 @@
   <header class="bg-emerald-700 text-white py-4 shadow-md">
     <div class="max-w-4xl mx-auto px-4 flex justify-between items-center">
       <div>
-        <h1 class="text-lg sm:text-xl font-bold">🕊️ Kirim Irsyad Spiritual</h1>
-        <p class="text-sm opacity-90">Supervisor dapat mengirim pesan bimbingan ke salik tertentu atau ke semua</p>
+        <h1 class="text-lg sm:text-xl font-bold">🕊️ Irsyad Supervisor</h1>
+        <p class="text-sm opacity-90">Kirim dan pantau pesan Irsyad untuk para Salik</p>
       </div>
       <a href="index.html" class="bg-white text-emerald-700 px-3 py-1.5 rounded-lg text-sm font-semibold shadow hover:bg-emerald-50">
         🏠 Dashboard
@@ -22,11 +28,18 @@
     </div>
   </header>
 
+  <!-- TAB NAVIGATION -->
+  <div class="max-w-3xl mx-auto w-full px-4 mt-4 flex gap-2">
+    <button id="tabKirim" class="flex-1 py-2 rounded-lg font-semibold shadow active-tab">✉️ Kirim Irsyad</button>
+    <button id="tabData" class="flex-1 py-2 rounded-lg font-semibold shadow bg-white text-emerald-700">📜 Data Irsyad</button>
+  </div>
+
   <!-- MAIN CONTENT -->
   <main class="flex-1 w-full max-w-3xl mx-auto px-4 py-6">
 
-    <!-- FORM -->
-    <form id="irsyadForm" class="bg-white rounded-2xl shadow-lg p-6 space-y-5">
+    <!-- === TAB 1: FORM KIRIM IRSYAD === -->
+    <div id="tabKirimContent" class="bg-white rounded-2xl shadow-lg p-6 space-y-5">
+
       <!-- Tujuan -->
       <div>
         <label class="block text-sm font-semibold text-emerald-700 mb-1">Tujuan Irsyad</label>
@@ -62,16 +75,21 @@
       </div>
 
       <div class="flex justify-end">
-        <button type="submit"
-          class="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2 rounded-lg font-semibold shadow">
+        <button id="btnKirim" class="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2 rounded-lg font-semibold shadow">
           📩 Kirim Irsyad
         </button>
       </div>
-    </form>
 
-    <!-- NOTIF -->
-    <div id="notif"
-      class="hidden mt-4 text-center text-sm font-semibold text-emerald-700 bg-emerald-100 border border-emerald-300 rounded-lg p-3"></div>
+      <div id="notif"
+        class="hidden mt-4 text-center text-sm font-semibold text-emerald-700 bg-emerald-100 border border-emerald-300 rounded-lg p-3"></div>
+    </div>
+
+    <!-- === TAB 2: DATA IRSYAD === -->
+    <div id="tabDataContent" class="hidden bg-white rounded-2xl shadow-lg p-6 space-y-5">
+      <h2 class="text-lg font-semibold text-emerald-700 mb-3">📜 Daftar Irsyad yang Telah Dikirim</h2>
+      <div id="irsyadList">🔄 Memuat data Irsyad...</div>
+    </div>
+
   </main>
 
   <footer class="w-full text-center py-3 text-xs text-emerald-900">
@@ -85,10 +103,13 @@
       getFirestore,
       collection,
       addDoc,
-      serverTimestamp
+      getDocs,
+      serverTimestamp,
+      query,
+      orderBy
     } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
 
-    // 🔥 Konfigurasi Firebase (sesuai project Abah)
+    // Konfigurasi Firebase
     const firebaseConfig = {
       apiKey: "AIzaSyDuxvufRwadUsGh8-Kakl9KTG5ZGVcIoYQ",
       authDomain: "naik-level-81580.firebaseapp.com",
@@ -103,13 +124,17 @@
     const db = getFirestore(app);
 
     // Elemen DOM
-    const irsyadForm = document.getElementById("irsyadForm");
+    const tabKirim = document.getElementById("tabKirim");
+    const tabData = document.getElementById("tabData");
+    const tabKirimContent = document.getElementById("tabKirimContent");
+    const tabDataContent = document.getElementById("tabDataContent");
     const targetType = document.getElementById("targetType");
-    const targetUser = document.getElementById("targetUser");
     const personalTargetBox = document.getElementById("personalTargetBox");
+    const targetUser = document.getElementById("targetUser");
     const notif = document.getElementById("notif");
+    const irsyadList = document.getElementById("irsyadList");
 
-    // 🔹 Daftar salik manual (username dan nama tampilan)
+    // Daftar salik manual
     const salikList = [
       { username: "meilisa", nama: "Meilisa" },
       { username: "fatimah", nama: "Fatimah" },
@@ -132,12 +157,7 @@
       { username: "dini", nama: "Dini" }
     ];
 
-    // Ubah tampilan form sesuai jenis target
-    targetType.addEventListener("change", () => {
-      personalTargetBox.style.display = targetType.value === "personal" ? "block" : "none";
-    });
-
-    // 🧠 Muat daftar salik ke dropdown
+    // Load daftar salik
     function loadUsers() {
       targetUser.innerHTML = `<option value="">-- Pilih Salik --</option>`;
       salikList.forEach(salik => {
@@ -148,17 +168,18 @@
       });
     }
 
-    // 💌 Kirim Irsyad ke Firestore
-    irsyadForm.addEventListener("submit", async (e) => {
-      e.preventDefault();
+    // Ubah tampilan form sesuai jenis target
+    targetType.addEventListener("change", () => {
+      personalTargetBox.style.display = targetType.value === "personal" ? "block" : "none";
+    });
 
+    // Kirim Irsyad
+    document.getElementById("btnKirim").addEventListener("click", async () => {
       const type = targetType.value;
       const judul = document.getElementById("judul").value.trim();
       const pesan = document.getElementById("pesan").value.trim();
       const penerima = type === "all" ? "ALL" : targetUser.value;
-
-      // Cari nama penerima untuk disimpan juga
-      const targetNama = type === "all" ? "Semua Salik" : (salikList.find(s => s.username === penerima)?.nama || "");
+      const penerimaNama = type === "all" ? "Semua Salik" : (salikList.find(s => s.username === penerima)?.nama || "");
 
       if (type === "personal" && !penerima) {
         alert("Silakan pilih salik terlebih dahulu.");
@@ -169,27 +190,72 @@
         await addDoc(collection(db, "irsyad"), {
           judul,
           pesan,
-          penerima,                   // username
-          penerimaNama: targetNama,    // nama salik untuk ditampilkan
+          penerima,
+          penerimaNama,
           jenis: type,
           dari: "Supervisor (Mursyid) Abah Multazam Zakaria",
           createdAt: serverTimestamp()
         });
 
-        notif.textContent = "✅ Pesan irsyad berhasil dikirim.";
+        notif.textContent = "✅ Pesan Irsyad berhasil dikirim.";
         notif.classList.remove("hidden");
-        irsyadForm.reset();
+        document.getElementById("judul").value = "";
+        document.getElementById("pesan").value = "";
         targetType.value = "personal";
         personalTargetBox.style.display = "block";
         loadUsers();
+        loadIrsyadList();
       } catch (err) {
-        console.error("❌ Gagal mengirim irsyad:", err);
-        notif.textContent = "❌ Terjadi kesalahan saat mengirim irsyad.";
+        console.error("❌ Gagal mengirim:", err);
+        notif.textContent = "❌ Terjadi kesalahan saat mengirim Irsyad.";
         notif.classList.remove("hidden");
       }
     });
 
-    // Jalankan saat halaman dimuat
+    // Muat daftar Irsyad yang sudah dikirim
+    async function loadIrsyadList() {
+      irsyadList.innerHTML = "🔄 Memuat data...";
+      const q = query(collection(db, "irsyad"), orderBy("createdAt", "desc"));
+      const snap = await getDocs(q);
+
+      if (snap.empty) {
+        irsyadList.innerHTML = "<p>Belum ada Irsyad yang dikirim 🌿</p>";
+        return;
+      }
+
+      let html = "";
+      snap.forEach(doc => {
+        const d = doc.data();
+        const tanggal = d.createdAt ? new Date(d.createdAt.toDate()).toLocaleString() : "-";
+        html += `
+          <div class="border border-emerald-200 rounded-lg p-3 mb-2 bg-emerald-50">
+            <strong>${d.judul || "(Tanpa Judul)"}</strong><br>
+            <small>Untuk: ${d.penerimaNama || d.penerima}</small><br>
+            <p class="mt-1 text-sm">${d.pesan}</p>
+            <small class="text-gray-500">${tanggal}</small>
+          </div>
+        `;
+      });
+      irsyadList.innerHTML = html;
+    }
+
+    // Navigasi Tab
+    tabKirim.addEventListener("click", () => {
+      tabKirim.classList.add("active-tab");
+      tabData.classList.remove("active-tab");
+      tabKirimContent.classList.remove("hidden");
+      tabDataContent.classList.add("hidden");
+    });
+
+    tabData.addEventListener("click", () => {
+      tabData.classList.add("active-tab");
+      tabKirim.classList.remove("active-tab");
+      tabDataContent.classList.remove("hidden");
+      tabKirimContent.classList.add("hidden");
+      loadIrsyadList();
+    });
+
+    // Jalankan awal
     loadUsers();
   </script>
 </body>
