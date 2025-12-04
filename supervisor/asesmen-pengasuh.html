@@ -14,26 +14,22 @@
     <p class="text-sm opacity-90">Hasil Asasmen Spiritual Pengasuh</p>
   </header>
 
-  <main class="max-w-5xl mx-auto mt-8 bg-white p-8 rounded-2xl shadow-lg">
+  <main class="max-w-6xl mx-auto mt-8 bg-white p-8 rounded-2xl shadow-lg">
     <div class="flex flex-wrap justify-between items-center gap-3 mb-6">
       <h2 class="text-xl font-bold text-emerald-700">Rekap Asasmen Pengasuh</h2>
       <div class="flex flex-wrap gap-2">
         <button id="refresh-btn" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg transition">
-          🔄 Refresh Data
+          🔄 Refresh
         </button>
         <button id="toggle-delete-panel" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition">
-          🗑️ Hapus Database
+          ⚙️ Filter / Hapus
         </button>
       </div>
     </div>
 
-    <!-- PANEL HAPUS DATABASE -->
-    <div id="delete-panel" class="hidden bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
-      <h3 class="font-semibold text-red-700 mb-2">⚠️ Hapus Data Berdasarkan Rentang Waktu</h3>
-      <p class="text-sm text-gray-700 mb-4">
-        Pilih tanggal <strong>awal</strong> dan <strong>akhir</strong> untuk menghapus data asesmen yang dibuat di rentang waktu tersebut.
-      </p>
-
+    <!-- PANEL FILTER & HAPUS -->
+    <div id="delete-panel" class="hidden bg-gray-50 border border-gray-200 rounded-lg p-4 mb-6">
+      <h3 class="font-semibold text-emerald-700 mb-2">🗓️ Filter & Hapus Berdasarkan Tanggal</h3>
       <div class="flex flex-wrap gap-3 mb-4">
         <div>
           <label for="startDate" class="block text-xs font-semibold text-gray-600 mb-1">Dari Tanggal:</label>
@@ -45,10 +41,14 @@
         </div>
       </div>
 
-      <button id="delete-range-btn"
-        class="bg-red-600 hover:bg-red-700 text-white px-5 py-2 rounded-md shadow transition">
-        🚨 Hapus Data Dalam Rentang Ini
-      </button>
+      <div class="flex flex-wrap gap-3">
+        <button id="filter-btn" class="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2 rounded-md shadow transition">
+          🔍 Tampilkan Hanya Rentang Ini
+        </button>
+        <button id="delete-range-btn" class="bg-red-600 hover:bg-red-700 text-white px-5 py-2 rounded-md shadow transition">
+          🚨 Hapus Data Dalam Rentang Ini
+        </button>
+      </div>
     </div>
 
     <!-- LOADING -->
@@ -67,6 +67,7 @@
             <th class="py-2 px-3 border">Level Dominan 1</th>
             <th class="py-2 px-3 border">Level Dominan 2</th>
             <th class="py-2 px-3 border">Level Dominan 3</th>
+            <th class="py-2 px-3 border">Aksi</th>
           </tr>
         </thead>
         <tbody id="tabel-body" class="text-center"></tbody>
@@ -97,11 +98,9 @@
       measurementId: "G-RG7JS79MZ1"
     };
 
-    // Inisialisasi Firebase
     const app = initializeApp(firebaseConfig);
     const db  = getFirestore(app);
 
-    // Elemen DOM
     const tabelBody       = document.getElementById("tabel-body");
     const loading         = document.getElementById("loading");
     const dataContainer   = document.getElementById("data-container");
@@ -109,31 +108,39 @@
     const toggleDeleteBtn = document.getElementById("toggle-delete-panel");
     const deletePanel     = document.getElementById("delete-panel");
     const deleteRangeBtn  = document.getElementById("delete-range-btn");
+    const filterBtn       = document.getElementById("filter-btn");
     const startDateInput  = document.getElementById("startDate");
     const endDateInput    = document.getElementById("endDate");
 
-    // ============================
-    // 🔹 Load data dari Firestore
-    // ============================
+    let semuaData = []; // cache semua data dari Firestore
+
+    // 🔹 LOAD DATA
     async function loadData() {
       loading.classList.remove("hidden");
       dataContainer.classList.add("hidden");
       tabelBody.innerHTML = "";
 
-      try {
-        const q = query(collection(db, "asasmen_pengasuh"));
-        const snapshot = await getDocs(q);
+      const q = query(collection(db, "asasmen_pengasuh"));
+      const snapshot = await getDocs(q);
+      semuaData = [];
 
-        if (snapshot.empty) {
-          loading.textContent = "Belum ada data asesmen.";
-          return;
-        }
+      snapshot.forEach(docSnap => {
+        semuaData.push({ id: docSnap.id, ...docSnap.data() });
+      });
 
+      tampilkanData(semuaData);
+    }
+
+    // 🔹 TAMPILKAN DATA DI TABEL
+    function tampilkanData(dataList) {
+      tabelBody.innerHTML = "";
+
+      if (dataList.length === 0) {
+        tabelBody.innerHTML = `<tr><td colspan="7" class="py-4 text-gray-500 italic">Tidak ada data ditemukan.</td></tr>`;
+      } else {
         let no = 1;
-        snapshot.forEach(docSnap => {
-          const data = docSnap.data();
+        dataList.forEach(data => {
           const hasil = data.hasil || {};
-
           const sorted = Object.entries(hasil)
             .map(([level, score]) => ({ level, score }))
             .sort((a, b) => b.score - a.score)
@@ -143,92 +150,102 @@
           const top2 = sorted[1] ? `${sorted[1].level} (${sorted[1].score})` : "-";
           const top3 = sorted[2] ? `${sorted[2].level} (${sorted[2].score})` : "-";
 
-          const tr = `
-            <tr class="odd:bg-gray-50 even:bg-gray-100 hover:bg-emerald-50 transition">
-              <td class="border px-3 py-2">${no++}</td>
-              <td class="border px-3 py-2 font-semibold text-left">${data.nama || "-"}</td>
-              <td class="border px-3 py-2">${data.tanggal || "-"}</td>
-              <td class="border px-3 py-2 text-emerald-700 font-semibold">${top1}</td>
-              <td class="border px-3 py-2">${top2}</td>
-              <td class="border px-3 py-2">${top3}</td>
-            </tr>
+          const tr = document.createElement("tr");
+          tr.className = "odd:bg-gray-50 even:bg-gray-100 hover:bg-emerald-50 transition";
+
+          tr.innerHTML = `
+            <td class="border px-3 py-2">${no++}</td>
+            <td class="border px-3 py-2 text-left font-semibold">${data.nama || "-"}</td>
+            <td class="border px-3 py-2">${data.tanggal || "-"}</td>
+            <td class="border px-3 py-2 text-emerald-700 font-semibold">${top1}</td>
+            <td class="border px-3 py-2">${top2}</td>
+            <td class="border px-3 py-2">${top3}</td>
+            <td class="border px-3 py-2">
+              <button class="hapus-btn bg-red-500 hover:bg-red-600 text-white text-xs px-3 py-1 rounded-md" data-id="${data.id}">
+                🗑️ Hapus
+              </button>
+            </td>
           `;
-          tabelBody.innerHTML += tr;
+          tabelBody.appendChild(tr);
         });
-
-        loading.classList.add("hidden");
-        dataContainer.classList.remove("hidden");
-      } catch (err) {
-        console.error("❌ Error:", err);
-        loading.textContent = "Terjadi kesalahan saat memuat data.";
-      }
-    }
-
-    // ============================
-    // 🧹 Panel hapus database toggle
-    // ============================
-    toggleDeleteBtn.addEventListener("click", () => {
-      deletePanel.classList.toggle("hidden");
-    });
-
-    // ============================
-    // 🗑️ Hapus berdasarkan rentang waktu
-    // ============================
-    async function deleteByDateRange() {
-      const startDate = startDateInput.value;
-      const endDate   = endDateInput.value;
-
-      if (!startDate || !endDate) {
-        alert("⚠️ Silakan pilih tanggal awal dan akhir terlebih dahulu.");
-        return;
       }
 
-      if (startDate > endDate) {
-        alert("⚠️ Tanggal awal tidak boleh setelah tanggal akhir.");
-        return;
-      }
+      loading.classList.add("hidden");
+      dataContainer.classList.remove("hidden");
 
-      const konfirmasi1 = confirm(`Anda akan menghapus data antara ${startDate} dan ${endDate}. Lanjutkan?`);
-      if (!konfirmasi1) return;
-      const konfirmasi2 = confirm("❗ Data yang dihapus tidak bisa dikembalikan. Yakin lanjut?");
-      if (!konfirmasi2) return;
-
-      try {
-        const q = query(collection(db, "asasmen_pengasuh"));
-        const snapshot = await getDocs(q);
-
-        let count = 0;
-        for (const docSnap of snapshot.docs) {
-          const data = docSnap.data();
-          if (!data.tanggal) continue;
-
-          // Ubah ke format Date agar bisa dibandingkan
-          const tanggalStr = data.tanggal.split(" ")[0];
-          const [hari, bulan, tahun] = tanggalStr.split("/").map(Number);
-          const tglData = new Date(tahun, bulan - 1, hari);
-
-          const start = new Date(startDate);
-          const end   = new Date(endDate);
-          end.setHours(23, 59, 59, 999);
-
-          if (tglData >= start && tglData <= end) {
-            await deleteDoc(doc(db, "asasmen_pengasuh", docSnap.id));
-            count++;
+      // Aktifkan tombol hapus per baris
+      document.querySelectorAll(".hapus-btn").forEach(btn => {
+        btn.addEventListener("click", async () => {
+          const id = btn.dataset.id;
+          if (confirm("Yakin ingin menghapus data ini?")) {
+            await deleteDoc(doc(db, "asasmen_pengasuh", id));
+            btn.closest("tr").remove();
           }
-        }
-
-        alert(`✅ ${count} data berhasil dihapus dalam rentang ${startDate} s.d ${endDate}.`);
-        loadData();
-      } catch (err) {
-        console.error("❌ Gagal menghapus data:", err);
-        alert("Terjadi kesalahan saat menghapus data.");
-      }
+        });
+      });
     }
 
+    // 🔹 FILTER BERDASARKAN TANGGAL
+    function filterByDate() {
+      const start = startDateInput.value ? new Date(startDateInput.value) : null;
+      const end = endDateInput.value ? new Date(endDateInput.value) : null;
+
+      if (!start || !end) {
+        alert("Silakan pilih tanggal awal dan akhir.");
+        return;
+      }
+
+      end.setHours(23, 59, 59, 999);
+
+      const filtered = semuaData.filter(data => {
+        if (!data.tanggal) return false;
+        const tanggalStr = data.tanggal.split(" ")[0];
+        const [hari, bulan, tahun] = tanggalStr.split("/").map(Number);
+        const tglData = new Date(tahun, bulan - 1, hari);
+        return tglData >= start && tglData <= end;
+      });
+
+      tampilkanData(filtered);
+    }
+
+    // 🔹 HAPUS BERDASARKAN RENTANG
+    async function deleteByDateRange() {
+      const start = startDateInput.value;
+      const end = endDateInput.value;
+      if (!start || !end) {
+        alert("Silakan isi tanggal awal dan akhir terlebih dahulu.");
+        return;
+      }
+
+      if (!confirm(`Anda akan menghapus data antara ${start} s.d ${end}. Yakin?`)) return;
+
+      const startD = new Date(start);
+      const endD = new Date(end);
+      endD.setHours(23, 59, 59, 999);
+
+      let count = 0;
+      for (const d of semuaData) {
+        if (!d.tanggal) continue;
+        const tanggalStr = d.tanggal.split(" ")[0];
+        const [hari, bulan, tahun] = tanggalStr.split("/").map(Number);
+        const tglData = new Date(tahun, bulan - 1, hari);
+
+        if (tglData >= startD && tglData <= endD) {
+          await deleteDoc(doc(db, "asasmen_pengasuh", d.id));
+          count++;
+        }
+      }
+      alert(`✅ ${count} data berhasil dihapus.`);
+      loadData();
+    }
+
+    // 🔹 Event Listeners
+    toggleDeleteBtn.addEventListener("click", () => deletePanel.classList.toggle("hidden"));
+    filterBtn.addEventListener("click", filterByDate);
     deleteRangeBtn.addEventListener("click", deleteByDateRange);
     refreshBtn.addEventListener("click", loadData);
 
-    // Load awal
+    // 🔹 Load awal
     loadData();
   </script>
 </body>
