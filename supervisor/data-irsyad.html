@@ -10,6 +10,9 @@
       background-color: #047857;
       color: white;
     }
+    .btn {
+      @apply px-3 py-1 rounded-lg text-sm font-semibold cursor-pointer;
+    }
   </style>
 </head>
 
@@ -20,7 +23,7 @@
     <div class="max-w-4xl mx-auto px-4 flex justify-between items-center">
       <div>
         <h1 class="text-lg sm:text-xl font-bold">🕊️ Irsyad Supervisor</h1>
-        <p class="text-sm opacity-90">Kirim dan pantau pesan Irsyad untuk para Salik</p>
+        <p class="text-sm opacity-90">Kirim dan kelola pesan Irsyad untuk para Salik</p>
       </div>
       <a href="index.html" class="bg-white text-emerald-700 px-3 py-1.5 rounded-lg text-sm font-semibold shadow hover:bg-emerald-50">
         🏠 Dashboard
@@ -39,8 +42,8 @@
 
     <!-- === TAB 1: FORM KIRIM IRSYAD === -->
     <div id="tabKirimContent" class="bg-white rounded-2xl shadow-lg p-6 space-y-5">
+      <h2 class="text-lg font-semibold text-emerald-700 mb-2">✉️ Form Kirim Irsyad</h2>
 
-      <!-- Tujuan -->
       <div>
         <label class="block text-sm font-semibold text-emerald-700 mb-1">Tujuan Irsyad</label>
         <select id="targetType"
@@ -50,7 +53,6 @@
         </select>
       </div>
 
-      <!-- Pilih Salik -->
       <div id="personalTargetBox">
         <label class="block text-sm font-semibold text-emerald-700 mb-1">Pilih Nama Salik</label>
         <select id="targetUser"
@@ -59,14 +61,12 @@
         </select>
       </div>
 
-      <!-- Judul -->
       <div>
         <label class="block text-sm font-semibold text-emerald-700 mb-1">Judul Irsyad</label>
         <input id="judul" type="text" placeholder="Contoh: Keikhlasan dalam Mengabdi" required
           class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-400">
       </div>
 
-      <!-- Pesan -->
       <div>
         <label class="block text-sm font-semibold text-emerald-700 mb-1">Isi Pesan Irsyad</label>
         <textarea id="pesan" rows="5"
@@ -74,9 +74,12 @@
           class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-400"></textarea>
       </div>
 
-      <div class="flex justify-end">
+      <div class="flex justify-end gap-2">
         <button id="btnKirim" class="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2 rounded-lg font-semibold shadow">
           📩 Kirim Irsyad
+        </button>
+        <button id="btnBatalEdit" class="hidden bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded-lg font-semibold shadow">
+          ❌ Batal Edit
         </button>
       </div>
 
@@ -100,16 +103,10 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
     import {
-      getFirestore,
-      collection,
-      addDoc,
-      getDocs,
-      serverTimestamp,
-      query,
-      orderBy
+      getFirestore, collection, addDoc, getDocs, updateDoc, deleteDoc,
+      doc, serverTimestamp, query, orderBy
     } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
 
-    // Konfigurasi Firebase
     const firebaseConfig = {
       apiKey: "AIzaSyDuxvufRwadUsGh8-Kakl9KTG5ZGVcIoYQ",
       authDomain: "naik-level-81580.firebaseapp.com",
@@ -133,31 +130,24 @@
     const targetUser = document.getElementById("targetUser");
     const notif = document.getElementById("notif");
     const irsyadList = document.getElementById("irsyadList");
+    const btnKirim = document.getElementById("btnKirim");
+    const btnBatalEdit = document.getElementById("btnBatalEdit");
 
-    // Daftar salik manual
+    let editId = null; // untuk menyimpan id dokumen yang sedang diedit
+
     const salikList = [
-      { username: "meilisa", nama: "Meilisa" },
-      { username: "fatimah", nama: "Fatimah" },
-      { username: "evita", nama: "Evita" },
-      { username: "rizki", nama: "Rizki" },
-      { username: "alvin", nama: "Alvin" },
-      { username: "haidar", nama: "Haidar" },
-      { username: "kamal", nama: "Kamal" },
-      { username: "anwar", nama: "Anwar" },
-      { username: "fatih", nama: "Fatih" },
-      { username: "nada", nama: "Nada" },
-      { username: "alzam", nama: "Alzam" },
-      { username: "regen", nama: "Regen" },
-      { username: "shafwan", nama: "Shafwan" },
-      { username: "faiq", nama: "Faiq" },
-      { username: "yuu", nama: "Yuu" },
-      { username: "lasti", nama: "Lasti" },
-      { username: "fitri", nama: "Fitri" },
-      { username: "rifay", nama: "Rifay" },
+      { username: "meilisa", nama: "Meilisa" }, { username: "fatimah", nama: "Fatimah" },
+      { username: "evita", nama: "Evita" }, { username: "rizki", nama: "Rizki" },
+      { username: "alvin", nama: "Alvin" }, { username: "haidar", nama: "Haidar" },
+      { username: "kamal", nama: "Kamal" }, { username: "anwar", nama: "Anwar" },
+      { username: "fatih", nama: "Fatih" }, { username: "nada", nama: "Nada" },
+      { username: "alzam", nama: "Alzam" }, { username: "regen", nama: "Regen" },
+      { username: "shafwan", nama: "Shafwan" }, { username: "faiq", nama: "Faiq" },
+      { username: "yuu", nama: "Yuu" }, { username: "lasti", nama: "Lasti" },
+      { username: "fitri", nama: "Fitri" }, { username: "rifay", nama: "Rifay" },
       { username: "dini", nama: "Dini" }
     ];
 
-    // Load daftar salik
     function loadUsers() {
       targetUser.innerHTML = `<option value="">-- Pilih Salik --</option>`;
       salikList.forEach(salik => {
@@ -168,51 +158,64 @@
       });
     }
 
-    // Ubah tampilan form sesuai jenis target
+    // Ganti tampilan personal/all
     targetType.addEventListener("change", () => {
       personalTargetBox.style.display = targetType.value === "personal" ? "block" : "none";
     });
 
-    // Kirim Irsyad
-    document.getElementById("btnKirim").addEventListener("click", async () => {
+    // Kirim atau Edit Irsyad
+    btnKirim.addEventListener("click", async () => {
       const type = targetType.value;
       const judul = document.getElementById("judul").value.trim();
       const pesan = document.getElementById("pesan").value.trim();
       const penerima = type === "all" ? "ALL" : targetUser.value;
       const penerimaNama = type === "all" ? "Semua Salik" : (salikList.find(s => s.username === penerima)?.nama || "");
 
-      if (type === "personal" && !penerima) {
-        alert("Silakan pilih salik terlebih dahulu.");
+      if (!judul || !pesan || (type === "personal" && !penerima)) {
+        alert("Lengkapi semua data terlebih dahulu.");
         return;
       }
 
       try {
-        await addDoc(collection(db, "irsyad"), {
-          judul,
-          pesan,
-          penerima,
-          penerimaNama,
-          jenis: type,
-          dari: "Supervisor (Mursyid) Abah Multazam Zakaria",
-          createdAt: serverTimestamp()
-        });
+        if (editId) {
+          await updateDoc(doc(db, "irsyad", editId), {
+            judul, pesan, penerima, penerimaNama, jenis: type,
+            updatedAt: serverTimestamp()
+          });
+          notif.textContent = "✅ Perubahan Irsyad berhasil disimpan.";
+        } else {
+          await addDoc(collection(db, "irsyad"), {
+            judul, pesan, penerima, penerimaNama,
+            jenis: type, dari: "Supervisor (Mursyid) Abah Multazam Zakaria",
+            createdAt: serverTimestamp()
+          });
+          notif.textContent = "✅ Pesan Irsyad berhasil dikirim.";
+        }
 
-        notif.textContent = "✅ Pesan Irsyad berhasil dikirim.";
         notif.classList.remove("hidden");
-        document.getElementById("judul").value = "";
-        document.getElementById("pesan").value = "";
-        targetType.value = "personal";
-        personalTargetBox.style.display = "block";
-        loadUsers();
+        resetForm();
         loadIrsyadList();
       } catch (err) {
-        console.error("❌ Gagal mengirim:", err);
-        notif.textContent = "❌ Terjadi kesalahan saat mengirim Irsyad.";
-        notif.classList.remove("hidden");
+        console.error("❌ Error:", err);
       }
     });
 
-    // Muat daftar Irsyad yang sudah dikirim
+    // Batalkan mode edit
+    btnBatalEdit.addEventListener("click", () => resetForm());
+
+    // Reset form
+    function resetForm() {
+      editId = null;
+      document.getElementById("judul").value = "";
+      document.getElementById("pesan").value = "";
+      targetType.value = "personal";
+      personalTargetBox.style.display = "block";
+      btnKirim.textContent = "📩 Kirim Irsyad";
+      btnBatalEdit.classList.add("hidden");
+      loadUsers();
+    }
+
+    // Muat daftar Irsyad
     async function loadIrsyadList() {
       irsyadList.innerHTML = "🔄 Memuat data...";
       const q = query(collection(db, "irsyad"), orderBy("createdAt", "desc"));
@@ -224,22 +227,58 @@
       }
 
       let html = "";
-      snap.forEach(doc => {
-        const d = doc.data();
+      snap.forEach(docSnap => {
+        const d = docSnap.data();
         const tanggal = d.createdAt ? new Date(d.createdAt.toDate()).toLocaleString() : "-";
         html += `
-          <div class="border border-emerald-200 rounded-lg p-3 mb-2 bg-emerald-50">
+          <div class="border border-emerald-200 rounded-lg p-3 mb-3 bg-emerald-50">
             <strong>${d.judul || "(Tanpa Judul)"}</strong><br>
             <small>Untuk: ${d.penerimaNama || d.penerima}</small><br>
             <p class="mt-1 text-sm">${d.pesan}</p>
-            <small class="text-gray-500">${tanggal}</small>
+            <small class="text-gray-500">${tanggal}</small><br>
+            <div class="mt-2 flex gap-2">
+              <button class="bg-yellow-500 text-white px-3 py-1 rounded edit-btn" data-id="${docSnap.id}">✏️ Edit</button>
+              <button class="bg-red-500 text-white px-3 py-1 rounded delete-btn" data-id="${docSnap.id}">🗑️ Hapus</button>
+            </div>
           </div>
         `;
       });
       irsyadList.innerHTML = html;
+
+      // Tambah event untuk Edit & Hapus
+      document.querySelectorAll(".edit-btn").forEach(btn =>
+        btn.addEventListener("click", () => editIrsyad(btn.dataset.id))
+      );
+      document.querySelectorAll(".delete-btn").forEach(btn =>
+        btn.addEventListener("click", () => deleteIrsyad(btn.dataset.id))
+      );
     }
 
-    // Navigasi Tab
+    // Edit Irsyad
+    async function editIrsyad(id) {
+      const snap = await getDocs(query(collection(db, "irsyad")));
+      const docSnap = (await getDocs(collection(db, "irsyad"))).docs.find(d => d.id === id);
+      if (!docSnap) return;
+      const d = docSnap.data();
+      editId = id;
+      document.getElementById("judul").value = d.judul;
+      document.getElementById("pesan").value = d.pesan;
+      targetType.value = d.jenis || "personal";
+      targetUser.value = d.penerima !== "ALL" ? d.penerima : "";
+      personalTargetBox.style.display = d.jenis === "personal" ? "block" : "none";
+      btnKirim.textContent = "💾 Simpan Perubahan";
+      btnBatalEdit.classList.remove("hidden");
+      tabKirim.click();
+    }
+
+    // Hapus Irsyad
+    async function deleteIrsyad(id) {
+      if (!confirm("Yakin ingin menghapus Irsyad ini?")) return;
+      await deleteDoc(doc(db, "irsyad", id));
+      loadIrsyadList();
+    }
+
+    // Navigasi tab
     tabKirim.addEventListener("click", () => {
       tabKirim.classList.add("active-tab");
       tabData.classList.remove("active-tab");
@@ -255,7 +294,6 @@
       loadIrsyadList();
     });
 
-    // Jalankan awal
     loadUsers();
   </script>
 </body>
