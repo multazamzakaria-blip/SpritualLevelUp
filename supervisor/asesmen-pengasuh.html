@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Supervisor - Asasmen Pengasuh</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
 
 <body class="bg-gradient-to-b from-sky-700 to-indigo-600 min-h-screen font-sans text-gray-800">
@@ -23,6 +24,9 @@
         </button>
         <button id="toggle-delete-panel" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition">
           ⚙️ Filter / Hapus
+        </button>
+        <button id="export-btn" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition">
+          📤 Ekspor Excel
         </button>
       </div>
     </div>
@@ -87,7 +91,7 @@
       query
     } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
 
-    // Konfigurasi Firebase
+    // 🔥 Konfigurasi Firebase
     const firebaseConfig = {
       apiKey: "AIzaSyDuxvufRwadUsGh8-Kakl9KTG5ZGVcIoYQ",
       authDomain: "naik-level-81580.firebaseapp.com",
@@ -101,6 +105,7 @@
     const app = initializeApp(firebaseConfig);
     const db  = getFirestore(app);
 
+    // 🔸 Elemen DOM
     const tabelBody       = document.getElementById("tabel-body");
     const loading         = document.getElementById("loading");
     const dataContainer   = document.getElementById("data-container");
@@ -111,8 +116,25 @@
     const filterBtn       = document.getElementById("filter-btn");
     const startDateInput  = document.getElementById("startDate");
     const endDateInput    = document.getElementById("endDate");
+    const exportBtn       = document.getElementById("export-btn");
 
-    let semuaData = []; // cache semua data dari Firestore
+    let semuaData = [];
+
+    // 🔹 Parsing tanggal fleksibel
+    function parseTanggal(tanggalStr) {
+      if (!tanggalStr) return null;
+      const bagianTanggal = tanggalStr.split(" ")[0];
+      if (bagianTanggal.includes("/")) {
+        const [d, m, y] = bagianTanggal.split("/").map(Number);
+        return new Date(y, m - 1, d);
+      }
+      if (bagianTanggal.includes("-")) {
+        const [y, m, d] = bagianTanggal.split("-").map(Number);
+        return new Date(y, m - 1, d);
+      }
+      const t = new Date(bagianTanggal);
+      return isNaN(t.getTime()) ? null : t;
+    }
 
     // 🔹 LOAD DATA
     async function loadData() {
@@ -131,10 +153,9 @@
       tampilkanData(semuaData);
     }
 
-    // 🔹 TAMPILKAN DATA DI TABEL
+    // 🔹 TAMPILKAN DATA
     function tampilkanData(dataList) {
       tabelBody.innerHTML = "";
-
       if (dataList.length === 0) {
         tabelBody.innerHTML = `<tr><td colspan="7" class="py-4 text-gray-500 italic">Tidak ada data ditemukan.</td></tr>`;
       } else {
@@ -152,7 +173,6 @@
 
           const tr = document.createElement("tr");
           tr.className = "odd:bg-gray-50 even:bg-gray-100 hover:bg-emerald-50 transition";
-
           tr.innerHTML = `
             <td class="border px-3 py-2">${no++}</td>
             <td class="border px-3 py-2 text-left font-semibold">${data.nama || "-"}</td>
@@ -173,7 +193,6 @@
       loading.classList.add("hidden");
       dataContainer.classList.remove("hidden");
 
-      // Aktifkan tombol hapus per baris
       document.querySelectorAll(".hapus-btn").forEach(btn => {
         btn.addEventListener("click", async () => {
           const id = btn.dataset.id;
@@ -185,30 +204,25 @@
       });
     }
 
-    // 🔹 FILTER BERDASARKAN TANGGAL
+    // 🔹 FILTER DATA
     function filterByDate() {
       const start = startDateInput.value ? new Date(startDateInput.value) : null;
       const end = endDateInput.value ? new Date(endDateInput.value) : null;
-
       if (!start || !end) {
         alert("Silakan pilih tanggal awal dan akhir.");
         return;
       }
-
       end.setHours(23, 59, 59, 999);
 
       const filtered = semuaData.filter(data => {
-        if (!data.tanggal) return false;
-        const tanggalStr = data.tanggal.split(" ")[0];
-        const [hari, bulan, tahun] = tanggalStr.split("/").map(Number);
-        const tglData = new Date(tahun, bulan - 1, hari);
-        return tglData >= start && tglData <= end;
+        const tglData = parseTanggal(data.tanggal);
+        return tglData && tglData >= start && tglData <= end;
       });
 
       tampilkanData(filtered);
     }
 
-    // 🔹 HAPUS BERDASARKAN RENTANG
+    // 🔹 HAPUS RENTANG
     async function deleteByDateRange() {
       const start = startDateInput.value;
       const end = endDateInput.value;
@@ -225,12 +239,8 @@
 
       let count = 0;
       for (const d of semuaData) {
-        if (!d.tanggal) continue;
-        const tanggalStr = d.tanggal.split(" ")[0];
-        const [hari, bulan, tahun] = tanggalStr.split("/").map(Number);
-        const tglData = new Date(tahun, bulan - 1, hari);
-
-        if (tglData >= startD && tglData <= endD) {
+        const tglData = parseTanggal(d.tanggal);
+        if (tglData && tglData >= startD && tglData <= endD) {
           await deleteDoc(doc(db, "asasmen_pengasuh", d.id));
           count++;
         }
@@ -239,11 +249,41 @@
       loadData();
     }
 
+    // 🔹 EKSPOR EXCEL
+    function exportToExcel() {
+      const rows = [];
+      const trs = tabelBody.querySelectorAll("tr");
+      trs.forEach((tr, i) => {
+        const cells = tr.querySelectorAll("td");
+        if (cells.length > 1) {
+          rows.push({
+            No: cells[0].innerText,
+            Nama: cells[1].innerText,
+            Tanggal: cells[2].innerText,
+            Level1: cells[3].innerText,
+            Level2: cells[4].innerText,
+            Level3: cells[5].innerText,
+          });
+        }
+      });
+
+      if (rows.length === 0) {
+        alert("Tidak ada data untuk diekspor.");
+        return;
+      }
+
+      const ws = XLSX.utils.json_to_sheet(rows);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Data Asasmen");
+      XLSX.writeFile(wb, "Rekap_Asasmen_Pengasuh.xlsx");
+    }
+
     // 🔹 Event Listeners
     toggleDeleteBtn.addEventListener("click", () => deletePanel.classList.toggle("hidden"));
     filterBtn.addEventListener("click", filterByDate);
     deleteRangeBtn.addEventListener("click", deleteByDateRange);
     refreshBtn.addEventListener("click", loadData);
+    exportBtn.addEventListener("click", exportToExcel);
 
     // 🔹 Load awal
     loadData();
