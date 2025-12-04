@@ -60,7 +60,14 @@
 
   <script type="module">
     import { app } from "../assets/firebase-config.js";
-    import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
+    import {
+      getFirestore,
+      collection,
+      query,
+      where,
+      getDocs,
+      orderBy
+    } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
     import { checkUser } from "../assets/script.js";
 
     const db = getFirestore(app);
@@ -71,48 +78,37 @@
       container.innerHTML = "<p>🔄 Sedang memuat pesan irsyad...</p>";
 
       try {
-        const globalSnap = await getDocs(collection(db, "irsyad_global"));
-        const personalSnap = await getDocs(collection(db, "irsyad_personal"));
+        // Ambil semua pesan yang ditujukan untuk user atau ALL
+        const q = query(collection(db, "irsyad"));
+        const snap = await getDocs(q);
 
-        let semuaIrsyad = [];
-
-        // Ambil semua irsyad umum
-        globalSnap.forEach(doc => {
+        let pesanList = [];
+        snap.forEach(doc => {
           const d = doc.data();
-          semuaIrsyad.push({
-            judul: d.judul || "(Tanpa Judul)",
-            pesan: d.pesan,
-            tanggal: d.tanggal,
-            dari: d.dari,
-            untuk: "Semua Salik"
-          });
-        });
-
-        // Ambil hanya irsyad personal untuk user ini
-        personalSnap.forEach(doc => {
-          const d = doc.data();
-          if (d.userId === user.uid || d.nama === user.username) {
-            semuaIrsyad.push({
+          const penerima = d.penerima || "";
+          if (penerima === "ALL" || penerima === user.username) {
+            pesanList.push({
               judul: d.judul || "(Tanpa Judul)",
-              pesan: d.pesan,
-              tanggal: d.tanggal,
-              dari: d.dari,
-              untuk: d.nama
+              pesan: d.pesan || "",
+              dari: d.dari || "Supervisor",
+              tanggal: d.createdAt
+                ? new Date(d.createdAt.toDate()).toLocaleString()
+                : "Waktu tidak diketahui"
             });
           }
         });
 
-        // Urutkan berdasarkan tanggal (string → waktu terbaru di atas)
-        semuaIrsyad.sort((a, b) => new Date(b.tanggal) - new Date(a.tanggal));
+        // Urutkan dari terbaru ke lama
+        pesanList.sort((a, b) => new Date(b.tanggal) - new Date(a.tanggal));
 
-        if (semuaIrsyad.length === 0) {
+        if (pesanList.length === 0) {
           container.innerHTML = "<p>Belum ada pesan irsyad dari supervisor 🌿</p>";
           return;
         }
 
-        // Tampilkan daftar irsyad
+        // Tampilkan daftar pesan
         container.innerHTML = "";
-        semuaIrsyad.forEach(item => {
+        pesanList.forEach(item => {
           const box = document.createElement("div");
           box.className = "irsyad-box";
           box.innerHTML = `
@@ -123,7 +119,7 @@
           container.appendChild(box);
         });
       } catch (err) {
-        console.error(err);
+        console.error("❌ Gagal memuat irsyad:", err);
         container.innerHTML = "<p>❌ Terjadi kesalahan saat memuat pesan irsyad.</p>";
       }
     }
