@@ -15,7 +15,7 @@
     <!-- Logo -->
     <div class="mb-6">
       <img src="assets/logoslu.png" alt="Logo Pesantren" class="mx-auto h-16 w-16 mb-3">
-      <h1 class="text-2xl font-bold text-teal-700">Spritual Level Up</h1>
+      <h1 class="text-2xl font-bold text-teal-700">Spiritual Level Up</h1>
       <p class="text-sm text-gray-500">Masuk untuk memulai perjalanan spiritualmu</p>
     </div>
 
@@ -60,19 +60,37 @@
       const password = document.getElementById('password').value.trim();
       const role = document.getElementById('role').value;
 
-      // === Data resmi pengguna Spiritual Level Up ===
+      // === Akun resmi Spiritual Level Up ===
       const supervisors = [
         { username: "abah multazam zakaria", password: "naiklevel123" }
       ];
 
-      const salikList = [
-        "meilisa", "fatimah", "evita", "rizki", "alvin", "haidar", 
-        "kamal", "anwar", "fatih", "nada", "alzam", "regen", "shafwan", "faiq"
+      // === Daftar akun Salik dengan password unik ===
+      const salikAccounts = [
+        { username: "meilisa", password: "santri123" },
+        { username: "fatimah", password: "azzahra" },
+        { username: "evita", password: "santri123" },
+        { username: "rizki", password: "santri123" },
+        { username: "alvin", password: "santri123" },
+        { username: "haidar", password: "santri123" },
+        { username: "kamal", password: "kamal28" },
+        { username: "anwar", password: "santri123" },
+        { username: "fatih", password: "santri123" },
+        { username: "nada", password: "santri123" },
+        { username: "alzam", password: "santri123" },
+        { username: "regen", password: "santri123" },
+        { username: "shafwan", password: "santri123" },
+        { username: "faiq", password: "santri123" },
+        { username: "yuu", password: "gilang211107" },
+        { username: "lasti", password: "lastika02" },
+        { username: "fitri", password: "lye23" },
+        { username: "rifay", password: "rifay31" },
+        { username: "dini", password: "di541993" }
       ];
 
-      // === Validasi berdasarkan role ===
+      // === Proses validasi ===
       if (role === "supervisor") {
-        const found = supervisors.find(user => user.username === username && user.password === password);
+        const found = supervisors.find(u => u.username === username && u.password === password);
         if (found) {
           localStorage.setItem("naikLevelUser", JSON.stringify({ username, role }));
           window.location.href = "supervisor/index.html";
@@ -81,11 +99,12 @@
         }
       } 
       else if (role === "salik") {
-        if (salikList.includes(username) && password === "santri123") {
+        const found = salikAccounts.find(u => u.username === username && u.password === password);
+        if (found) {
           localStorage.setItem("naikLevelUser", JSON.stringify({ username, role }));
           window.location.href = "dashboard.html";
         } else {
-          alert("❌ Nama atau kata sandi tidak sesuai. Gunakan nama depan dan sandi: santri123");
+          alert("❌ Username atau password salik salah. Periksa kembali ejaan dan huruf besar/kecil.");
         }
       } 
       else {
