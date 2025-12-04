@@ -64,9 +64,7 @@
       getFirestore,
       collection,
       query,
-      where,
-      getDocs,
-      orderBy
+      getDocs
     } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
     import { checkUser } from "../assets/script.js";
 
@@ -78,7 +76,7 @@
       container.innerHTML = "<p>🔄 Sedang memuat pesan irsyad...</p>";
 
       try {
-        // Ambil semua pesan yang ditujukan untuk user atau ALL
+        // Ambil semua pesan dari koleksi "irsyad"
         const q = query(collection(db, "irsyad"));
         const snap = await getDocs(q);
 
@@ -86,11 +84,14 @@
         snap.forEach(doc => {
           const d = doc.data();
           const penerima = d.penerima || "";
+
+          // Tampilkan pesan yang ditujukan ke user atau ALL
           if (penerima === "ALL" || penerima === user.username) {
             pesanList.push({
               judul: d.judul || "(Tanpa Judul)",
               pesan: d.pesan || "",
-              dari: d.dari || "Supervisor",
+              // jika field 'dari' kosong, tampilkan nama resmi supervisor
+              dari: "Supervisor (Mursyid) Abah Multazam Zakaria",
               tanggal: d.createdAt
                 ? new Date(d.createdAt.toDate()).toLocaleString()
                 : "Waktu tidak diketahui"
@@ -102,7 +103,7 @@
         pesanList.sort((a, b) => new Date(b.tanggal) - new Date(a.tanggal));
 
         if (pesanList.length === 0) {
-          container.innerHTML = "<p>Belum ada pesan irsyad dari supervisor 🌿</p>";
+          container.innerHTML = "<p>Belum ada pesan irsyad dari Supervisor 🌿</p>";
           return;
         }
 
