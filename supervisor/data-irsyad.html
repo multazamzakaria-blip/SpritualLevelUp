@@ -91,7 +91,7 @@
       serverTimestamp
     } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
 
-    // Konfigurasi Firebase
+    // 🔥 Konfigurasi Firebase (sesuai project Abah)
     const firebaseConfig = {
       apiKey: "AIzaSyDuxvufRwadUsGh8-Kakl9KTG5ZGVcIoYQ",
       authDomain: "naik-level-81580.firebaseapp.com",
@@ -102,7 +102,6 @@
       measurementId: "G-RG7JS79MZ1"
     };
 
-    // Inisialisasi Firebase
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
@@ -113,7 +112,7 @@
     const personalTargetBox = document.getElementById("personalTargetBox");
     const notif = document.getElementById("notif");
 
-    // Ganti tampilan jika kirim ke semua
+    // Ubah tampilan form sesuai jenis target
     targetType.addEventListener("change", () => {
       personalTargetBox.style.display = targetType.value === "personal" ? "block" : "none";
     });
@@ -123,10 +122,9 @@
       targetUser.innerHTML = `<option value="">-- Memuat daftar salik... --</option>`;
 
       try {
-        // 🔁 SESUAIKAN kalau nama koleksi / field Abah berbeda
         const q = query(
-          collection(db, "users"),          // <-- nama koleksi akun
-          where("role", "==", "salik")      // <-- hanya role salik
+          collection(db, "users"),
+          where("role", "==", "salik")
         );
         const snap = await getDocs(q);
 
@@ -139,20 +137,14 @@
 
         snap.forEach(doc => {
           const d = doc.data();
-          const nama =
-            d.nama ||
-            d.displayName ||
-            d.namaLengkap ||
-            d.fullName ||
-            d.username;
-
-          const username = d.username || doc.id; // penerima disimpan dg username
+          const nama = d.nama || d.displayName || d.fullName || d.username;
+          const username = d.username || doc.id;
 
           if (!nama || !username) return;
 
           const opt = document.createElement("option");
-          opt.value = username;       // yang dipakai di field "penerima"
-          opt.textContent = nama;     // yang terlihat di dropdown
+          opt.value = username;   // inilah yang akan digunakan di field penerima
+          opt.textContent = nama;
           targetUser.appendChild(opt);
         });
       } catch (err) {
@@ -168,8 +160,7 @@
       const type = targetType.value;
       const judul = document.getElementById("judul").value.trim();
       const pesan = document.getElementById("pesan").value.trim();
-      const penerima =
-        type === "all" ? "ALL" : targetUser.value;
+      const penerima = type === "all" ? "ALL" : targetUser.value;
 
       if (type === "personal" && !penerima) {
         alert("Silakan pilih salik terlebih dahulu.");
@@ -182,7 +173,7 @@
           pesan,
           penerima,             // username salik atau "ALL"
           jenis: type,          // "personal" atau "all"
-          dari: "Supervisor",   // bisa disesuaikan
+          dari: "Supervisor",   // identitas pengirim
           createdAt: serverTimestamp()
         });
 
@@ -191,7 +182,7 @@
         irsyadForm.reset();
         targetType.value = "personal";
         personalTargetBox.style.display = "block";
-        await loadUsers(); // segarkan dropdown (kalau form di-reset)
+        await loadUsers();
       } catch (err) {
         console.error("❌ Gagal mengirim irsyad:", err);
         notif.textContent = "❌ Terjadi kesalahan saat mengirim irsyad.";
@@ -199,7 +190,7 @@
       }
     });
 
-    // Jalankan saat halaman selesai dimuat
+    // Jalankan saat halaman dimuat
     loadUsers();
   </script>
 </body>
