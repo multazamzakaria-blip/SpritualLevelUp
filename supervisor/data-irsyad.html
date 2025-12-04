@@ -85,9 +85,6 @@
       getFirestore,
       collection,
       addDoc,
-      getDocs,
-      query,
-      where,
       serverTimestamp
     } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
 
@@ -112,45 +109,43 @@
     const personalTargetBox = document.getElementById("personalTargetBox");
     const notif = document.getElementById("notif");
 
+    // 🔹 Daftar salik manual (username dan nama tampilan)
+    const salikList = [
+      { username: "meilisa", nama: "Meilisa" },
+      { username: "fatimah", nama: "Fatimah" },
+      { username: "evita", nama: "Evita" },
+      { username: "rizki", nama: "Rizki" },
+      { username: "alvin", nama: "Alvin" },
+      { username: "haidar", nama: "Haidar" },
+      { username: "kamal", nama: "Kamal" },
+      { username: "anwar", nama: "Anwar" },
+      { username: "fatih", nama: "Fatih" },
+      { username: "nada", nama: "Nada" },
+      { username: "alzam", nama: "Alzam" },
+      { username: "regen", nama: "Regen" },
+      { username: "shafwan", nama: "Shafwan" },
+      { username: "faiq", nama: "Faiq" },
+      { username: "yuu", nama: "Yuu" },
+      { username: "lasti", nama: "Lasti" },
+      { username: "fitri", nama: "Fitri" },
+      { username: "rifay", nama: "Rifay" },
+      { username: "dini", nama: "Dini" }
+    ];
+
     // Ubah tampilan form sesuai jenis target
     targetType.addEventListener("change", () => {
       personalTargetBox.style.display = targetType.value === "personal" ? "block" : "none";
     });
 
-    // 🧠 Muat daftar salik dari koleksi "users"
-    async function loadUsers() {
-      targetUser.innerHTML = `<option value="">-- Memuat daftar salik... --</option>`;
-
-      try {
-        const q = query(
-          collection(db, "users"),
-          where("role", "==", "salik")
-        );
-        const snap = await getDocs(q);
-
-        if (snap.empty) {
-          targetUser.innerHTML = `<option value="">❌ Belum ada data salik di Firestore</option>`;
-          return;
-        }
-
-        targetUser.innerHTML = `<option value="">-- Pilih Salik --</option>`;
-
-        snap.forEach(doc => {
-          const d = doc.data();
-          const nama = d.nama || d.displayName || d.fullName || d.username;
-          const username = d.username || doc.id;
-
-          if (!nama || !username) return;
-
-          const opt = document.createElement("option");
-          opt.value = username;   // inilah yang akan digunakan di field penerima
-          opt.textContent = nama;
-          targetUser.appendChild(opt);
-        });
-      } catch (err) {
-        console.error("❌ Gagal memuat user:", err);
-        targetUser.innerHTML = `<option value="">⚠️ Gagal memuat daftar salik</option>`;
-      }
+    // 🧠 Muat daftar salik ke dropdown
+    function loadUsers() {
+      targetUser.innerHTML = `<option value="">-- Pilih Salik --</option>`;
+      salikList.forEach(salik => {
+        const opt = document.createElement("option");
+        opt.value = salik.username;
+        opt.textContent = salik.nama;
+        targetUser.appendChild(opt);
+      });
     }
 
     // 💌 Kirim Irsyad ke Firestore
@@ -162,6 +157,9 @@
       const pesan = document.getElementById("pesan").value.trim();
       const penerima = type === "all" ? "ALL" : targetUser.value;
 
+      // Cari nama penerima untuk disimpan juga
+      const targetNama = type === "all" ? "Semua Salik" : (salikList.find(s => s.username === penerima)?.nama || "");
+
       if (type === "personal" && !penerima) {
         alert("Silakan pilih salik terlebih dahulu.");
         return;
@@ -171,9 +169,10 @@
         await addDoc(collection(db, "irsyad"), {
           judul,
           pesan,
-          penerima,             // username salik atau "ALL"
-          jenis: type,          // "personal" atau "all"
-          dari: "Supervisor",   // identitas pengirim
+          penerima,                   // username
+          penerimaNama: targetNama,    // nama salik untuk ditampilkan
+          jenis: type,
+          dari: "Supervisor (Mursyid) Abah Multazam Zakaria",
           createdAt: serverTimestamp()
         });
 
@@ -182,7 +181,7 @@
         irsyadForm.reset();
         targetType.value = "personal";
         personalTargetBox.style.display = "block";
-        await loadUsers();
+        loadUsers();
       } catch (err) {
         console.error("❌ Gagal mengirim irsyad:", err);
         notif.textContent = "❌ Terjadi kesalahan saat mengirim irsyad.";
