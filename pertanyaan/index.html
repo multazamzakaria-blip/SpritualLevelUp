@@ -38,90 +38,104 @@
   </footer>
 
   <!-- FIREBASE SCRIPT -->
-  <script type="module">
-    import { app } from "../assets/firebase-config.js";
-    import { getFirestore, collection, addDoc, getDocs, query, where, orderBy, serverTimestamp } 
-      from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
-    import { checkUser } from "../assets/script.js";
+ <script type="module">
+  import { app } from "../assets/firebase-config.js";
+  import { 
+    getFirestore, collection, addDoc, getDocs, serverTimestamp 
+  } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
+  import { checkUser } from "../assets/script.js";
 
-    const db = getFirestore(app);
-    const user = checkUser();
-    const input = document.getElementById("pertanyaanInput");
-    const btn = document.getElementById("kirimBtn");
-    const notif = document.getElementById("notif");
-    const list = document.getElementById("pertanyaanList");
+  const db = getFirestore(app);
+  const user = checkUser();
+  const input = document.getElementById("pertanyaanInput");
+  const btn = document.getElementById("kirimBtn");
+  const notif = document.getElementById("notif");
+  const list = document.getElementById("pertanyaanList");
 
-    // === FUNGSI KIRIM PERTANYAAN ===
-    btn.addEventListener("click", async () => {
-      const isi = input.value.trim();
-      if (!isi) {
-        alert("Tulis pertanyaan terlebih dahulu.");
+  // === KIRIM PERTANYAAN ===
+  btn.addEventListener("click", async () => {
+    const isi = input.value.trim();
+    if (!isi) {
+      alert("Tulis pertanyaan terlebih dahulu.");
+      return;
+    }
+
+    try {
+      await addDoc(collection(db, "pertanyaanSalik"), {
+        isi: isi,
+        dari: user.username,
+        waktu: serverTimestamp(),
+        status: "belum dijawab"
+      });
+
+      notif.textContent = "✅ Pertanyaan berhasil dikirim.";
+      notif.classList.remove("hidden");
+      input.value = "";
+      loadPertanyaan();
+
+    } catch (err) {
+      console.error("❌ Gagal mengirim:", err);
+      notif.textContent = "❌ Gagal mengirim pertanyaan.";
+      notif.classList.remove("hidden");
+    }
+  });
+
+  // === MUAT SEMUA PERTANYAAN LALU FILTER USER SENDIRI ===
+  async function loadPertanyaan() {
+    list.innerHTML = "🔄 Memuat pertanyaanmu...";
+    try {
+      const snap = await getDocs(collection(db, "pertanyaanSalik"));
+
+      if (snap.empty) {
+        list.innerHTML = "<p class='text-gray-500 italic text-sm'>Belum ada pertanyaan.</p>";
         return;
       }
 
-      try {
-        const namaUser = user?.username || "Anonim";
-        await addDoc(collection(db, "pertanyaanSalik"), {
-          isi: isi,
-          dari: namaUser,
-          waktu: serverTimestamp(),
-          status: "belum dijawab"
-        });
-        notif.textContent = "✅ Pertanyaan berhasil dikirim.";
-        notif.classList.remove("hidden");
-        input.value = "";
-        loadPertanyaan();
-      } catch (err) {
-        console.error("❌ Gagal mengirim:", err);
-        notif.textContent = "❌ Gagal mengirim pertanyaan. Periksa koneksi.";
-        notif.classList.remove("hidden");
+      let semuaPertanyaan = [];
+      snap.forEach(doc => {
+        const d = doc.data();
+        if (d.dari === user.username) semuaPertanyaan.push(d);
+      });
+
+      // Urutkan manual berdasarkan waktu terbaru
+      semuaPertanyaan.sort((a, b) => {
+        if (!a.waktu || !b.waktu) return 0;
+        return b.waktu.seconds - a.waktu.seconds;
+      });
+
+      if (semuaPertanyaan.length === 0) {
+        list.innerHTML = "<p class='text-gray-500 italic text-sm'>Belum ada pertanyaan.</p>";
+        return;
       }
-    });
 
-    // === FUNGSI MUAT PERTANYAAN SALIK SENDIRI ===
-    async function loadPertanyaan() {
-      list.innerHTML = "🔄 Memuat pertanyaanmu...";
-      try {
-        const namaUser = user?.username || "Anonim";
+      let html = "";
+      semuaPertanyaan.forEach(d => {
+        const waktu = d.waktu
+          ? new Date(d.waktu.toDate()).toLocaleString()
+          : "-";
+        const jawaban = d.jawaban
+          ? `<div class='mt-2 p-2 bg-emerald-50 border border-emerald-100 rounded-lg'>
+              <strong>🕊️ Jawaban Supervisor:</strong><br>${d.jawaban}
+            </div>`
+          : `<p class='text-xs text-gray-400 italic mt-1'>Belum dijawab</p>`;
 
-        const q = query(
-          collection(db, "pertanyaanSalik"),
-          where("dari", "==", namaUser),
-          orderBy("waktu", "desc")
-        );
-        const snap = await getDocs(q);
+        html += `
+          <div class="border border-emerald-200 rounded-lg p-2 mb-3 bg-emerald-50">
+            <p>${d.isi}</p>
+            <small class="text-gray-500 text-xs">${waktu}</small>
+            ${jawaban}
+          </div>`;
+      });
 
-        if (snap.empty) {
-          list.innerHTML = "<p class='text-gray-500 italic text-sm'>Belum ada pertanyaan yang kamu kirim.</p>";
-          return;
-        }
+      list.innerHTML = html;
 
-        let html = "";
-        snap.forEach(doc => {
-          const d = doc.data();
-          const waktu = d.waktu ? new Date(d.waktu.toDate()).toLocaleString() : "-";
-          const jawaban = d.jawaban 
-            ? `<div class='mt-2 p-2 bg-emerald-50 border border-emerald-100 rounded-lg text-sm'>
-                 <strong>🕊️ Jawaban Supervisor:</strong><br>${d.jawaban}
-               </div>` 
-            : `<p class='text-xs text-gray-400 italic mt-1'>Belum dijawab</p>`;
-
-          html += `
-            <div class="border border-emerald-200 rounded-lg p-2 mb-3 bg-emerald-50">
-              <p>${d.isi}</p>
-              <small class="text-gray-500 text-xs">${waktu}</small>
-              ${jawaban}
-            </div>`;
-        });
-
-        list.innerHTML = html;
-      } catch (err) {
-        console.error("❌ Gagal memuat pertanyaan:", err);
-        list.innerHTML = "<p class='text-red-500 text-sm'>❌ Gagal memuat pertanyaan.</p>";
-      }
+    } catch (err) {
+      console.error("❌ Gagal memuat pertanyaan:", err);
+      list.innerHTML = "<p class='text-red-500 text-sm font-semibold'>❌ Gagal memuat pertanyaan.</p>";
     }
+  }
 
-    loadPertanyaan();
-  </script>
+  loadPertanyaan();
+</script>
 </body>
 </html>
