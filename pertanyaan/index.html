@@ -51,7 +51,7 @@
     const notif = document.getElementById("notif");
     const list = document.getElementById("pertanyaanList");
 
-    // === KIRIM PERTANYAAN ===
+    // === FUNGSI KIRIM PERTANYAAN ===
     btn.addEventListener("click", async () => {
       const isi = input.value.trim();
       if (!isi) {
@@ -60,9 +60,10 @@
       }
 
       try {
+        const namaUser = user?.username || "Anonim";
         await addDoc(collection(db, "pertanyaanSalik"), {
           isi: isi,
-          dari: user.username,
+          dari: namaUser,
           waktu: serverTimestamp(),
           status: "belum dijawab"
         });
@@ -77,19 +78,21 @@
       }
     });
 
-    // === MUAT PERTANYAAN USER SENDIRI ===
+    // === FUNGSI MUAT PERTANYAAN SALIK SENDIRI ===
     async function loadPertanyaan() {
       list.innerHTML = "🔄 Memuat pertanyaanmu...";
       try {
+        const namaUser = user?.username || "Anonim";
+
         const q = query(
           collection(db, "pertanyaanSalik"),
-          where("dari", "==", user.username),
+          where("dari", "==", namaUser),
           orderBy("waktu", "desc")
         );
         const snap = await getDocs(q);
 
         if (snap.empty) {
-          list.innerHTML = "<p class='text-gray-500 italic text-sm'>Belum ada pertanyaan.</p>";
+          list.innerHTML = "<p class='text-gray-500 italic text-sm'>Belum ada pertanyaan yang kamu kirim.</p>";
           return;
         }
 
@@ -97,10 +100,10 @@
         snap.forEach(doc => {
           const d = doc.data();
           const waktu = d.waktu ? new Date(d.waktu.toDate()).toLocaleString() : "-";
-          const jawaban = d.jawaban ? 
-            `<div class='mt-2 p-2 bg-emerald-50 border border-emerald-100 rounded-lg'>
-               <strong>🕊️ Jawaban Supervisor:</strong><br>${d.jawaban}
-             </div>` 
+          const jawaban = d.jawaban 
+            ? `<div class='mt-2 p-2 bg-emerald-50 border border-emerald-100 rounded-lg text-sm'>
+                 <strong>🕊️ Jawaban Supervisor:</strong><br>${d.jawaban}
+               </div>` 
             : `<p class='text-xs text-gray-400 italic mt-1'>Belum dijawab</p>`;
 
           html += `
@@ -113,8 +116,8 @@
 
         list.innerHTML = html;
       } catch (err) {
-        console.error("❌ Gagal memuat:", err);
-        list.innerHTML = "<p class='text-red-500'>❌ Gagal memuat pertanyaan.</p>";
+        console.error("❌ Gagal memuat pertanyaan:", err);
+        list.innerHTML = "<p class='text-red-500 text-sm'>❌ Gagal memuat pertanyaan.</p>";
       }
     }
 
