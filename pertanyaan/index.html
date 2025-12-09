@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kirim Pertanyaan - Naik Level</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gradient-to-b from-emerald-100 to-teal-200 min-h-screen font-sans text-slate-700">
+  <header class="bg-emerald-700 text-white py-4 text-center shadow">
+    <h2 class="text-lg font-bold">💬 Kirim Pertanyaan ke Supervisor</h2>
+    <p class="text-sm opacity-90">Tulis pertanyaanmu seputar riyadhah, batin, atau refleksi spiritual</p>
+  </header>
+
+  <main class="max-w-xl mx-auto p-5 space-y-5">
+    <div class="bg-white rounded-2xl shadow p-5 space-y-4">
+      <textarea id="pertanyaanInput" rows="4" placeholder="Tulis pertanyaanmu di sini..."
+        class="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-emerald-400"></textarea>
+      <button id="kirimBtn"
+        class="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2 rounded-lg font-semibold w-full">
+        📩 Kirim Pertanyaan
+      </button>
+    </div>
+
+    <div id="daftarPertanyaan" class="bg-white rounded-2xl shadow p-5 space-y-4">
+      🔄 Memuat pertanyaanmu...
+    </div>
+  </main>
+
+  <footer class="text-center text-xs text-emerald-900 py-3">© 2025 Naik Level • Pesantren Fajrul Islam</footer>
+
+  <script type="module">
+    import { app } from "../../assets/firebase-config.js";
+    import {
+      getFirestore, collection, addDoc, getDocs, query, where, orderBy, serverTimestamp, updateDoc, doc
+    } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
+    import { checkUser } from "../../assets/script.js";
+
+    const db = getFirestore(app);
+    const user = checkUser();
+    const daftarPertanyaan = document.getElementById("daftarPertanyaan");
+    const kirimBtn = document.getElementById("kirimBtn");
+    const pertanyaanInput = document.getElementById("pertanyaanInput");
+
+    async function kirimPertanyaan() {
+      const isi = pertanyaanInput.value.trim();
+      if (!isi) return alert("Tulis pertanyaan terlebih dahulu.");
+      try {
+        await addDoc(collection(db, "pertanyaanSalik"), {
+          dari: user.username,
+          isi,
+          waktu: serverTimestamp(),
+          jawaban: null,
+          dijawabOleh: null,
+          waktuJawab: null
+        });
+        pertanyaanInput.value = "";
+        alert("✅ Pertanyaan terkirim.");
+        loadPertanyaan();
+      } catch (err) {
+        console.error(err);
+        alert("❌ Gagal mengirim pertanyaan.");
+      }
+    }
+
+    kirimBtn.addEventListener("click", kirimPertanyaan);
+
+    async function loadPertanyaan() {
+      daftarPertanyaan.innerHTML = "🔄 Memuat pertanyaan...";
+      const q = query(collection(db, "pertanyaanSalik"), where("dari", "==", user.username));
+      const snap = await getDocs(q);
+      if (snap.empty) {
+        daftarPertanyaan.innerHTML = "<p class='text-gray-500 italic'>Belum ada pertanyaan yang dikirim.</p>";
+        return;
+      }
+
+      let html = "";
+      snap.forEach(docSnap => {
+        const d = docSnap.data();
+        const waktu = d.waktu ? new Date(d.waktu.toDate()).toLocaleString() : "-";
+        html += `
+          <div class="border border-emerald-200 rounded-lg p-3 bg-emerald-50">
+            <p><strong>Pertanyaan:</strong> ${d.isi}</p>
+            <small class="text-gray-500">${waktu}</small>
+            ${d.jawaban
+              ? `<div class="mt-2 p-2 bg-white rounded border border-emerald-100">
+                  <strong>Jawaban Supervisor:</strong> ${d.jawaban}
+                  <br><small class="text-gray-500">${d.waktuJawab ? new Date(d.waktuJawab.toDate()).toLocaleString() : ""}</small>
+                </div>`
+              : `<p class="text-sm text-gray-400 mt-2 italic">Belum dijawab.</p>`}
+          </div>
+        `;
+      });
+      daftarPertanyaan.innerHTML = html;
+    }
+
+    loadPertanyaan();
+  </script>
+</body>
+</html>
