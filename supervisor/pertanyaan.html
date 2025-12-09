@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pertanyaan Salik - Naik Level</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="min-h-screen bg-gradient-to-b from-emerald-100 to-teal-200 font-sans text-slate-700">
+  <header class="bg-emerald-700 text-white py-4 text-center shadow">
+    <h2 class="text-lg font-bold">❓ Pertanyaan dari Para Salik</h2>
+    <p class="text-sm opacity-90">Berikan jawaban atau arahan atas pertanyaan yang masuk</p>
+  </header>
+
+  <main class="max-w-3xl mx-auto p-5 space-y-5">
+    <div id="pertanyaanList" class="bg-white rounded-2xl shadow p-5 space-y-4">
+      🔄 Memuat pertanyaan...
+    </div>
+  </main>
+
+  <footer class="text-center text-xs text-emerald-900 py-3">© 2025 Naik Level • Pesantren Fajrul Islam</footer>
+
+  <script type="module">
+    import { app } from "../../assets/firebase-config.js";
+    import {
+      getFirestore, collection, getDocs, updateDoc, doc, query, orderBy, serverTimestamp
+    } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
+
+    const db = getFirestore(app);
+    const pertanyaanList = document.getElementById("pertanyaanList");
+
+    async function loadPertanyaan() {
+      pertanyaanList.innerHTML = "🔄 Memuat pertanyaan...";
+      const q = query(collection(db, "pertanyaanSalik"), orderBy("waktu", "desc"));
+      const snap = await getDocs(q);
+
+      if (snap.empty) {
+        pertanyaanList.innerHTML = "<p class='text-gray-500 italic'>Belum ada pertanyaan dari salik.</p>";
+        return;
+      }
+
+      let html = "";
+      snap.forEach(docSnap => {
+        const d = docSnap.data();
+        const waktu = d.waktu ? new Date(d.waktu.toDate()).toLocaleString() : "-";
+        html += `
+          <div class="border border-emerald-200 rounded-lg p-4 bg-emerald-50">
+            <p><strong>${d.dari}</strong>: ${d.isi}</p>
+            <small class="text-gray-500">${waktu}</small>
+            ${d.jawaban
+              ? `<div class="mt-2 p-2 bg-white border border-emerald-100 rounded">
+                  <strong>Jawaban:</strong> ${d.jawaban}
+                  <br><small class="text-gray-500">${d.waktuJawab ? new Date(d.waktuJawab.toDate()).toLocaleString() : ""}</small>
+                </div>`
+              : `
+                <textarea id="jawaban-${docSnap.id}" rows="2" placeholder="Tulis jawaban di sini..."
+                  class="w-full border border-gray-300 rounded-lg p-2 mt-2 focus:ring-2 focus:ring-emerald-400"></textarea>
+                <button class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-1 rounded mt-2"
+                  data-id="${docSnap.id}">💬 Kirim Jawaban</button>
+              `}
+          </div>
+        `;
+      });
+
+      pertanyaanList.innerHTML = html;
+
+      document.querySelectorAll("button[data-id]").forEach(btn => {
+        btn.addEventListener("click", async () => {
+          const id = btn.dataset.id;
+          const textarea = document.getElementById(`jawaban-${id}`);
+          const isi = textarea.value.trim();
+          if (!isi) return alert("Tulis jawaban terlebih dahulu.");
+          try {
+            await updateDoc(doc(db, "pertanyaanSalik", id), {
+              jawaban: isi,
+              dijawabOleh: "Abah Multazam Zakaria",
+              waktuJawab: serverTimestamp()
+            });
+            alert("✅ Jawaban terkirim.");
+            loadPertanyaan();
+          } catch (err) {
+            console.error("❌ Gagal:", err);
+          }
+        });
+      });
+    }
+
+    loadPertanyaan();
+  </script>
+</body>
+</html>
