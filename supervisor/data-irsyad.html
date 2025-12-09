@@ -10,9 +10,6 @@
       background-color: #047857;
       color: white;
     }
-    .btn {
-      @apply px-3 py-1 rounded-lg text-sm font-semibold cursor-pointer;
-    }
   </style>
 </head>
 
@@ -104,7 +101,7 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
     import {
       getFirestore, collection, addDoc, getDocs, updateDoc, deleteDoc,
-      doc, serverTimestamp, query, orderBy
+      doc, serverTimestamp, query, orderBy, where
     } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -133,39 +130,26 @@
     const btnKirim = document.getElementById("btnKirim");
     const btnBatalEdit = document.getElementById("btnBatalEdit");
 
-    let editId = null; // untuk menyimpan id dokumen yang sedang diedit
+    let editId = null;
 
     const salikList = [
-  { username: "meilisa", nama: "Meilisa" },
-  { username: "fatimah", nama: "Fatimah" },
-  { username: "evita", nama: "Evita" },
-  { username: "rizki", nama: "Rizki" },
-  { username: "alvin", nama: "Alvin" },
-  { username: "haidar", nama: "Haidar" },
-  { username: "kamal", nama: "Kamal" },
-  { username: "anwar", nama: "Anwar" },
-  { username: "fatih", nama: "Fatih" },
-  { username: "nada", nama: "Nada" },
-  { username: "alzam", nama: "Alzam" },
-  { username: "regen", nama: "Regen" },
-  { username: "shafwan", nama: "Shafwan" },
-  { username: "faiq", nama: "Faiq" },
-  { username: "yuu", nama: "Yuu" },
-  { username: "lasti", nama: "Lasti" },
-  { username: "fitri", nama: "Fitri" },
-  { username: "rifay", nama: "Rifay" },
-  { username: "uyun", nama: "Uyun" },
-  { username: "najwa", nama: "Najwa" },
-  { username: "dini", nama: "Dini" },
-
-  // 🔽 Tambahan baru dari daftar Spiritual Level Up
-  { username: "rubaatul uyun", nama: "Rubaatul Uyun" },
-  { username: "devina", nama: "Devina" },
-  { username: "evani", nama: "Evani" },
-  { username: "muhammad dani", nama: "Muhammad Dani" },
-  { username: "favian", nama: "Favian" }
-];
-
+      { username: "meilisa", nama: "Meilisa" }, { username: "fatimah", nama: "Fatimah" },
+      { username: "evita", nama: "Evita" }, { username: "rizki", nama: "Rizki" },
+      { username: "alvin", nama: "Alvin" }, { username: "haidar", nama: "Haidar" },
+      { username: "kamal", nama: "Kamal" }, { username: "anwar", nama: "Anwar" },
+      { username: "fatih", nama: "Fatih" }, { username: "nada", nama: "Nada" },
+      { username: "alzam", nama: "Alzam" }, { username: "regen", nama: "Regen" },
+      { username: "shafwan", nama: "Shafwan" }, { username: "faiq", nama: "Faiq" },
+      { username: "yuu", nama: "Yuu" }, { username: "lasti", nama: "Lasti" },
+      { username: "fitri", nama: "Fitri" }, { username: "rifay", nama: "Rifay" },
+      { username: "uyun", nama: "Uyun" }, { username: "najwa", nama: "Najwa" },
+      { username: "dini", nama: "Dini" },
+      { username: "rubaatul uyun", nama: "Rubaatul Uyun" },
+      { username: "devina", nama: "Devina" },
+      { username: "evani", nama: "Evani" },
+      { username: "muhammad dani", nama: "Muhammad Dani" },
+      { username: "favian", nama: "Favian" }
+    ];
 
     function loadUsers() {
       targetUser.innerHTML = `<option value="">-- Pilih Salik --</option>`;
@@ -177,12 +161,10 @@
       });
     }
 
-    // Ganti tampilan personal/all
     targetType.addEventListener("change", () => {
       personalTargetBox.style.display = targetType.value === "personal" ? "block" : "none";
     });
 
-    // Kirim atau Edit Irsyad
     btnKirim.addEventListener("click", async () => {
       const type = targetType.value;
       const judul = document.getElementById("judul").value.trim();
@@ -219,10 +201,8 @@
       }
     });
 
-    // Batalkan mode edit
     btnBatalEdit.addEventListener("click", () => resetForm());
 
-    // Reset form
     function resetForm() {
       editId = null;
       document.getElementById("judul").value = "";
@@ -234,7 +214,6 @@
       loadUsers();
     }
 
-    // Muat daftar Irsyad
     async function loadIrsyadList() {
       irsyadList.innerHTML = "🔄 Memuat data...";
       const q = query(collection(db, "irsyad"), orderBy("createdAt", "desc"));
@@ -246,12 +225,14 @@
       }
 
       let html = "";
-      snap.forEach(docSnap => {
+      for (const docSnap of snap.docs) {
         const d = docSnap.data();
         const tanggal = d.createdAt ? new Date(d.createdAt.toDate()).toLocaleString() : "-";
+        const judul = d.judul || "(Tanpa Judul)";
+
         html += `
-          <div class="border border-emerald-200 rounded-lg p-3 mb-3 bg-emerald-50">
-            <strong>${d.judul || "(Tanpa Judul)"}</strong><br>
+          <div class="border border-emerald-200 rounded-lg p-3 mb-4 bg-emerald-50">
+            <strong>${judul}</strong><br>
             <small>Untuk: ${d.penerimaNama || d.penerima}</small><br>
             <p class="mt-1 text-sm">${d.pesan}</p>
             <small class="text-gray-500">${tanggal}</small><br>
@@ -259,21 +240,63 @@
               <button class="bg-yellow-500 text-white px-3 py-1 rounded edit-btn" data-id="${docSnap.id}">✏️ Edit</button>
               <button class="bg-red-500 text-white px-3 py-1 rounded delete-btn" data-id="${docSnap.id}">🗑️ Hapus</button>
             </div>
+            <div id="balasan-${docSnap.id}" class="mt-3 border-t border-emerald-200 pt-2 text-sm">
+              <em>🔄 Memuat balasan...</em>
+            </div>
           </div>
         `;
-      });
+      }
+
       irsyadList.innerHTML = html;
 
-      // Tambah event untuk Edit & Hapus
       document.querySelectorAll(".edit-btn").forEach(btn =>
         btn.addEventListener("click", () => editIrsyad(btn.dataset.id))
       );
       document.querySelectorAll(".delete-btn").forEach(btn =>
         btn.addEventListener("click", () => deleteIrsyad(btn.dataset.id))
       );
+
+      for (const docSnap of snap.docs) {
+        const d = docSnap.data();
+        await loadBalasan(docSnap.id, d.judul || "(Tanpa Judul)");
+      }
     }
 
-    // Edit Irsyad
+    async function loadBalasan(id, judul) {
+      const targetDiv = document.getElementById(`balasan-${id}`);
+      try {
+        const q = query(
+          collection(db, "balasanIrsyad"),
+          where("irsyadJudul", "==", judul),
+          orderBy("waktu", "asc")
+        );
+        const snap = await getDocs(q);
+        if (snap.empty) {
+          targetDiv.innerHTML = "<p class='text-gray-400 italic'>Belum ada balasan dari salik.</p>";
+          return;
+        }
+
+        let html = `<div class='bg-white border border-emerald-100 rounded-lg p-2 mt-2'>`;
+        html += `<p class='font-semibold text-emerald-700 mb-1'>💬 Balasan Salik:</p>`;
+        snap.forEach(doc => {
+          const b = doc.data();
+          const waktu = b.waktu ? new Date(b.waktu.toDate()).toLocaleString() : "-";
+          html += `
+            <div class="border-b border-emerald-100 py-1">
+              <strong>${b.dari}</strong>: ${b.isi}<br>
+              <span class="text-xs text-gray-500">${waktu}</span>
+            </div>
+          `;
+        });
+        html += `</div>`;
+        targetDiv.innerHTML = html;
+
+      } catch (err) {
+        console.error("❌ Gagal memuat balasan:", err);
+        targetDiv.innerHTML = "<p class='text-red-500 text-sm'>Gagal memuat balasan.</p>";
+      }
+    }
+
     async function editIrsyad(id) {
       const snap = await getDocs(query(collection(db, "irsyad")));
       const docSnap = (await getDocs(collection(db, "irsyad"))).docs.find(d => d.id === id);
@@ -290,14 +313,12 @@
       tabKirim.click();
     }
 
-    // Hapus Irsyad
     async function deleteIrsyad(id) {
       if (!confirm("Yakin ingin menghapus Irsyad ini?")) return;
       await deleteDoc(doc(db, "irsyad", id));
       loadIrsyadList();
     }
 
-    // Navigasi tab
     tabKirim.addEventListener("click", () => {
       tabKirim.classList.add("active-tab");
       tabData.classList.remove("active-tab");
