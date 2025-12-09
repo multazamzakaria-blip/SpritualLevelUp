@@ -117,7 +117,7 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    // Elemen DOM
+    // === Variabel DOM
     const tabKirim = document.getElementById("tabKirim");
     const tabData = document.getElementById("tabData");
     const tabKirimContent = document.getElementById("tabKirimContent");
@@ -151,6 +151,7 @@
       { username: "favian", nama: "Favian" }
     ];
 
+    // === Fungsi Load Pengguna
     function loadUsers() {
       targetUser.innerHTML = `<option value="">-- Pilih Salik --</option>`;
       salikList.forEach(salik => {
@@ -165,6 +166,7 @@
       personalTargetBox.style.display = targetType.value === "personal" ? "block" : "none";
     });
 
+    // === Kirim atau Edit Irsyad
     btnKirim.addEventListener("click", async () => {
       const type = targetType.value;
       const judul = document.getElementById("judul").value.trim();
@@ -201,8 +203,8 @@
       }
     });
 
+    // === Reset Form
     btnBatalEdit.addEventListener("click", () => resetForm());
-
     function resetForm() {
       editId = null;
       document.getElementById("judul").value = "";
@@ -214,6 +216,7 @@
       loadUsers();
     }
 
+    // === Muat Daftar Irsyad
     async function loadIrsyadList() {
       irsyadList.innerHTML = "🔄 Memuat data...";
       const q = query(collection(db, "irsyad"), orderBy("createdAt", "desc"));
@@ -262,14 +265,11 @@
       }
     }
 
+    // === TANPA INDEX: Load Balasan
     async function loadBalasan(id, judul) {
       const targetDiv = document.getElementById(`balasan-${id}`);
       try {
-        const q = query(
-          collection(db, "balasanIrsyad"),
-          where("irsyadJudul", "==", judul),
-          orderBy("waktu", "asc")
-        );
+        const q = query(collection(db, "balasanIrsyad"), where("irsyadJudul", "==", judul));
         const snap = await getDocs(q);
         if (snap.empty) {
           targetDiv.innerHTML = "<p class='text-gray-400 italic'>Belum ada balasan dari salik.</p>";
@@ -297,6 +297,7 @@
       }
     }
 
+    // === Edit & Hapus
     async function editIrsyad(id) {
       const snap = await getDocs(query(collection(db, "irsyad")));
       const docSnap = (await getDocs(collection(db, "irsyad"))).docs.find(d => d.id === id);
@@ -319,6 +320,7 @@
       loadIrsyadList();
     }
 
+    // === Navigasi Tab
     tabKirim.addEventListener("click", () => {
       tabKirim.classList.add("active-tab");
       tabData.classList.remove("active-tab");
