@@ -20,7 +20,7 @@
       border: 1px solid #a7f3d0;
       border-radius: 16px;
       padding: 1rem 1.2rem;
-      margin-bottom: 1rem;
+      margin-bottom: 1.5rem;
       box-shadow: 0 4px 10px rgba(0,0,0,0.05);
     }
     .irsyad-box h4 {
@@ -40,6 +40,36 @@
       color: #047857;
       font-size: 0.75rem;
     }
+    textarea {
+      width: 100%;
+      border: 1px solid #a7f3d0;
+      border-radius: 8px;
+      padding: 0.5rem;
+      margin-top: 0.5rem;
+      font-size: 0.9rem;
+      resize: vertical;
+    }
+    button {
+      background-color: #059669;
+      color: white;
+      border: none;
+      padding: 0.4rem 0.8rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      margin-top: 0.4rem;
+    }
+    button:hover {
+      background-color: #047857;
+    }
+    .balasan-box {
+      background: #f0fdf4;
+      border-left: 3px solid #10b981;
+      margin-top: 0.5rem;
+      padding: 0.5rem 0.7rem;
+      border-radius: 6px;
+      font-size: 0.85rem;
+    }
   </style>
 </head>
 
@@ -50,7 +80,7 @@
     <p>Pesan bimbingan dan nasehat dari Supervisor untukmu</p>
   </header>
 
-  <main class="card fade-in" id="irsyadContainer" style="max-width:600px;margin:auto;background:#fff;padding:1.5rem;border-radius:16px;">
+  <main id="irsyadContainer" style="max-width:600px;margin:auto;background:#fff;padding:1.5rem;border-radius:16px;">
     <p>🔄 Memuat pesan irsyad...</p>
   </main>
 
@@ -64,7 +94,11 @@
       getFirestore,
       collection,
       query,
-      getDocs
+      getDocs,
+      addDoc,
+      where,
+      orderBy,
+      serverTimestamp
     } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
     import { checkUser } from "../assets/script.js";
 
@@ -76,22 +110,20 @@
       container.innerHTML = "<p>🔄 Sedang memuat pesan irsyad...</p>";
 
       try {
-        // Ambil semua pesan dari koleksi "irsyad"
         const q = query(collection(db, "irsyad"));
         const snap = await getDocs(q);
-
         let pesanList = [];
+
         snap.forEach(doc => {
           const d = doc.data();
           const penerima = d.penerima || "";
 
-          // Tampilkan pesan yang ditujukan ke user atau ALL
           if (penerima === "ALL" || penerima === user.username) {
             pesanList.push({
+              id: doc.id,
               judul: d.judul || "(Tanpa Judul)",
               pesan: d.pesan || "",
-              // jika field 'dari' kosong, tampilkan nama resmi supervisor
-              dari: "Supervisor (Mursyid) Abah Multazam Zakaria",
+              dari: d.dari || "Supervisor (Mursyid) Abah Multazam Zakaria",
               tanggal: d.createdAt
                 ? new Date(d.createdAt.toDate()).toLocaleString()
                 : "Waktu tidak diketahui"
@@ -99,7 +131,6 @@
           }
         });
 
-        // Urutkan dari terbaru ke lama
         pesanList.sort((a, b) => new Date(b.tanggal) - new Date(a.tanggal));
 
         if (pesanList.length === 0) {
@@ -107,22 +138,80 @@
           return;
         }
 
-        // Tampilkan daftar pesan
         container.innerHTML = "";
-        pesanList.forEach(item => {
+        for (const item of pesanList) {
           const box = document.createElement("div");
           box.className = "irsyad-box";
           box.innerHTML = `
             <h4>${item.judul}</h4>
             <p>${item.pesan}</p>
             <small>🕊️ Dari: ${item.dari} • ${item.tanggal}</small>
+            <div id="balasan-${item.id}" class="balasan-section">
+              <textarea id="reply-${item.id}" rows="2" placeholder="Tulis balasanmu di sini..."></textarea>
+              <button data-id="${item.id}" data-judul="${item.judul}" class="btn-balas">📨 Kirim Balasan</button>
+              <div id="balasan-list-${item.id}" class="mt-2"></div>
+            </div>
           `;
           container.appendChild(box);
+
+          // Load balasan yang sudah ada
+          loadBalasan(item.id, item.judul);
+        }
+
+        // Tambahkan event listener ke tombol balas
+        document.querySelectorAll(".btn-balas").forEach(btn => {
+          btn.addEventListener("click", async () => {
+            const id = btn.dataset.id;
+            const judul = btn.dataset.judul;
+            const textarea = document.getElementById(`reply-${id}`);
+            const isi = textarea.value.trim();
+            if (!isi) {
+              alert("Tuliskan balasan terlebih dahulu.");
+              return;
+            }
+
+            try {
+              await addDoc(collection(db, "balasanIrsyad"), {
+                irsyadJudul: judul,
+                dari: user.username,
+                isi: isi,
+                waktu: serverTimestamp()
+              });
+              textarea.value = "";
+              loadBalasan(id, judul);
+            } catch (err) {
+              console.error("❌ Gagal mengirim balasan:", err);
+            }
+          });
         });
+
       } catch (err) {
         console.error("❌ Gagal memuat irsyad:", err);
         container.innerHTML = "<p>❌ Terjadi kesalahan saat memuat pesan irsyad.</p>";
       }
+    }
+
+    async function loadBalasan(id, judul) {
+      const balasanDiv = document.getElementById(`balasan-list-${id}`);
+      balasanDiv.innerHTML = "🔄 Memuat balasan...";
+      const q = query(collection(db, "balasanIrsyad"), where("irsyadJudul", "==", judul), orderBy("waktu", "asc"));
+      const snap = await getDocs(q);
+      if (snap.empty) {
+        balasanDiv.innerHTML = "<p class='text-sm text-gray-500 italic'>Belum ada balasan.</p>";
+        return;
+      }
+      let html = "";
+      snap.forEach(doc => {
+        const d = doc.data();
+        const waktu = d.waktu ? new Date(d.waktu.toDate()).toLocaleString() : "-";
+        html += `
+          <div class="balasan-box">
+            <strong>${d.dari}</strong>: ${d.isi}
+            <div class="text-xs text-gray-500">${waktu}</div>
+          </div>
+        `;
+      });
+      balasanDiv.innerHTML = html;
     }
 
     loadIrsyad();
