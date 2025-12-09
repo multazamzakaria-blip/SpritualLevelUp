@@ -97,6 +97,7 @@
       getDocs,
       addDoc,
       where,
+      orderBy,
       serverTimestamp
     } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
     import { checkUser } from "../assets/script.js";
@@ -109,7 +110,8 @@
       container.innerHTML = "<p>🔄 Sedang memuat pesan irsyad...</p>";
 
       try {
-        const q = query(collection(db, "irsyad"));
+        // 🟢 Urutkan langsung berdasarkan createdAt DESCENDING (terbaru di atas)
+        const q = query(collection(db, "irsyad"), orderBy("createdAt", "desc"));
         const snap = await getDocs(q);
         let pesanList = [];
 
@@ -129,8 +131,6 @@
             });
           }
         });
-
-        pesanList.sort((a, b) => new Date(b.tanggal) - new Date(a.tanggal));
 
         if (pesanList.length === 0) {
           container.innerHTML = "<p>Belum ada pesan irsyad dari Supervisor 🌿</p>";
@@ -152,12 +152,9 @@
             </div>
           `;
           container.appendChild(box);
-
-          // Load balasan yang sudah ada
           loadBalasan(item.id, item.judul);
         }
 
-        // Tombol kirim balasan
         document.querySelectorAll(".btn-balas").forEach(btn => {
           btn.addEventListener("click", async () => {
             const id = btn.dataset.id;
@@ -191,44 +188,41 @@
       }
     }
 
-    // 🟢 TANPA INDEX
     async function loadBalasan(id, judul) {
-  const balasanDiv = document.getElementById(`balasan-list-${id}`);
-  balasanDiv.innerHTML = "🔄 Memuat balasan...";
+      const balasanDiv = document.getElementById(`balasan-list-${id}`);
+      balasanDiv.innerHTML = "🔄 Memuat balasan...";
 
-  try {
-    // hanya ambil balasan dari user yang sedang login
-    const q = query(
-      collection(db, "balasanIrsyad"),
-      where("irsyadJudul", "==", judul),
-      where("dari", "==", user.username)
-    );
+      try {
+        const q = query(
+          collection(db, "balasanIrsyad"),
+          where("irsyadJudul", "==", judul),
+          where("dari", "==", user.username)
+        );
 
-    const snap = await getDocs(q);
-    if (snap.empty) {
-      balasanDiv.innerHTML = "<p class='text-sm text-gray-500 italic'>Belum ada balasanmu.</p>";
-      return;
+        const snap = await getDocs(q);
+        if (snap.empty) {
+          balasanDiv.innerHTML = "<p class='text-sm text-gray-500 italic'>Belum ada balasanmu.</p>";
+          return;
+        }
+
+        let html = "";
+        snap.forEach(doc => {
+          const d = doc.data();
+          const waktu = d.waktu ? new Date(d.waktu.toDate()).toLocaleString() : "-";
+          html += `
+            <div class="balasan-box">
+              <strong>${d.dari}</strong>: ${d.isi}
+              <div class="text-xs text-gray-500">${waktu}</div>
+            </div>
+          `;
+        });
+        balasanDiv.innerHTML = html;
+
+      } catch (err) {
+        console.error("❌ Gagal memuat balasan:", err);
+        balasanDiv.innerHTML = "<p class='text-red-500 text-sm'>Gagal memuat balasan.</p>";
+      }
     }
-
-    let html = "";
-    snap.forEach(doc => {
-      const d = doc.data();
-      const waktu = d.waktu ? new Date(d.waktu.toDate()).toLocaleString() : "-";
-      html += `
-        <div class="balasan-box">
-          <strong>${d.dari}</strong>: ${d.isi}
-          <div class="text-xs text-gray-500">${waktu}</div>
-        </div>
-      `;
-    });
-    balasanDiv.innerHTML = html;
-
-  } catch (err) {
-    console.error("❌ Gagal memuat balasan:", err);
-    balasanDiv.innerHTML = "<p class='text-red-500 text-sm'>Gagal memuat balasan.</p>";
-  }
-}
-
 
     loadIrsyad();
   </script>
